@@ -16,7 +16,7 @@ const btnStyle = {
 
 export default function ActivityCreatePage() {
   const params = Taro.getCurrentInstance().router?.params ?? {}
-  const resultFor = params.resultFor ? Number(params.resultFor) : null
+  const resultFor = params.resultFor ?? null
 
   // Create activity state
   const [type, setType] = useState<'MATCH' | 'TRAINING'>('MATCH')
@@ -38,6 +38,18 @@ export default function ActivityCreatePage() {
   const submitActivity = async () => {
     if (!title.trim() || !location.trim() || !startTime) {
       Taro.showToast({ title: '请填写必填项', icon: 'none' })
+      return
+    }
+    if (isNaN(new Date(startTime).getTime())) {
+      Taro.showToast({ title: '开始时间格式错误，请使用 2026-06-01 09:00', icon: 'none' })
+      return
+    }
+    if (deadline && isNaN(new Date(deadline).getTime())) {
+      Taro.showToast({ title: '截止时间格式错误', icon: 'none' })
+      return
+    }
+    if (maxPlayers && (isNaN(Number(maxPlayers)) || Number(maxPlayers) <= 0 || !Number.isInteger(Number(maxPlayers)))) {
+      Taro.showToast({ title: '最大报名人数须为正整数', icon: 'none' })
       return
     }
     if (!currentTeamId) return
@@ -73,7 +85,7 @@ export default function ActivityCreatePage() {
     setLoading(true)
     try {
       await activityApi.recordResult(
-        resultFor!,
+        Number(resultFor!),
         Number(ourScore),
         Number(oppScore),
         notes.trim() || undefined

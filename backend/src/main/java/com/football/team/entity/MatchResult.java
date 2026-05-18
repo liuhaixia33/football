@@ -12,6 +12,7 @@ public class MatchResult {
     private int ourScore;
     private int oppScore;
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(8)")
     private MatchOutcome outcome;
     private String notes;
     private LocalDateTime createdAt = LocalDateTime.now();

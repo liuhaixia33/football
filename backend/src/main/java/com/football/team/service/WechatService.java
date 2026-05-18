@@ -15,6 +15,9 @@ public class WechatService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String getOpenid(String code) {
+        if ("dev_mock".equals(appId)) {
+            return "mock_openid_" + code;
+        }
         String url = "https://api.weixin.qq.com/sns/jscode2session"
             + "?appid=" + appId
             + "&secret=" + appSecret

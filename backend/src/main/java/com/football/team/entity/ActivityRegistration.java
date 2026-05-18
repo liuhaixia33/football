@@ -11,6 +11,7 @@ public class ActivityRegistration {
     private Long activityId;
     private Long userId;
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(16)")
     private RegStatus status = RegStatus.JOINED;
     private LocalDateTime createdAt = LocalDateTime.now();
 }

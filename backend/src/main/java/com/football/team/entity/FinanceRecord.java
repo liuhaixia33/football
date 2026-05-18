@@ -12,6 +12,7 @@ public class FinanceRecord {
     private Long id;
     private Long teamId;
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "varchar(16)")
     private FinanceType type;
     private BigDecimal amount;
     private String category;

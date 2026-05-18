@@ -12,9 +12,9 @@ server:
   port: 8080
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:dev_local_secret_key_for_testing}
   expire-hours: 720
 
 wechat:
-  app-id: ${WECHAT_APP_ID}
-  app-secret: ${WECHAT_APP_SECRET}
+  app-id: ${WECHAT_APP_ID:dev_mock}
+  app-secret: ${WECHAT_APP_SECRET:dev_mock}

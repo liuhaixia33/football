@@ -11,7 +11,7 @@ function App({ children }: PropsWithChildren) {
     if (!token) {
       Taro.reLaunch({ url: '/pages/login/index' })
     }
-  }, [])
+  }, [token])
 
   return <>{children}</>
 }

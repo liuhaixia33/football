@@ -54,8 +54,10 @@ export default function MyPage() {
           const { teamApi } = await import('../../api/team')
           await teamApi.leave(currentTeamId)
           Taro.showToast({ title: '已退出球队', icon: 'success' })
-          clear()
-          setTimeout(() => Taro.reLaunch({ url: '/pages/login/index' }), 1000)
+          setTimeout(() => {
+            clear()
+            Taro.reLaunch({ url: '/pages/login/index' })
+          }, 1000)
         } catch (e: unknown) {
           Taro.showToast({ title: e instanceof Error ? e.message : '操作失败', icon: 'none' })
         }

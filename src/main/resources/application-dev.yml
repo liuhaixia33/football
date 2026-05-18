@@ -7,3 +7,7 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+wechat:
+  app-id: ${WECHAT_APP_ID:dev_mock}
+  app-secret: ${WECHAT_APP_SECRET:dev_mock}

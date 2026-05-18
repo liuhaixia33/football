@@ -3,7 +3,9 @@ import type { FinanceSummaryRes, FinanceRecord, MemberFeeRes } from '../types/ap
 
 export const financeApi = {
   summary: (teamId: number, from?: string, to?: string) => {
-    const params = from && to ? `?from=${from}&to=${to}` : ''
+    const params = from && to
+      ? `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+      : ''
     return api.get<FinanceSummaryRes>(`/api/v1/finance/team/${teamId}/summary${params}`)
   },
   createRecord: (teamId: number, body: {
@@ -14,5 +16,5 @@ export const financeApi = {
   markFee: (teamId: number, userId: number, season: number, amountPaid: number) =>
     api.put<void>(`/api/v1/finance/team/${teamId}/fees/mark`, { userId, season, amountPaid }),
   memberFees: (teamId: number, season: number) =>
-    api.get<MemberFeeRes[]>(`/api/v1/finance/team/${teamId}/fees?season=${season}`),
+    api.get<MemberFeeRes[]>(`/api/v1/finance/team/${teamId}/fees?season=${encodeURIComponent(String(season))}`),
 }

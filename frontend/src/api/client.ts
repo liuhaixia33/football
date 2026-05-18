@@ -29,6 +29,10 @@ export async function request<T>(
     header,
   })
 
+  if (res.statusCode >= 400) {
+    throw new Error(`服务器错误 (${res.statusCode})`)
+  }
+
   const body = res.data as ApiResponse<T>
   if (body.code === 401) {
     useAuthStore.getState().clear()

@@ -37,7 +37,8 @@ public class ActivityController {
     public ApiResponse<ActivityDetailRes> detail(HttpServletRequest req,
                                                   @PathVariable Long activityId) {
         User user = (User) req.getAttribute("currentUser");
-        return ApiResponse.ok(activityService.getDetail(activityId, user.getId()));
+        Long teamId = (Long) req.getAttribute("currentTeamId");
+        return ApiResponse.ok(activityService.getDetail(activityId, user.getId(), teamId));
     }
 
     @PostMapping("/team/{teamId}")
@@ -53,7 +54,8 @@ public class ActivityController {
     @RequireRole(MemberRole.PLAYER)
     public ApiResponse<Void> register(HttpServletRequest req, @PathVariable Long activityId) {
         User user = (User) req.getAttribute("currentUser");
-        activityService.register(activityId, user.getId());
+        Long teamId = (Long) req.getAttribute("currentTeamId");
+        activityService.register(activityId, user.getId(), teamId);
         return ApiResponse.ok(null);
     }
 
@@ -61,22 +63,25 @@ public class ActivityController {
     @RequireRole(MemberRole.PLAYER)
     public ApiResponse<Void> cancelRegister(HttpServletRequest req, @PathVariable Long activityId) {
         User user = (User) req.getAttribute("currentUser");
-        activityService.cancelRegister(activityId, user.getId());
+        Long teamId = (Long) req.getAttribute("currentTeamId");
+        activityService.cancelRegister(activityId, user.getId(), teamId);
         return ApiResponse.ok(null);
     }
 
     @PutMapping("/{activityId}/close")
     @RequireRole(MemberRole.ADMIN)
-    public ApiResponse<Void> close(@PathVariable Long activityId) {
-        activityService.closeActivity(activityId);
+    public ApiResponse<Void> close(HttpServletRequest req, @PathVariable Long activityId) {
+        Long teamId = (Long) req.getAttribute("currentTeamId");
+        activityService.closeActivity(activityId, teamId);
         return ApiResponse.ok(null);
     }
 
     @PutMapping("/{activityId}/result")
     @RequireRole(MemberRole.ADMIN)
-    public ApiResponse<Void> result(@PathVariable Long activityId,
+    public ApiResponse<Void> result(HttpServletRequest req, @PathVariable Long activityId,
                                     @RequestBody @Valid RecordResultReq body) {
-        activityService.recordResult(activityId, body);
+        Long teamId = (Long) req.getAttribute("currentTeamId");
+        activityService.recordResult(activityId, body, teamId);
         return ApiResponse.ok(null);
     }
 }

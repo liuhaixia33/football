@@ -47,9 +47,11 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public ActivityDetailRes getDetail(Long activityId, Long currentUserId) {
+    public ActivityDetailRes getDetail(Long activityId, Long currentUserId, Long teamId) {
         Activity a = activityRepository.findById(activityId)
             .orElseThrow(() -> BusinessException.notFound("活动不存在"));
+        if (!a.getTeamId().equals(teamId))
+            throw BusinessException.notFound("活动不存在");
 
         List<MemberRes> regs = regRepository.findByActivityIdAndStatus(activityId, RegStatus.JOINED)
             .stream().map(r -> {
@@ -71,9 +73,11 @@ public class ActivityService {
             .build();
     }
 
-    public void register(Long activityId, Long userId) {
+    public void register(Long activityId, Long userId, Long teamId) {
         Activity a = activityRepository.findById(activityId)
             .orElseThrow(() -> BusinessException.notFound("活动不存在"));
+        if (!a.getTeamId().equals(teamId))
+            throw BusinessException.notFound("活动不存在");
         if (a.getStatus() != ActivityStatus.OPEN)
             throw BusinessException.badRequest("报名已截止");
         if (a.getDeadline() != null && LocalDateTime.now().isAfter(a.getDeadline()))
@@ -92,11 +96,16 @@ public class ActivityService {
             ActivityRegistration reg = new ActivityRegistration();
             reg.setActivityId(activityId);
             reg.setUserId(userId);
+            reg.setStatus(RegStatus.JOINED);
             regRepository.save(reg);
         });
     }
 
-    public void cancelRegister(Long activityId, Long userId) {
+    public void cancelRegister(Long activityId, Long userId, Long teamId) {
+        Activity a = activityRepository.findById(activityId)
+            .orElseThrow(() -> BusinessException.notFound("活动不存在"));
+        if (!a.getTeamId().equals(teamId))
+            throw BusinessException.notFound("活动不存在");
         ActivityRegistration reg = regRepository.findByActivityIdAndUserId(activityId, userId)
             .filter(r -> r.getStatus() == RegStatus.JOINED)
             .orElseThrow(() -> BusinessException.notFound("未找到报名记录"));
@@ -104,16 +113,22 @@ public class ActivityService {
         regRepository.save(reg);
     }
 
-    public void closeActivity(Long activityId) {
+    public void closeActivity(Long activityId, Long teamId) {
         Activity a = activityRepository.findById(activityId)
             .orElseThrow(() -> BusinessException.notFound("活动不存在"));
+        if (!a.getTeamId().equals(teamId))
+            throw BusinessException.notFound("活动不存在");
+        if (a.getStatus() != ActivityStatus.OPEN)
+            throw BusinessException.badRequest("只有开放中的活动可以关闭");
         a.setStatus(ActivityStatus.CLOSED);
         activityRepository.save(a);
     }
 
-    public void recordResult(Long activityId, RecordResultReq req) {
+    public void recordResult(Long activityId, RecordResultReq req, Long teamId) {
         Activity a = activityRepository.findById(activityId)
             .orElseThrow(() -> BusinessException.notFound("活动不存在"));
+        if (!a.getTeamId().equals(teamId))
+            throw BusinessException.notFound("活动不存在");
         if (a.getType() != ActivityType.MATCH)
             throw BusinessException.badRequest("仅比赛可记录结果");
 

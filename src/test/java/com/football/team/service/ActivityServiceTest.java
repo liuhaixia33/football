@@ -34,32 +34,32 @@ class ActivityServiceTest {
 
     @Test
     void register_closedActivity_throwsBadRequest() {
-        Activity a = new Activity(); a.setStatus(ActivityStatus.CLOSED);
+        Activity a = new Activity(); a.setId(1L); a.setTeamId(1L); a.setStatus(ActivityStatus.CLOSED);
         when(activityRepository.findById(1L)).thenReturn(Optional.of(a));
-        assertThrows(BusinessException.class, () -> activityService.register(1L, 1L));
+        assertThrows(BusinessException.class, () -> activityService.register(1L, 1L, 1L));
     }
 
     @Test
     void register_alreadyJoined_throwsBadRequest() {
-        Activity a = new Activity(); a.setStatus(ActivityStatus.OPEN);
+        Activity a = new Activity(); a.setId(1L); a.setTeamId(1L); a.setStatus(ActivityStatus.OPEN);
         when(activityRepository.findById(1L)).thenReturn(Optional.of(a));
         when(regRepository.countByActivityIdAndStatus(1L, RegStatus.JOINED)).thenReturn(0L);
         ActivityRegistration existing = new ActivityRegistration();
         existing.setStatus(RegStatus.JOINED);
         when(regRepository.findByActivityIdAndUserId(1L, 2L)).thenReturn(Optional.of(existing));
-        assertThrows(BusinessException.class, () -> activityService.register(1L, 2L));
+        assertThrows(BusinessException.class, () -> activityService.register(1L, 2L, 1L));
     }
 
     @Test
     void recordResult_win_setsOutcomeCorrectly() {
-        Activity a = new Activity(); a.setId(1L); a.setType(ActivityType.MATCH);
+        Activity a = new Activity(); a.setId(1L); a.setTeamId(1L); a.setType(ActivityType.MATCH);
         when(activityRepository.findById(1L)).thenReturn(Optional.of(a));
         when(matchResultRepository.findByActivityId(1L)).thenReturn(Optional.empty());
         when(matchResultRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         RecordResultReq req = new RecordResultReq();
         req.setOurScore(3); req.setOppScore(1);
-        activityService.recordResult(1L, req);
+        activityService.recordResult(1L, req, 1L);
 
         verify(matchResultRepository).save(argThat(r -> r.getOutcome() == MatchOutcome.WIN));
     }

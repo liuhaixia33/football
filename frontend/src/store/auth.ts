@@ -22,7 +22,10 @@ interface AuthState {
 const ROLE_ORDER: Record<MemberRole, number> = { CAPTAIN: 0, ADMIN: 1, PLAYER: 2 }
 
 function load<T>(key: string): T | null {
-  try { return Taro.getStorageSync(key) || null } catch { return null }
+  try {
+    const v = Taro.getStorageSync(key)
+    return (v !== '' && v != null) ? v as T : null
+  } catch { return null }
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -51,7 +54,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setTeams: (teams) => set({ teams }),
 
   clear: () => {
-    try { Taro.clearStorageSync() } catch {}
+    const keys = ['token', 'userId', 'nickname', 'avatarUrl', 'currentTeamId', 'currentRole']
+    keys.forEach(k => { try { Taro.removeStorageSync(k) } catch {} })
     set({ token: null, userId: null, nickname: null, avatarUrl: null,
           currentTeamId: null, currentRole: null, teams: [] })
   },

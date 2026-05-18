@@ -4,6 +4,7 @@ const Taro = {
   getStorageSync: (key: string) => storage[key] ?? null,
   setStorageSync: (key: string, value: unknown) => { storage[key] = value },
   clearStorageSync: () => { Object.keys(storage).forEach(k => delete storage[k]) },
+  removeStorageSync: (key: string) => { delete storage[key] },
   reLaunch: jest.fn(),
   navigateTo: jest.fn(),
   switchTab: jest.fn(),

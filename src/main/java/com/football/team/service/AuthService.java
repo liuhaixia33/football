@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,18 +31,21 @@ public class AuthService {
     public LoginRes login(LoginReq req) {
         String openid = wechatService.getOpenid(req.getCode());
 
-        User user = userRepository.findByOpenid(openid).orElseGet(() -> {
-            User u = new User();
-            u.setOpenid(openid);
-            u.setNickname(req.getNickname() != null ? req.getNickname() : "球员");
-            u.setAvatarUrl(req.getAvatarUrl() != null ? req.getAvatarUrl() : "");
-            return userRepository.save(u);
-        });
-
-        if (req.getNickname() != null) {
-            user.setNickname(req.getNickname());
+        Optional<User> existing = userRepository.findByOpenid(openid);
+        User user;
+        if (existing.isPresent()) {
+            user = existing.get();
+            if (req.getNickname() != null) {
+                user.setNickname(req.getNickname());
+                user.setAvatarUrl(req.getAvatarUrl() != null ? req.getAvatarUrl() : "");
+                userRepository.save(user);
+            }
+        } else {
+            user = new User();
+            user.setOpenid(openid);
+            user.setNickname(req.getNickname() != null ? req.getNickname() : "球员");
             user.setAvatarUrl(req.getAvatarUrl() != null ? req.getAvatarUrl() : "");
-            userRepository.save(user);
+            user = userRepository.save(user);
         }
 
         List<TeamBriefRes> teams = teamMemberRepository

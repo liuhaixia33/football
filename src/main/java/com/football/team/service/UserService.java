@@ -30,7 +30,8 @@ public class UserService {
         List<TeamBriefRes> teams = teamMemberRepository
             .findByUserIdAndStatus(userId, MemberStatus.ACTIVE)
             .stream().map(m -> {
-                Team t = teamRepository.findById(m.getTeamId()).orElseThrow();
+                Team t = teamRepository.findById(m.getTeamId())
+                    .orElseThrow(() -> BusinessException.notFound("球队不存在"));
                 return TeamBriefRes.builder().teamId(t.getId()).teamName(t.getName())
                     .logoUrl(t.getLogoUrl()).role(m.getRole().name()).build();
             }).toList();

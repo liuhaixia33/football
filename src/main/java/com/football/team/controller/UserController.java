@@ -4,6 +4,7 @@ import com.football.team.dto.res.ApiResponse;
 import com.football.team.dto.res.MyStatsRes;
 import com.football.team.dto.res.UserProfileRes;
 import com.football.team.entity.User;
+import com.football.team.exception.BusinessException;
 import com.football.team.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class UserController {
     @GetMapping("/me")
     public ApiResponse<UserProfileRes> me(HttpServletRequest req) {
         User user = (User) req.getAttribute("currentUser");
+        if (user == null) throw BusinessException.unauthorized("请先登录");
         return ApiResponse.ok(userService.getProfile(user.getId()));
     }
 
@@ -26,6 +28,7 @@ public class UserController {
     public ApiResponse<MyStatsRes> stats(HttpServletRequest req,
                                          @RequestParam Long teamId) {
         User user = (User) req.getAttribute("currentUser");
+        if (user == null) throw BusinessException.unauthorized("请先登录");
         return ApiResponse.ok(userService.getStats(user.getId(), teamId));
     }
 }

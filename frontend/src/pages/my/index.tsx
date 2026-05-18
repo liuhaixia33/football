@@ -7,7 +7,7 @@ import type { MyStatsRes, MemberRole } from '../../types/api'
 
 export default function MyPage() {
   const [stats, setStats] = useState<MyStatsRes | null>(null)
-  const { nickname, currentTeamId, currentRole, teams, setCurrentTeam, clear } = useAuthStore()
+  const { nickname, currentTeamId, currentRole, teams, setCurrentTeam, setTeams, clear } = useAuthStore()
 
   const load = async () => {
     if (!currentTeamId) return
@@ -16,6 +16,12 @@ export default function MyPage() {
       setStats(s)
     } catch {
       // stats load failure is non-critical, silently ignore
+    }
+    try {
+      const profile = await userApi.me()
+      setTeams(profile.teams)
+    } catch {
+      // profile refresh failure is non-critical
     }
   }
 

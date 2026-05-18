@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
@@ -33,7 +33,13 @@ export default function ActivityCreatePage() {
   const [notes, setNotes] = useState('')
 
   const [loading, setLoading] = useState(false)
-  const { currentTeamId } = useAuthStore()
+  const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
+
+  useEffect(() => {
+    if (!isCaptainOrAdmin()) {
+      Taro.navigateBack()
+    }
+  }, [])
 
   const submitActivity = async () => {
     if (!title.trim() || !location.trim() || !startTime) {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { financeApi } from '../../api/finance'
@@ -20,7 +20,13 @@ export default function FinanceRecordPage() {
   const [description, setDescription] = useState('')
   const [recordDate, setRecordDate] = useState(new Date().toISOString().slice(0, 10))
   const [loading, setLoading] = useState(false)
-  const { currentTeamId } = useAuthStore()
+  const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
+
+  useEffect(() => {
+    if (!isCaptainOrAdmin()) {
+      Taro.reLaunch({ url: '/pages/home/index' })
+    }
+  }, [])
 
   const submit = async () => {
     const amountNum = Number(amount)

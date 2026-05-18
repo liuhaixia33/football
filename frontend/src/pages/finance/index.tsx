@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { financeApi } from '../../api/finance'
@@ -7,7 +7,13 @@ import type { FinanceSummaryRes } from '../../types/api'
 
 export default function FinancePage() {
   const [summary, setSummary] = useState<FinanceSummaryRes | null>(null)
-  const { currentTeamId } = useAuthStore()
+  const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
+
+  useEffect(() => {
+    if (!isCaptainOrAdmin()) {
+      Taro.reLaunch({ url: '/pages/home/index' })
+    }
+  }, [])
 
   const load = async () => {
     if (!currentTeamId) return

@@ -18,6 +18,10 @@ export default function CreateTeamPage() {
     try {
       const team = await teamApi.create(name.trim(), description.trim() || undefined)
       useAuthStore.getState().setCurrentTeam(team.id, 'CAPTAIN')
+      // Refresh teams list
+      const { userApi } = await import('../../api/user')
+      const profile = await userApi.me()
+      useAuthStore.getState().setTeams(profile.teams)
       Taro.showToast({ title: '创建成功', icon: 'success' })
       setTimeout(() => Taro.reLaunch({ url: '/pages/home/index' }), 1000)
     } catch (e: unknown) {

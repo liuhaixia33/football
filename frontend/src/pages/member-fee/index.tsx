@@ -10,7 +10,13 @@ export default function MemberFeePage() {
   const [season, setSeason] = useState(currentYear)
   const [fees, setFees] = useState<MemberFeeRes[]>([])
   const [feeAmount, setFeeAmount] = useState('')
-  const { currentTeamId, currentRole } = useAuthStore()
+  const { currentTeamId, currentRole, isCaptainOrAdmin } = useAuthStore()
+
+  useEffect(() => {
+    if (!isCaptainOrAdmin()) {
+      Taro.reLaunch({ url: '/pages/home/index' })
+    }
+  }, [])
 
   const load = async () => {
     if (!currentTeamId) return

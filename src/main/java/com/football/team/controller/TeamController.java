@@ -38,6 +38,7 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}/members")
+    @RequireRole(MemberRole.PLAYER)
     public ApiResponse<List<MemberRes>> members(@PathVariable Long teamId) {
         return ApiResponse.ok(teamService.listMembers(teamId));
     }

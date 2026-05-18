@@ -2,6 +2,7 @@ package com.football.team.service;
 
 import com.football.team.dto.req.ApplyJoinReq;
 import com.football.team.dto.req.ReviewApplyReq;
+import com.football.team.dto.req.SetRoleReq;
 import com.football.team.entity.Team;
 import com.football.team.entity.TeamMember;
 import com.football.team.enums.MemberRole;
@@ -49,6 +50,36 @@ class TeamServiceTest {
         req.setInviteCode("CODE1");
         BusinessException ex = assertThrows(BusinessException.class,
             () -> teamService.applyJoin(1L, req));
+        assertEquals(400, ex.getCode());
+    }
+
+    @Test
+    void applyJoin_removedMember_resetsToPending() {
+        Team team = new Team(); team.setId(10L);
+        when(teamRepository.findByInviteCode("CODE2")).thenReturn(Optional.of(team));
+        TeamMember removed = new TeamMember();
+        removed.setStatus(MemberStatus.REMOVED);
+        when(teamMemberRepository.findByTeamIdAndUserId(10L, 1L)).thenReturn(Optional.of(removed));
+
+        ApplyJoinReq req = new ApplyJoinReq();
+        req.setInviteCode("CODE2");
+        teamService.applyJoin(1L, req);  // should not throw
+
+        verify(teamMemberRepository).save(argThat(m -> m.getStatus() == MemberStatus.PENDING));
+    }
+
+    @Test
+    void setRole_captain_throwsBadRequest() {
+        TeamMember captain = new TeamMember();
+        captain.setStatus(MemberStatus.ACTIVE);
+        captain.setRole(MemberRole.CAPTAIN);
+        when(teamMemberRepository.findByTeamIdAndUserId(1L, 5L)).thenReturn(Optional.of(captain));
+
+        SetRoleReq req = new SetRoleReq();
+        req.setUserId(5L);
+        req.setRole(MemberRole.ADMIN);
+        BusinessException ex = assertThrows(BusinessException.class,
+            () -> teamService.setRole(1L, req));
         assertEquals(400, ex.getCode());
     }
 

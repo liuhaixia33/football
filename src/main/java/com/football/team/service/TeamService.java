@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -45,12 +46,19 @@ public class TeamService {
         Team team = teamRepository.findByInviteCode(req.getInviteCode())
             .orElseThrow(() -> BusinessException.notFound("邀请码无效"));
 
-        teamMemberRepository.findByTeamIdAndUserId(team.getId(), userId).ifPresent(m -> {
+        Optional<TeamMember> existing = teamMemberRepository.findByTeamIdAndUserId(team.getId(), userId);
+        if (existing.isPresent()) {
+            TeamMember m = existing.get();
             if (m.getStatus() == MemberStatus.ACTIVE)
                 throw BusinessException.badRequest("您已是该球队成员");
             if (m.getStatus() == MemberStatus.PENDING)
                 throw BusinessException.badRequest("您的申请正在审核中");
-        });
+            // REMOVED: reset to PENDING to allow re-apply
+            m.setStatus(MemberStatus.PENDING);
+            m.setJoinedAt(null);
+            teamMemberRepository.save(m);
+            return;
+        }
 
         TeamMember member = new TeamMember();
         member.setTeamId(team.getId());
@@ -82,6 +90,9 @@ public class TeamService {
         TeamMember member = teamMemberRepository.findByTeamIdAndUserId(teamId, req.getUserId())
             .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
             .orElseThrow(() -> BusinessException.notFound("队员不存在"));
+
+        if (member.getRole() == MemberRole.CAPTAIN)
+            throw BusinessException.badRequest("不能修改队长角色，请使用转让队长功能");
 
         member.setRole(req.getRole());
         teamMemberRepository.save(member);

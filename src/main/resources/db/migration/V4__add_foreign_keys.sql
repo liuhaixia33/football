@@ -5,7 +5,8 @@ ALTER TABLE `team_member`
 
 -- activity
 ALTER TABLE `activity`
-  ADD CONSTRAINT `fk_act_team` FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_act_team` FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_act_creator` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
 
 -- activity_registration
 ALTER TABLE `activity_registration`
@@ -18,7 +19,8 @@ ALTER TABLE `match_result`
 
 -- finance_record
 ALTER TABLE `finance_record`
-  ADD CONSTRAINT `fk_fr_team` FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `fk_fr_team` FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_fr_creator` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
 
 -- member_fee
 ALTER TABLE `member_fee`

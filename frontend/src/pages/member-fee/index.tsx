@@ -105,7 +105,7 @@ export default function MemberFeePage() {
           </View>
           {f.isPaid ? (
             <Text style={{ color: '#4CAF50', fontSize: '13px' }}>✓ 已付</Text>
-          ) : (
+          ) : (currentRole === 'CAPTAIN' || currentRole === 'ADMIN') ? (
             <Button
               size='mini'
               style={{ background: '#E8F5E9', color: '#4CAF50', border: 'none',
@@ -114,6 +114,8 @@ export default function MemberFeePage() {
             >
               标记已付
             </Button>
+          ) : (
+            <Text style={{ color: '#f44336', fontSize: '13px' }}>未付</Text>
           )}
         </View>
       ))}

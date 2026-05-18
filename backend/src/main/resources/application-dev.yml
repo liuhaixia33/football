@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/football_team?useSSL=false&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: ${DB_USER:root}
+    password: ${DB_PASS:root}
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+wechat:
+  app-id: ${WECHAT_APP_ID:dev_mock}
+  app-secret: ${WECHAT_APP_SECRET:dev_mock}

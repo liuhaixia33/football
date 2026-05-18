@@ -1,0 +1,5 @@
+com/football/team/service/FinanceServiceTest.class
+com/football/team/service/AuthServiceTest.class
+com/football/team/security/JwtUtilTest.class
+com/football/team/service/ActivityServiceTest.class
+com/football/team/service/TeamServiceTest.class

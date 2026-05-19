@@ -1,8 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
+
+const fmt = (iso: string) => {
+  const d = new Date(iso)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 const labelStyle = { fontSize: '14px', color: '#666', marginBottom: '8px', display: 'block' } as const
 const inputStyle = {
@@ -33,6 +39,7 @@ export default function ActivityCreatePage() {
 
   const [loading, setLoading] = useState(false)
   const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
+  const hasLoaded = useRef(false)
 
   useEffect(() => {
     if (!isCaptainOrAdmin()) {
@@ -49,18 +56,14 @@ export default function ActivityCreatePage() {
   }, [])
 
   useDidShow(() => {
-    if (editId) {
+    if (editId && !hasLoaded.current) {
+      hasLoaded.current = true
       activityApi.detail(Number(editId)).then(detail => {
         const a = detail.activity
         setType(a.type)
         setTitle(a.title)
         setOpponent(a.opponent ?? '')
         setLocation(a.location)
-        const fmt = (iso: string) => {
-          const d = new Date(iso)
-          const pad = (n: number) => String(n).padStart(2, '0')
-          return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-        }
         setStartTime(fmt(a.startTime))
         setDeadline(a.deadline ? fmt(a.deadline) : '')
         setMaxPlayers(a.maxPlayers != null ? String(a.maxPlayers) : '')
@@ -93,7 +96,7 @@ export default function ActivityCreatePage() {
     title: title.trim(),
     location: location.trim(),
     startTime: new Date(startTime).toISOString(),
-    opponent: opponent.trim() || undefined,
+    opponent: type === 'MATCH' ? (opponent.trim() || undefined) : undefined,
     deadline: deadline ? new Date(deadline).toISOString() : undefined,
     maxPlayers: maxPlayers ? Number(maxPlayers) : undefined,
   })

@@ -49,7 +49,15 @@ function ActivityCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
           已报名 {a.registeredCount}
           {a.maxPlayers ? `/${a.maxPlayers}` : ''}{t('home.players')}
         </Text>
-        {a.iJoined && <Text style={{ fontSize: '12px', color: '#4CAF50' }}>✓ 已报名</Text>}
+        {a.myStatus === 'JOINED' && (
+          <Text style={{ fontSize: '12px', color: '#4CAF50' }}>{t('act.badge_joined')}</Text>
+        )}
+        {a.myStatus === 'TENTATIVE' && (
+          <Text style={{ fontSize: '12px', color: '#FF9800' }}>{t('act.badge_tentative')}</Text>
+        )}
+        {a.myStatus === 'ABSENT' && (
+          <Text style={{ fontSize: '12px', color: '#999' }}>{t('act.badge_absent')}</Text>
+        )}
       </View>
     </View>
   )

@@ -204,6 +204,25 @@ export default function ActivityDetailPage() {
             关闭报名
           </Button>
         )}
+        {isCaptainOrAdmin() && a.status === 'OPEN' && (
+          <Button
+            style={{
+              background: '#2196F3',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              marginTop: '8px',
+              fontSize: '14px',
+            }}
+            onClick={() =>
+              Taro.navigateTo({
+                url: `/pages/activity-create/index?editId=${activityId}`,
+              })
+            }
+          >
+            编辑活动
+          </Button>
+        )}
         {isCaptainOrAdmin() && a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
           <Button
             style={{

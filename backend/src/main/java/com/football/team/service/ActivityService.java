@@ -42,7 +42,7 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public List<ActivityRes> listActivities(Long teamId, Long currentUserId) {
         return activityRepository.findByTeamIdOrderByStartTimeDesc(teamId).stream()
-            .map(a -> toRes(a, currentUserId))
+            .map(a -> toActivityRes(a, currentUserId))
             .toList();
     }
 
@@ -67,7 +67,7 @@ public class ActivityService {
             .orElse(null);
 
         return ActivityDetailRes.builder()
-            .activity(toRes(a, currentUserId))
+            .activity(toActivityRes(a, currentUserId))
             .registrations(regs)
             .result(result)
             .build();
@@ -166,7 +166,7 @@ public class ActivityService {
         activityRepository.save(a);
     }
 
-    private ActivityRes toRes(Activity a, Long currentUserId) {
+    public ActivityRes toActivityRes(Activity a, Long currentUserId) {
         long count = regRepository.countByActivityIdAndStatus(a.getId(), RegStatus.JOINED);
         boolean iJoined = regRepository.findByActivityIdAndUserId(a.getId(), currentUserId)
             .map(r -> r.getStatus() == RegStatus.JOINED).orElse(false);

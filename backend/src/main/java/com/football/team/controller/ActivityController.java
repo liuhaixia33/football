@@ -84,4 +84,15 @@ public class ActivityController {
         activityService.recordResult(activityId, body, teamId);
         return ApiResponse.ok(null);
     }
+
+    @PutMapping("/{activityId}")
+    @RequireRole(MemberRole.ADMIN)
+    public ApiResponse<ActivityRes> update(HttpServletRequest req,
+                                           @PathVariable Long activityId,
+                                           @RequestBody @Valid CreateActivityReq body) {
+        Long teamId = (Long) req.getAttribute("currentTeamId");
+        User user = (User) req.getAttribute("currentUser");
+        Activity updated = activityService.updateActivity(activityId, teamId, body);
+        return ApiResponse.ok(activityService.toActivityRes(updated, user.getId()));
+    }
 }

@@ -16,5 +16,5 @@ public class ActivityRes {
     private Integer maxPlayers;
     private long registeredCount;
     private String status;
-    private Boolean iJoined;
+    private String myStatus;
 }

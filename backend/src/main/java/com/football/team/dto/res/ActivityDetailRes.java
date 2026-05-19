@@ -7,6 +7,6 @@ import java.util.List;
 @Data @Builder
 public class ActivityDetailRes {
     private ActivityRes activity;
-    private List<MemberRes> registrations;
+    private List<RegistrationRes> registrations;
     private MatchResultRes result;
 }

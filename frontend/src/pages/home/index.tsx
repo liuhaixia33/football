@@ -3,18 +3,19 @@ import { View, Text, ScrollView } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
+import { useT } from '../../i18n/useT'
 import type { ActivityRes } from '../../types/api'
 
-function statusLabel(a: ActivityRes): string {
-  if (a.status === 'FINISHED') return '已结束'
-  if (a.status === 'CLOSED') return '已截止'
-  if (a.deadline && new Date(a.deadline) < new Date()) return '已截止'
-  return '报名中'
-}
-
 function ActivityCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
-  const label = statusLabel(a)
-  const labelColor = label === '报名中' ? '#4CAF50' : '#999'
+  const t = useT()
+  const statusLabel = (status: string) => {
+    if (status === 'FINISHED') return t('home.finished')
+    if (status === 'CLOSED')   return t('home.closed')
+    return t('home.open')
+  }
+  const label = statusLabel(a.status)
+  const openLabel = t('home.open')
+  const labelColor = label === openLabel ? '#4CAF50' : '#999'
 
   return (
     <View
@@ -46,7 +47,7 @@ function ActivityCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
       <View style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
         <Text style={{ fontSize: '12px', color: '#999' }}>
           已报名 {a.registeredCount}
-          {a.maxPlayers ? `/${a.maxPlayers}` : ''} 人
+          {a.maxPlayers ? `/${a.maxPlayers}` : ''}{t('home.players')}
         </Text>
         {a.iJoined && <Text style={{ fontSize: '12px', color: '#4CAF50' }}>✓ 已报名</Text>}
       </View>
@@ -57,6 +58,7 @@ function ActivityCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
 export default function HomePage() {
   const [activities, setActivities] = useState<ActivityRes[]>([])
   const [loading, setLoading] = useState(false)
+  const t = useT()
   const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
 
   const load = async () => {
@@ -86,13 +88,13 @@ export default function HomePage() {
           borderBottom: '1px solid #f0f0f0',
         }}
       >
-        <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>活动</Text>
+        <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{t('tab.home')}</Text>
         {isCaptainOrAdmin() && (
           <Text
             style={{ fontSize: '14px', color: '#4CAF50' }}
             onClick={() => Taro.navigateTo({ url: '/pages/activity-create/index' })}
           >
-            + 发布活动
+            {t('home.create')}
           </Text>
         )}
       </View>
@@ -106,7 +108,7 @@ export default function HomePage() {
               display: 'block',
             }}
           >
-            加载中...
+            {t('common.loading')}
           </Text>
         ) : activities.length === 0 ? (
           <Text
@@ -117,7 +119,7 @@ export default function HomePage() {
               display: 'block',
             }}
           >
-            暂无活动
+            {t('home.empty')}
           </Text>
         ) : (
           activities.map(a => (

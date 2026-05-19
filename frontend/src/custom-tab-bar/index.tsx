@@ -44,7 +44,7 @@ export default class CustomTabBar extends Component {
   render() {
     const { language } = useLangStore.getState()
     const dict = language === 'zh' ? zh : en
-    const t = (key: string) => (dict as Record<string, string>)[key] ?? key
+    const t = (key: string) => dict[key] ?? key
     const tabs = this.getTabs(t)
     const selected = this.getCurrentIndex(tabs)
 

@@ -1,1 +1,1 @@
-export default definePageConfig({ navigationBarTitleText: '发布活动' })
+export default definePageConfig({ navigationBarTitleText: '活动' })

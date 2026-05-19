@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
 
@@ -17,8 +17,8 @@ const btnStyle = {
 export default function ActivityCreatePage() {
   const params = Taro.getCurrentInstance().router?.params ?? {}
   const resultFor = params.resultFor ?? null
+  const editId = params.editId ?? null
 
-  // Create activity state
   const [type, setType] = useState<'MATCH' | 'TRAINING'>('MATCH')
   const [title, setTitle] = useState('')
   const [opponent, setOpponent] = useState('')
@@ -27,7 +27,6 @@ export default function ActivityCreatePage() {
   const [deadline, setDeadline] = useState('')
   const [maxPlayers, setMaxPlayers] = useState('')
 
-  // Record result state
   const [ourScore, setOurScore] = useState('')
   const [oppScore, setOppScore] = useState('')
   const [notes, setNotes] = useState('')
@@ -38,42 +37,82 @@ export default function ActivityCreatePage() {
   useEffect(() => {
     if (!isCaptainOrAdmin()) {
       Taro.navigateBack()
+      return
+    }
+    if (editId) {
+      Taro.setNavigationBarTitle({ title: '编辑活动' })
+    } else if (!resultFor) {
+      Taro.setNavigationBarTitle({ title: '发布活动' })
+    } else {
+      Taro.setNavigationBarTitle({ title: '录入比分' })
     }
   }, [])
 
-  const submitActivity = async () => {
+  useDidShow(() => {
+    if (editId) {
+      activityApi.detail(Number(editId)).then(detail => {
+        const a = detail.activity
+        setType(a.type)
+        setTitle(a.title)
+        setOpponent(a.opponent ?? '')
+        setLocation(a.location)
+        const fmt = (iso: string) => {
+          const d = new Date(iso)
+          const pad = (n: number) => String(n).padStart(2, '0')
+          return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+        }
+        setStartTime(fmt(a.startTime))
+        setDeadline(a.deadline ? fmt(a.deadline) : '')
+        setMaxPlayers(a.maxPlayers != null ? String(a.maxPlayers) : '')
+      }).catch(() => Taro.showToast({ title: '加载活动失败', icon: 'none' }))
+    }
+  })
+
+  const validateActivityForm = (): boolean => {
     if (!title.trim() || !location.trim() || !startTime) {
       Taro.showToast({ title: '请填写必填项', icon: 'none' })
-      return
+      return false
     }
     if (isNaN(new Date(startTime).getTime())) {
       Taro.showToast({ title: '开始时间格式错误，请使用 2026-06-01 09:00', icon: 'none' })
-      return
+      return false
     }
     if (deadline && isNaN(new Date(deadline).getTime())) {
       Taro.showToast({ title: '截止时间格式错误', icon: 'none' })
-      return
+      return false
     }
     if (maxPlayers && (isNaN(Number(maxPlayers)) || Number(maxPlayers) <= 0 || !Number.isInteger(Number(maxPlayers)))) {
       Taro.showToast({ title: '最大报名人数须为正整数', icon: 'none' })
-      return
+      return false
     }
+    return true
+  }
+
+  const buildActivityBody = () => ({
+    type,
+    title: title.trim(),
+    location: location.trim(),
+    startTime: new Date(startTime).toISOString(),
+    opponent: opponent.trim() || undefined,
+    deadline: deadline ? new Date(deadline).toISOString() : undefined,
+    maxPlayers: maxPlayers ? Number(maxPlayers) : undefined,
+  })
+
+  const submitActivity = async () => {
+    if (!validateActivityForm()) return
     if (!currentTeamId) return
     setLoading(true)
     try {
-      await activityApi.create(currentTeamId, {
-        type,
-        title: title.trim(),
-        location: location.trim(),
-        startTime: new Date(startTime).toISOString(),
-        opponent: opponent.trim() || undefined,
-        deadline: deadline ? new Date(deadline).toISOString() : undefined,
-        maxPlayers: maxPlayers ? Number(maxPlayers) : undefined,
-      })
-      Taro.showToast({ title: '发布成功', icon: 'success' })
+      if (editId) {
+        await activityApi.update(Number(editId), buildActivityBody())
+        Taro.showToast({ title: '修改成功', icon: 'success' })
+      } else {
+        await activityApi.create(currentTeamId, buildActivityBody())
+        Taro.showToast({ title: '发布成功', icon: 'success' })
+      }
       setTimeout(() => Taro.navigateBack(), 1000)
     } catch (e: unknown) {
-      Taro.showToast({ title: e instanceof Error ? e.message : '发布失败', icon: 'none' })
+      Taro.showToast({ title: e instanceof Error ? e.message : '操作失败', icon: 'none' })
     } finally {
       setLoading(false)
     }
@@ -105,7 +144,6 @@ export default function ActivityCreatePage() {
     }
   }
 
-  // Record result mode
   if (resultFor) {
     return (
       <View style={{ padding: '16px' }}>
@@ -139,7 +177,6 @@ export default function ActivityCreatePage() {
     )
   }
 
-  // Create activity mode
   return (
     <View style={{ padding: '16px' }}>
       <Text style={labelStyle}>类型 *</Text>
@@ -213,7 +250,7 @@ export default function ActivityCreatePage() {
       />
 
       <Button style={btnStyle} loading={loading} onClick={submitActivity}>
-        发布活动
+        {editId ? '保存修改' : '发布活动'}
       </Button>
     </View>
   )

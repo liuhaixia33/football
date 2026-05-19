@@ -169,4 +169,6 @@ export const zh: Record<string, string> = {
   'my.lang_zh': '中文',
   'my.lang_en': 'English',
   'my.lang_title': '选择语言',
+  'my.edit': '编辑',
+  'my.edit_profile': '编辑个人资料',
 }

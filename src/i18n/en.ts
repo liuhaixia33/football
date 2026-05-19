@@ -169,4 +169,6 @@ export const en: Record<string, string> = {
   'my.lang_zh': '中文',
   'my.lang_en': 'English',
   'my.lang_title': 'Select Language',
+  'my.edit': 'Edit',
+  'my.edit_profile': 'Edit Profile',
 }

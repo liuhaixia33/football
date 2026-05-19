@@ -18,3 +18,10 @@ jwt:
 wechat:
   app-id: ${WECHAT_APP_ID:dev_mock}
   app-secret: ${WECHAT_APP_SECRET:dev_mock}
+
+oss:
+  endpoint: ${OSS_ENDPOINT}
+  access-key-id: ${OSS_KEY_ID}
+  access-key-secret: ${OSS_KEY_SECRET}
+  bucket-name: ${OSS_BUCKET}
+  base-url: ${OSS_BASE_URL}

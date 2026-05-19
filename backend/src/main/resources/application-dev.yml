@@ -12,6 +12,13 @@ wechat:
   app-id: ${WECHAT_APP_ID:dev_mock}
   app-secret: ${WECHAT_APP_SECRET:dev_mock}
 
+oss:
+  endpoint: https://oss-cn-hangzhou.aliyuncs.com
+  access-key-id: ${OSS_KEY_ID:your-key-id}
+  access-key-secret: ${OSS_KEY_SECRET:your-key-secret}
+  bucket-name: your-bucket-name
+  base-url: https://your-bucket.oss-cn-hangzhou.aliyuncs.com
+
 logging:
   level:
     org.springframework.web.servlet.DispatcherServlet: DEBUG

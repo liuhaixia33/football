@@ -14,7 +14,7 @@ public class OssConfig {
 
     private final OssProperties ossProperties;
 
-    @Bean
+    @Bean(destroyMethod = "shutdown")
     public OSS ossClient() {
         return new OSSClientBuilder().build(
             ossProperties.getEndpoint(),

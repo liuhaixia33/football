@@ -4,9 +4,11 @@ import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
 import type { ActivityDetailRes } from '../../types/api'
+import { useT } from '../../i18n/useT'
 
 export default function ActivityDetailPage() {
   const [detail, setDetail] = useState<ActivityDetailRes | null>(null)
+  const t = useT()
   const { isCaptainOrAdmin, currentTeamId } = useAuthStore()
 
   const activityId = Number(Taro.getCurrentInstance().router?.params?.id)
@@ -26,13 +28,13 @@ export default function ActivityDetailPage() {
     activityApi
       .detail(activityId)
       .then(setDetail)
-      .catch(() => Taro.showToast({ title: '加载失败', icon: 'none' }))
+      .catch(() => Taro.showToast({ title: t('act.load_fail'), icon: 'none' }))
   }, [activityId])
 
   if (!detail) {
     return (
       <View style={{ padding: '32px', textAlign: 'center' }}>
-        <Text style={{ color: '#999' }}>加载中...</Text>
+        <Text style={{ color: '#999' }}>{t('common.loading')}</Text>
       </View>
     )
   }
@@ -52,7 +54,7 @@ export default function ActivityDetailPage() {
       const updated = await activityApi.detail(activityId)
       setDetail(updated)
     } catch (e: unknown) {
-      Taro.showToast({ title: e instanceof Error ? e.message : '操作失败', icon: 'none' })
+      Taro.showToast({ title: e instanceof Error ? e.message : t('common.error'), icon: 'none' })
     }
   }
 
@@ -63,7 +65,7 @@ export default function ActivityDetailPage() {
       const updated = await activityApi.detail(activityId)
       setDetail(updated)
     } catch (e: unknown) {
-      Taro.showToast({ title: e instanceof Error ? e.message : '操作失败', icon: 'none' })
+      Taro.showToast({ title: e instanceof Error ? e.message : t('common.error'), icon: 'none' })
     }
   }
 
@@ -91,18 +93,18 @@ export default function ActivityDetailPage() {
           </Text>
           {a.opponent && (
             <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '6px' }}>
-              ⚽ 对阵：{a.opponent}
+              {t('act.vs')}{a.opponent}
             </Text>
           )}
           <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '6px' }}>
-            📍 地点：{a.location}
+            {t('act.location')}{a.location}
           </Text>
           <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '6px' }}>
-            🕐 开始：{new Date(a.startTime).toLocaleString('zh-CN')}
+            {t('act.start')}{new Date(a.startTime).toLocaleString('zh-CN')}
           </Text>
           {a.deadline && (
             <Text style={{ fontSize: '14px', color: '#999', display: 'block' }}>
-              ⏰ 截止：{new Date(a.deadline).toLocaleString('zh-CN')}
+              {t('act.deadline')}{new Date(a.deadline).toLocaleString('zh-CN')}
             </Text>
           )}
         </View>
@@ -126,7 +128,7 @@ export default function ActivityDetailPage() {
                 marginBottom: '8px',
               }}
             >
-              比赛结果
+              {t('act.result')}
             </Text>
             <Text style={{ fontSize: '36px', fontWeight: 'bold' }}>
               {detail.result.ourScore} : {detail.result.oppScore}
@@ -145,10 +147,10 @@ export default function ActivityDetailPage() {
               }}
             >
               {detail.result.outcome === 'WIN'
-                ? '胜利'
+                ? t('act.win')
                 : detail.result.outcome === 'LOSE'
-                  ? '负'
-                  : '平局'}
+                  ? t('act.lose')
+                  : t('act.draw')}
             </Text>
           </View>
         )}
@@ -163,7 +165,7 @@ export default function ActivityDetailPage() {
           }}
         >
           <Text style={{ fontWeight: 'bold', marginBottom: '12px', display: 'block' }}>
-            报名名单（{a.registeredCount}
+            {t('act.registrations')}（{a.registeredCount}
             {a.maxPlayers ? `/${a.maxPlayers}` : ''}人）
           </Text>
           {detail.registrations.map(r => (
@@ -180,7 +182,7 @@ export default function ActivityDetailPage() {
             </View>
           ))}
           {detail.registrations.length === 0 && (
-            <Text style={{ color: '#999', fontSize: '14px' }}>暂无人报名</Text>
+            <Text style={{ color: '#999', fontSize: '14px' }}>{t('act.no_regs')}</Text>
           )}
         </View>
 
@@ -196,7 +198,7 @@ export default function ActivityDetailPage() {
             }}
             onClick={handleRegister}
           >
-            {a.iJoined ? '取消报名' : '我要参加'}
+            {a.iJoined ? t('act.cancel_join') : t('act.join')}
           </Button>
         )}
         {isCaptainOrAdmin() && isOpen && (
@@ -211,7 +213,7 @@ export default function ActivityDetailPage() {
             }}
             onClick={handleClose}
           >
-            关闭报名
+            {t('act.close')}
           </Button>
         )}
         {isCaptainOrAdmin() && a.status === 'OPEN' && (
@@ -230,7 +232,7 @@ export default function ActivityDetailPage() {
               })
             }
           >
-            编辑活动
+            {t('act.edit')}
           </Button>
         )}
         {isCaptainOrAdmin() && a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
@@ -249,7 +251,7 @@ export default function ActivityDetailPage() {
               })
             }
           >
-            录入比分
+            {t('act.record')}
           </Button>
         )}
         <Button
@@ -263,7 +265,7 @@ export default function ActivityDetailPage() {
             fontSize: '14px',
           }}
         >
-          分享给好友
+          {t('act.share')}
         </Button>
       </View>
     </ScrollView>

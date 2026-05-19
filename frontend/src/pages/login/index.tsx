@@ -58,82 +58,135 @@ export default function LoginPage() {
 
   return (
     <View style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'flex-start', height: '100%', background: C.bg,
-      paddingTop: px(80), paddingLeft: px(32), paddingRight: px(32), paddingBottom: px(32),
+      height: '100%',
+      background: C.bg,
+      display: 'flex',
+      flexDirection: 'column',
     }}>
+      {/* 顶部品牌色块 */}
       <View style={{
-        background: C.surface, borderRadius: px(20), padding: `${px(28)} ${px(24)}`,
-        width: '100%', maxWidth: px(360),
-        boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+        background: C.primary,
+        paddingTop: px(80),
+        paddingBottom: px(48),
+        paddingLeft: px(24),
+        paddingRight: px(24),
+        borderBottomLeftRadius: px(28),
+        borderBottomRightRadius: px(28),
       }}>
+        <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(20) }}>
+          <View style={{
+            width: px(88),
+            height: px(88),
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '2px solid rgba(255,255,255,0.3)',
+          }}>
+            <Text style={{ fontSize: px(44) }}>⚽</Text>
+          </View>
+        </View>
         <Text style={{
-          fontSize: px(24), fontWeight: '700', color: C.text,
-          marginBottom: px(8), display: 'block', textAlign: 'center',
+          fontSize: px(26),
+          fontWeight: '700',
+          color: '#fff',
+          textAlign: 'center',
+          display: 'block',
+          marginBottom: px(8),
         }}>
           {t('login.title')}
         </Text>
         <Text style={{
-          fontSize: px(14), color: C.text3, marginBottom: px(28),
-          display: 'block', textAlign: 'center',
+          fontSize: px(14),
+          color: 'rgba(255,255,255,0.85)',
+          textAlign: 'center',
+          display: 'block',
         }}>
           加入你的球队，记录每一场比赛
         </Text>
+      </View>
 
-        {/* 头像选择 */}
+      {/* 表单区铺满 */}
+      <View style={{
+        flex: 1,
+        padding: `${px(32)} ${px(24)} ${px(24)}`,
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* 头像 */}
         <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(8) }}>
           <Button
             openType="chooseAvatar"
             onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
             style={{
               background: 'transparent', border: 'none', padding: 0,
-              width: px(96), height: px(96), borderRadius: '50%',
+              width: px(88), height: px(88), borderRadius: '50%',
             }}
           >
             {avatarDisplay
               ? <Image src={avatarDisplay} style={{
-                  width: px(96), height: px(96), borderRadius: '50%',
-                  border: '3px solid ' + C.primaryLight,
+                  width: px(88), height: px(88), borderRadius: '50%',
+                  border: `3px solid ${C.primaryLight}`,
                 }} />
               : <View style={{
-                  width: px(96), height: px(96), borderRadius: '50%',
-                  background: C.bg, display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', border: '2px dashed #d1d5db',
+                  width: px(88), height: px(88), borderRadius: '50%',
+                  background: C.surface, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                  border: `2px dashed ${C.text3}`,
                 }}>
-                  <Text style={{ fontSize: px(24) }}>📷</Text>
+                  <Text style={{ fontSize: px(28) }}>📷</Text>
                 </View>
             }
           </Button>
         </View>
-        <Text style={{ fontSize: px(12), color: C.text3, marginBottom: px(24), textAlign: 'center', display: 'block' }}>
+        <Text style={{
+          fontSize: px(13), color: C.text3, marginBottom: px(28),
+          textAlign: 'center', display: 'block',
+        }}>
           {t('login.tap_avatar')}
         </Text>
 
-        {/* 昵称输入 */}
-        <Text style={{
-          fontSize: px(13), fontWeight: '500', color: C.text2,
-          marginBottom: px(8), display: 'block',
-        }}>
-          昵称
-        </Text>
-        <Input
-          type="nickname"
-          value={nickname}
-          onInput={(e) => setNickname(e.detail.value)}
-          placeholder={t('login.nickname_placeholder')}
-          style={{
-            background: C.bg, borderRadius: px(12), padding: '12px 14px',
-            fontSize: px(15), width: '100%', marginBottom: px(32),
-            border: '1px solid #e5e7eb', color: C.text, boxSizing: 'border-box',
-          }}
-        />
+        {/* 昵称 */}
+        <View style={{ marginBottom: px(24) }}>
+          <Text style={{
+            fontSize: px(14), fontWeight: '600', color: C.text,
+            marginBottom: px(8), display: 'block',
+          }}>
+            昵称
+          </Text>
+          <Input
+            type="nickname"
+            value={nickname}
+            onInput={(e) => setNickname(e.detail.value)}
+            placeholder={t('login.nickname_placeholder')}
+            style={{
+              height: px(52),
+              background: C.surface,
+              borderRadius: px(14),
+              padding: `0 ${px(16)}`,
+              fontSize: px(16),
+              border: `1px solid #e5e7eb`,
+              color: C.text,
+            }}
+          />
+        </View>
+
+        {/* 撑开 */}
+        <View style={{ flex: 1 }} />
 
         {/* 登录按钮 */}
         <Button
           style={{
-            background: canLogin ? C.primary : '#d1d5db', color: '#fff',
-            borderRadius: '9999px', padding: '12px 0', fontSize: px(16),
-            fontWeight: '600', border: 'none', opacity: loading ? 0.7 : 1,
+            background: canLogin ? C.primary : '#d1d5db',
+            color: '#fff',
+            borderRadius: px(16),
+            height: px(52),
+            lineHeight: px(52),
+            fontSize: px(17),
+            fontWeight: '600',
+            border: 'none',
+            opacity: loading ? 0.7 : 1,
           }}
           loading={loading}
           disabled={!canLogin}

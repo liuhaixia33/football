@@ -3,11 +3,8 @@ import { View, Text, Button, ScrollView } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
+import { useT } from '../../i18n/useT'
 import type { MemberRes } from '../../types/api'
-
-function roleLabel(role: string) {
-  return role === 'CAPTAIN' ? '队长' : role === 'ADMIN' ? '管理员' : '队员'
-}
 
 function roleColor(role: string) {
   return role === 'CAPTAIN' ? '#FF9800' : role === 'ADMIN' ? '#2196F3' : '#666'
@@ -16,6 +13,10 @@ function roleColor(role: string) {
 export default function MembersPage() {
   const [members, setMembers] = useState<MemberRes[]>([])
   const [tab, setTab] = useState<'active' | 'pending'>('active')
+  const t = useT()
+
+  const roleLabel = (role: string) =>
+    role === 'CAPTAIN' ? t('members.captain') : role === 'ADMIN' ? t('members.admin') : t('members.player')
   const { currentTeamId, userId, currentRole, isCaptainOrAdmin } = useAuthStore()
 
   const load = async () => {
@@ -81,20 +82,20 @@ export default function MembersPage() {
       {/* Tab switcher */}
       <View style={{ display: 'flex', background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
         {[
-          { key: 'active', label: `活跃 (${active.length})` },
-          { key: 'pending', label: `待审批 (${pending.length})` },
-        ].map(t => (
+          { key: 'active', label: `${t('members.active')} (${active.length})` },
+          { key: 'pending', label: `${t('members.pending')} (${pending.length})` },
+        ].map(item => (
           <View
-            key={t.key}
-            onClick={() => setTab(t.key as 'active' | 'pending')}
+            key={item.key}
+            onClick={() => setTab(item.key as 'active' | 'pending')}
             style={{
               flex: 1, textAlign: 'center', padding: '12px',
-              color: tab === t.key ? '#4CAF50' : '#666',
-              borderBottom: tab === t.key ? '2px solid #4CAF50' : '2px solid transparent',
+              color: tab === item.key ? '#4CAF50' : '#666',
+              borderBottom: tab === item.key ? '2px solid #4CAF50' : '2px solid transparent',
               fontSize: '14px'
             }}
           >
-            <Text>{t.label}</Text>
+            <Text>{item.label}</Text>
           </View>
         ))}
       </View>
@@ -124,13 +125,13 @@ export default function MembersPage() {
                   style={{ background: '#4CAF50', color: '#fff', border: 'none',
                            borderRadius: '4px', fontSize: '12px' }}
                   onClick={() => reviewApply(m.memberId, true)}
-                >通过</Button>
+                >{t('members.approve')}</Button>
                 <Button
                   size='mini'
                   style={{ background: '#f5f5f5', color: '#999', border: 'none',
                            borderRadius: '4px', fontSize: '12px' }}
                   onClick={() => reviewApply(m.memberId, false)}
-                >拒绝</Button>
+                >{t('members.reject')}</Button>
               </View>
             )}
 
@@ -144,21 +145,21 @@ export default function MembersPage() {
                            borderRadius: '4px', fontSize: '11px' }}
                   onClick={() => toggleAdmin(m.userId, m.role)}
                 >
-                  {m.role === 'ADMIN' ? '取消管理' : '设为管理'}
+                  {m.role === 'ADMIN' ? t('members.remove_admin') : t('members.set_admin')}
                 </Button>
                 <Button
                   size='mini'
                   style={{ background: '#FFEBEE', color: '#C62828', border: 'none',
                            borderRadius: '4px', fontSize: '11px' }}
                   onClick={() => removeMember(m.userId)}
-                >移除</Button>
+                >{t('members.remove')}</Button>
               </View>
             )}
           </View>
         ))}
         {list.length === 0 && (
           <Text style={{ textAlign: 'center', color: '#999', display: 'block', padding: '32px' }}>
-            {tab === 'pending' ? '暂无待审批申请' : '暂无成员'}
+            {t('members.empty')}
           </Text>
         )}
       </ScrollView>

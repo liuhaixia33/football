@@ -1,7 +1,9 @@
 import { View, Text, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
+import { useT } from '../../i18n/useT'
 
 export default function OnboardPage() {
+  const t = useT()
   return (
     <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
                    justifyContent: 'center', height: '100vh', padding: '32px' }}>
@@ -18,14 +20,14 @@ export default function OnboardPage() {
                  width: '100%', marginBottom: '12px', border: 'none' }}
         onClick={() => Taro.navigateTo({ url: '/pages/create-team/index' })}
       >
-        创建球队
+        {t('onboard.create')}
       </Button>
       <Button
         style={{ background: '#fff', color: '#4CAF50', border: '1px solid #4CAF50',
                  borderRadius: '8px', width: '100%' }}
         onClick={() => Taro.navigateTo({ url: '/pages/join-team/index' })}
       >
-        输入邀请码加入
+        {t('onboard.join')}
       </Button>
     </View>
   )

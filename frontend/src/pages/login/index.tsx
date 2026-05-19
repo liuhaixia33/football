@@ -3,10 +3,12 @@ import { View, Text, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { authApi } from '../../api/auth'
 import { useAuthStore } from '../../store/auth'
+import { useT } from '../../i18n/useT'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const { setAuth, setTeams } = useAuthStore()
+  const t = useT()
 
   const handleLogin = async () => {
     if (loading) return
@@ -38,7 +40,7 @@ export default function LoginPage() {
         Taro.reLaunch({ url: '/pages/team-select/index' })
       }
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : '登录失败，请重试'
+      const msg = e instanceof Error ? e.message : t('login.fail')
       Taro.showToast({ title: msg, icon: 'none' })
     } finally {
       setLoading(false)
@@ -50,7 +52,7 @@ export default function LoginPage() {
                    justifyContent: 'center', height: '100vh', background: '#f5f5f5' }}>
       <Text style={{ fontSize: '48px', marginBottom: '16px' }}>⚽</Text>
       <Text style={{ fontSize: '24px', fontWeight: 'bold', color: '#333',
-                     marginBottom: '8px' }}>足球队管理</Text>
+                     marginBottom: '8px' }}>{t('login.title')}</Text>
       <Text style={{ fontSize: '14px', color: '#999', marginBottom: '60px' }}>
         管理你的球队，记录每一场比赛
       </Text>
@@ -60,7 +62,7 @@ export default function LoginPage() {
         loading={loading}
         onClick={handleLogin}
       >
-        微信一键登录
+        {t('login.btn')}
       </Button>
     </View>
   )

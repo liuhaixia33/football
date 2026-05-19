@@ -2,9 +2,11 @@ import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuthStore } from '../../store/auth'
 import type { MemberRole } from '../../types/api'
+import { useT } from '../../i18n/useT'
 
 export default function TeamSelectPage() {
   const { teams, setCurrentTeam } = useAuthStore()
+  const i18n = useT()
 
   const select = (teamId: number, role: MemberRole) => {
     setCurrentTeam(teamId, role)
@@ -14,11 +16,11 @@ export default function TeamSelectPage() {
   return (
     <View style={{ padding: '16px' }}>
       <Text style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px',
-                     display: 'block' }}>选择球队</Text>
-      {teams.map(t => (
+                     display: 'block' }}>{i18n('team_select.title')}</Text>
+      {teams.map(team => (
         <View
-          key={t.teamId}
-          onClick={() => select(t.teamId, t.role)}
+          key={team.teamId}
+          onClick={() => select(team.teamId, team.role)}
           style={{ background: '#fff', borderRadius: '8px', padding: '16px',
                    marginBottom: '12px', display: 'flex', alignItems: 'center',
                    boxShadow: '0 1px 4px rgba(0,0,0,.1)' }}
@@ -26,10 +28,10 @@ export default function TeamSelectPage() {
           <Text style={{ fontSize: '32px', marginRight: '12px' }}>⚽</Text>
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: '16px', fontWeight: 'bold', display: 'block' }}>
-              {t.teamName}
+              {team.teamName}
             </Text>
             <Text style={{ fontSize: '12px', color: '#999' }}>
-              {t.role === 'CAPTAIN' ? '队长' : t.role === 'ADMIN' ? '管理员' : '队员'}
+              {team.role === 'CAPTAIN' ? i18n('my.captain') : team.role === 'ADMIN' ? i18n('my.admin') : i18n('my.player')}
             </Text>
           </View>
           <Text style={{ color: '#ccc' }}>›</Text>

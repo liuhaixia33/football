@@ -4,6 +4,7 @@ import Taro from '@tarojs/taro'
 import { financeApi } from '../../api/finance'
 import { useAuthStore } from '../../store/auth'
 import type { MemberFeeRes } from '../../types/api'
+import { useT } from '../../i18n/useT'
 
 export default function MemberFeePage() {
   const currentYear = new Date().getFullYear()
@@ -11,11 +12,16 @@ export default function MemberFeePage() {
   const [fees, setFees] = useState<MemberFeeRes[]>([])
   const [feeAmount, setFeeAmount] = useState('')
   const { currentTeamId, currentRole, isCaptainOrAdmin } = useAuthStore()
+  const t = useT()
 
   useEffect(() => {
     if (!isCaptainOrAdmin()) {
       Taro.reLaunch({ url: '/pages/home/index' })
     }
+  }, [])
+
+  useEffect(() => {
+    Taro.setNavigationBarTitle({ title: t('member_fee.title') })
   }, [])
 
   const load = async () => {
@@ -88,7 +94,7 @@ export default function MemberFeePage() {
                      borderRadius: '6px', fontSize: '13px' }}
             onClick={handleSetFee}
           >
-            设置
+            {t('member_fee.set_fee')}
           </Button>
         </View>
       )}
@@ -106,11 +112,11 @@ export default function MemberFeePage() {
               {f.nickname}
             </Text>
             <Text style={{ fontSize: '12px', color: '#999' }}>
-              已付 ¥{f.amountPaid} / 应缴 ¥{f.amountDue}
+              {t('member_fee.paid')} ¥{f.amountPaid} / {t('member_fee.due')} ¥{f.amountDue}
             </Text>
           </View>
           {f.isPaid ? (
-            <Text style={{ color: '#4CAF50', fontSize: '13px' }}>✓ 已付</Text>
+            <Text style={{ color: '#4CAF50', fontSize: '13px' }}>✓ {t('member_fee.is_paid')}</Text>
           ) : (currentRole === 'CAPTAIN' || currentRole === 'ADMIN') ? (
             <Button
               size='mini'
@@ -118,7 +124,7 @@ export default function MemberFeePage() {
                        borderRadius: '4px', fontSize: '12px' }}
               onClick={() => handleMarkFee(f.userId, f.amountDue)}
             >
-              标记已付
+              {t('member_fee.mark_paid')}
             </Button>
           ) : (
             <Text style={{ color: '#f44336', fontSize: '13px' }}>未付</Text>

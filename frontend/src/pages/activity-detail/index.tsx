@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Button, ScrollView } from '@tarojs/components'
+import { View, Text, Button, ScrollView, Image } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
@@ -158,7 +158,10 @@ export default function ActivityDetailPage() {
               </Text>
               {joined.map(r => (
                 <View key={r.userId} style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-                  <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
+                  {r.avatarUrl
+                    ? <Image src={r.avatarUrl} style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '8px' }} />
+                    : <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
+                  }
                   <Text style={{ fontSize: '14px' }}>{r.nickname}</Text>
                 </View>
               ))}
@@ -173,7 +176,10 @@ export default function ActivityDetailPage() {
               </Text>
               {tentative.map(r => (
                 <View key={r.userId} style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-                  <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
+                  {r.avatarUrl
+                    ? <Image src={r.avatarUrl} style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '8px' }} />
+                    : <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
+                  }
                   <Text style={{ fontSize: '14px' }}>{r.nickname}</Text>
                 </View>
               ))}
@@ -188,7 +194,10 @@ export default function ActivityDetailPage() {
               </Text>
               {absent.map(r => (
                 <View key={r.userId} style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-                  <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
+                  {r.avatarUrl
+                    ? <Image src={r.avatarUrl} style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '8px' }} />
+                    : <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
+                  }
                   <Text style={{ fontSize: '14px' }}>{r.nickname}</Text>
                 </View>
               ))}

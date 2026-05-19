@@ -16,6 +16,8 @@ export const zh: Record<string, string> = {
   'login.title': '足球队管理',
   'login.btn': '微信一键登录',
   'login.fail': '登录失败，请重试',
+  'login.tap_avatar': '点击设置头像',
+  'login.nickname_placeholder': '请输入昵称',
 
   'onboard.title': '开始使用',
   'onboard.join': '加入球队',
@@ -167,4 +169,6 @@ export const zh: Record<string, string> = {
   'my.lang_zh': '中文',
   'my.lang_en': 'English',
   'my.lang_title': '选择语言',
+  'my.edit': '编辑',
+  'my.edit_profile': '编辑个人资料',
 }

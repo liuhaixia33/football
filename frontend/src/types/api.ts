@@ -17,6 +17,7 @@ export interface LoginRes {
   token: string
   userId: number
   nickname: string
+  avatarUrl: string
   teams: TeamBrief[]
 }
 

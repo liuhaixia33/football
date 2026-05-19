@@ -1,5 +1,6 @@
 package com.football.team.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.football.team.exception.BusinessException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ public class WechatService {
     @Value("${wechat.app-secret}") private String appSecret;
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public String getOpenid(String code) {
         if ("dev_mock".equals(appId)) {
@@ -23,9 +25,18 @@ public class WechatService {
             + "&secret=" + appSecret
             + "&js_code=" + code
             + "&grant_type=authorization_code";
-        Map<?, ?> result = restTemplate.getForObject(url, Map.class);
-        if (result == null || result.containsKey("errcode"))
+
+        String raw = restTemplate.getForObject(url, String.class);
+        Map<?, ?> result;
+        try {
+            result = objectMapper.readValue(raw, Map.class);
+        } catch (Exception e) {
+            throw BusinessException.badRequest("微信登录接口返回异常：" + raw);
+        }
+
+        if (result == null || result.containsKey("errcode")) {
             throw BusinessException.badRequest("微信登录失败：" + result);
+        }
         return (String) result.get("openid");
     }
 }

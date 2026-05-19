@@ -9,5 +9,6 @@ public class LoginRes {
     private String token;
     private Long userId;
     private String nickname;
+    private String avatarUrl;
     private List<TeamBriefRes> teams;
 }

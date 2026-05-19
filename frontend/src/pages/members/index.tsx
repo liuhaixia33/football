@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, Button, ScrollView } from '@tarojs/components'
+import { View, Text, Button, ScrollView, Image } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
@@ -107,7 +107,10 @@ export default function MembersPage() {
             style={{ background: '#fff', borderRadius: '8px', padding: '12px 16px',
                      marginBottom: '8px', display: 'flex', alignItems: 'center' }}
           >
-            <Text style={{ fontSize: '32px', marginRight: '12px' }}>👤</Text>
+            {m.avatarUrl
+              ? <Image src={m.avatarUrl} style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '12px' }} />
+              : <Text style={{ fontSize: '32px', marginRight: '12px' }}>👤</Text>
+            }
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: '15px', fontWeight: 'bold', display: 'block' }}>
                 {m.nickname}

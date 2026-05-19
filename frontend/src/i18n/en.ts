@@ -16,6 +16,8 @@ export const en: Record<string, string> = {
   'login.title': 'Football Team',
   'login.btn': 'Login with WeChat',
   'login.fail': 'Login failed, please retry',
+  'login.tap_avatar': 'Tap to set avatar',
+  'login.nickname_placeholder': 'Enter nickname',
 
   'onboard.title': 'Get Started',
   'onboard.join': 'Join a Team',
@@ -167,4 +169,6 @@ export const en: Record<string, string> = {
   'my.lang_zh': '中文',
   'my.lang_en': 'English',
   'my.lang_title': 'Select Language',
+  'my.edit': 'Edit',
+  'my.edit_profile': 'Edit Profile',
 }

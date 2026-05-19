@@ -63,6 +63,7 @@ public class AuthService {
             .token(jwtUtil.generate(user.getId()))
             .userId(user.getId())
             .nickname(user.getNickname())
+            .avatarUrl(user.getAvatarUrl())
             .teams(teams)
             .build();
     }

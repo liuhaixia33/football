@@ -63,59 +63,47 @@ export default function LoginPage() {
       display: 'flex',
       flexDirection: 'column',
     }}>
-      {/* 顶部品牌色块 */}
+      {/* 顶部品牌区 */}
       <View style={{
         background: C.primary,
-        paddingTop: px(80),
-        paddingBottom: px(48),
+        paddingTop: px(56),
+        paddingBottom: px(28),
         paddingLeft: px(24),
         paddingRight: px(24),
-        borderBottomLeftRadius: px(28),
-        borderBottomRightRadius: px(28),
+        borderBottomLeftRadius: px(24),
+        borderBottomRightRadius: px(24),
       }}>
-        <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(20) }}>
-          <View style={{
-            width: px(88),
-            height: px(88),
-            borderRadius: '50%',
-            background: 'rgba(255,255,255,0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '2px solid rgba(255,255,255,0.3)',
-          }}>
-            <Text style={{ fontSize: px(44) }}>⚽</Text>
-          </View>
-        </View>
         <Text style={{
-          fontSize: px(26),
-          fontWeight: '700',
+          fontSize: px(14),
+          color: 'rgba(255,255,255,0.7)',
+          textAlign: 'center',
+          display: 'block',
+          marginBottom: px(12),
+          letterSpacing: px(2),
+        }}>
+          ⚽ 球队管理小程序
+        </Text>
+        <Text style={{
+          fontSize: px(30),
+          fontWeight: '800',
           color: '#fff',
           textAlign: 'center',
           display: 'block',
-          marginBottom: px(8),
+          marginBottom: px(6),
         }}>
           {t('login.title')}
         </Text>
         <Text style={{
           fontSize: px(14),
-          color: 'rgba(255,255,255,0.85)',
+          color: 'rgba(255,255,255,0.8)',
           textAlign: 'center',
           display: 'block',
         }}>
           加入你的球队，记录每一场比赛
         </Text>
-      </View>
 
-      {/* 表单区铺满 */}
-      <View style={{
-        flex: 1,
-        padding: `${px(32)} ${px(24)} ${px(24)}`,
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        {/* 头像 */}
-        <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(8) }}>
+        {/* 头像放在绿区底部 */}
+        <View style={{ display: 'flex', justifyContent: 'center', marginTop: px(20) }}>
           <Button
             openType="chooseAvatar"
             onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
@@ -127,13 +115,14 @@ export default function LoginPage() {
             {avatarDisplay
               ? <Image src={avatarDisplay} style={{
                   width: px(88), height: px(88), borderRadius: '50%',
-                  border: `3px solid ${C.primaryLight}`,
+                  border: `4px solid #fff`,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
                 }} />
               : <View style={{
                   width: px(88), height: px(88), borderRadius: '50%',
-                  background: C.surface, display: 'flex',
+                  background: '#fff', display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
-                  border: `2px dashed ${C.text3}`,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
                 }}>
                   <Text style={{ fontSize: px(28) }}>📷</Text>
                 </View>
@@ -141,17 +130,26 @@ export default function LoginPage() {
           </Button>
         </View>
         <Text style={{
-          fontSize: px(13), color: C.text3, marginBottom: px(28),
-          textAlign: 'center', display: 'block',
+          fontSize: px(12), color: 'rgba(255,255,255,0.7)',
+          marginTop: px(6), textAlign: 'center', display: 'block',
         }}>
           {t('login.tap_avatar')}
         </Text>
+      </View>
 
+      {/* 表单区 — 内容居中偏下 */}
+      <View style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: `0 ${px(24)} ${px(40)}`,
+      }}>
         {/* 昵称 */}
         <View style={{ marginBottom: px(24) }}>
           <Text style={{
             fontSize: px(14), fontWeight: '600', color: C.text,
-            marginBottom: px(8), display: 'block',
+            marginBottom: px(10), display: 'block',
           }}>
             昵称
           </Text>
@@ -171,9 +169,6 @@ export default function LoginPage() {
             }}
           />
         </View>
-
-        {/* 撑开 */}
-        <View style={{ flex: 1 }} />
 
         {/* 登录按钮 */}
         <Button

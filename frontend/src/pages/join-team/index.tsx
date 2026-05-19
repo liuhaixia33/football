@@ -6,13 +6,15 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#4CAF50',
-  primaryLight: '#f0fdf4',
-  surface: '#ffffff',
-  bg: '#f9fafb',
-  text: '#1f2937',
-  text2: '#4b5563',
-  text3: '#9ca3af',
+  primary: '#00e472',
+  primaryDim: 'rgba(0,228,114,0.12)',
+  bg: '#0b0f18',
+  surface: '#131a27',
+  surface2: '#1a2235',
+  border: 'rgba(255,255,255,0.09)',
+  text: '#e8f0fb',
+  text2: '#7a8ca3',
+  text3: '#364a60',
 }
 
 export default function JoinTeamPage() {
@@ -42,24 +44,37 @@ export default function JoinTeamPage() {
   }
 
   return (
-    <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
+    <View style={{ padding: px(20), background: C.bg, minHeight: '100%' }}>
       <View style={{
-        background: C.surface, borderRadius: px(16), padding: px(24),
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        background: C.surface, borderRadius: px(20), padding: px(24),
+        border: `1px solid ${C.border}`,
       }}>
+        {/* Icon */}
+        <View style={{
+          width: px(56), height: px(56), borderRadius: px(16),
+          background: C.primaryDim, border: `1px solid rgba(0,228,114,0.2)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginBottom: px(16),
+        }}>
+          <Text style={{ fontSize: px(52) }}>🔑</Text>
+        </View>
+
         <Text style={{
-          fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(8), display: 'block',
+          fontSize: px(44), fontWeight: '800', color: C.text, marginBottom: px(6), display: 'block',
+          letterSpacing: '-0.01em',
         }}>
           {t('join_team.title')}
         </Text>
         <Text style={{
-          fontSize: px(13), color: C.text3, marginBottom: px(20), display: 'block',
+          fontSize: px(28), color: C.text2, marginBottom: px(32), display: 'block',
         }}>
           向球队管理员索取邀请码，输入后即可申请加入
         </Text>
 
         <Text style={{
-          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
+          fontSize: px(24), fontWeight: '600', color: C.text3,
+          marginBottom: px(10), display: 'block',
+          letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>
           {t('join_team.code')}
         </Text>
@@ -69,16 +84,19 @@ export default function JoinTeamPage() {
           placeholder='请输入 8 位邀请码'
           maxlength={8}
           style={{
-            border: '1.5px solid #e5e7eb', borderRadius: px(12), padding: px(14),
-            marginBottom: px(24), fontSize: px(22), letterSpacing: px(6),
-            textAlign: 'center', background: C.bg, color: C.text,
-            fontWeight: '600',
+            border: `1.5px solid ${code ? 'rgba(0,228,114,0.4)' : C.border}`,
+            borderRadius: px(14), padding: `${px(18)} ${px(14)}`,
+            marginBottom: px(32), fontSize: px(52), letterSpacing: px(8),
+            textAlign: 'center', background: C.surface2, color: C.primary,
+            fontWeight: '800',
           }}
         />
         <Button
           style={{
-            background: C.primary, color: '#fff', borderRadius: '9999px',
-            border: 'none', fontSize: px(16), fontWeight: '600', padding: '10px 0',
+            background: code.trim().length > 0 ? C.primary : 'rgba(255,255,255,0.07)',
+            color: code.trim().length > 0 ? '#0b0f18' : C.text3,
+            borderRadius: px(14), border: 'none',
+            fontSize: px(32), fontWeight: '700', padding: `${px(14)} 0`,
           }}
           loading={loading}
           onClick={submit}

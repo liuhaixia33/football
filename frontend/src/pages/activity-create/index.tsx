@@ -7,13 +7,16 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#4CAF50',
-  primaryLight: '#f0fdf4',
-  surface: '#ffffff',
-  bg: '#f9fafb',
-  text: '#1f2937',
-  text2: '#4b5563',
-  text3: '#9ca3af',
+  primary: '#00e472',
+  primaryDim: 'rgba(0,228,114,0.12)',
+  bg: '#0b0f18',
+  surface: '#131a27',
+  surface2: '#1a2235',
+  border: 'rgba(255,255,255,0.09)',
+  text: '#e8f0fb',
+  text2: '#7a8ca3',
+  text3: '#364a60',
+  draw: '#ffb700',
 }
 
 const fmt = (iso: string) => {
@@ -150,30 +153,39 @@ export default function ActivityCreatePage() {
     }
   }
 
-  const labelStyle = { fontSize: px(14), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block' } as const
+  const labelStyle = {
+    fontSize: px(24), fontWeight: '600', color: C.text3,
+    marginBottom: px(8), display: 'block',
+    letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+  }
   const inputStyle = {
-    border: '1px solid #e5e7eb', borderRadius: px(12), padding: '12px 14px',
-    marginBottom: px(16), fontSize: px(15), background: C.bg, color: C.text,
-  } as const
-  const btnStyle = {
-    background: C.primary, color: '#fff', borderRadius: '9999px',
-    border: 'none', fontSize: px(16), fontWeight: '600',
-  } as const
+    border: `1px solid ${C.border}`, borderRadius: px(12),
+    padding: `${px(14)} ${px(14)}`, marginBottom: px(20),
+    fontSize: px(30), background: C.surface2, color: C.text,
+  }
 
   if (resultFor) {
     return (
       <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
-        <View style={{ background: C.surface, borderRadius: px(16), padding: px(20), boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-          <Text style={{ fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(20), display: 'block' }}>
+        <View style={{
+          background: C.surface, borderRadius: px(16), padding: px(20),
+          border: `1px solid ${C.border}`,
+        }}>
+          <Text style={{
+            fontSize: px(40), fontWeight: '800', color: C.text,
+            marginBottom: px(24), display: 'block', letterSpacing: '-0.01em',
+          }}>
             录入比赛结果
           </Text>
+
           <Text style={labelStyle}>{t('act_form.our_score')}</Text>
           <Input
             value={ourScore}
             onInput={e => setOurScore(e.detail.value)}
             type='number'
             placeholder='0'
-            style={{ ...inputStyle, fontSize: px(24), textAlign: 'center', fontWeight: '700' }}
+            style={{ ...inputStyle, fontSize: px(60), textAlign: 'center', fontWeight: '800',
+                     letterSpacing: '0.05em' }}
           />
           <Text style={labelStyle}>{t('act_form.opp_score')}</Text>
           <Input
@@ -181,7 +193,8 @@ export default function ActivityCreatePage() {
             onInput={e => setOppScore(e.detail.value)}
             type='number'
             placeholder='0'
-            style={{ ...inputStyle, fontSize: px(24), textAlign: 'center', fontWeight: '700' }}
+            style={{ ...inputStyle, fontSize: px(60), textAlign: 'center', fontWeight: '800',
+                     letterSpacing: '0.05em' }}
           />
           <Text style={labelStyle}>{t('act_form.notes')}</Text>
           <Input
@@ -190,7 +203,15 @@ export default function ActivityCreatePage() {
             placeholder={t('common.optional')}
             style={{ ...inputStyle, marginBottom: px(32) }}
           />
-          <Button style={btnStyle} loading={loading} onClick={submitResult}>
+          <Button
+            style={{
+              background: C.primary, color: '#0b0f18', borderRadius: px(14),
+              border: 'none', fontSize: px(32), fontWeight: '700',
+              padding: `${px(14)} 0`,
+            }}
+            loading={loading}
+            onClick={submitResult}
+          >
             {t('act_form.save_score')}
           </Button>
         </View>
@@ -200,26 +221,35 @@ export default function ActivityCreatePage() {
 
   return (
     <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
-      <View style={{ background: C.surface, borderRadius: px(16), padding: px(20), boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-        <Text style={{ fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(20), display: 'block' }}>
+      <View style={{
+        background: C.surface, borderRadius: px(16), padding: px(20),
+        border: `1px solid ${C.border}`,
+      }}>
+        <Text style={{
+          fontSize: px(40), fontWeight: '800', color: C.text,
+          marginBottom: px(24), display: 'block', letterSpacing: '-0.01em',
+        }}>
           {editId ? t('act_form.title_edit') : t('act_form.title_create')}
         </Text>
 
         <Text style={labelStyle}>{t('act_form.type')}</Text>
-        <View style={{ display: 'flex', marginBottom: px(16), gap: px(8) }}>
+        <View style={{ display: 'flex', marginBottom: px(20), gap: px(10) }}>
           {(['MATCH', 'TRAINING'] as const).map(tp => (
             <View
               key={tp}
               onClick={() => setType(tp)}
               style={{
-                flex: 1, textAlign: 'center', padding: px(10),
-                border: `1.5px solid ${type === tp ? C.primary : '#e5e7eb'}`,
+                flex: 1, textAlign: 'center', padding: px(12),
+                border: `1.5px solid ${type === tp ? C.primary : C.border}`,
                 borderRadius: px(12), color: type === tp ? C.primary : C.text2,
-                background: type === tp ? C.primaryLight : C.surface,
-                fontWeight: type === tp ? '600' : '400',
+                background: type === tp ? C.primaryDim : C.surface2,
+                fontWeight: type === tp ? '700' : '400',
               }}
             >
-              <Text>{tp === 'MATCH' ? t('act_form.match') : t('act_form.training')}</Text>
+              <Text style={{ fontSize: px(28), fontWeight: type === tp ? '700' : '400',
+                             color: type === tp ? C.primary : C.text2 }}>
+                {tp === 'MATCH' ? t('act_form.match') : t('act_form.training')}
+              </Text>
             </View>
           ))}
         </View>
@@ -277,7 +307,15 @@ export default function ActivityCreatePage() {
           style={{ ...inputStyle, marginBottom: px(32) }}
         />
 
-        <Button style={btnStyle} loading={loading} onClick={submitActivity}>
+        <Button
+          style={{
+            background: C.primary, color: '#0b0f18', borderRadius: px(14),
+            border: 'none', fontSize: px(32), fontWeight: '700',
+            padding: `${px(14)} 0`,
+          }}
+          loading={loading}
+          onClick={submitActivity}
+        >
           {editId ? t('act_form.save') : t('act_form.publish')}
         </Button>
       </View>

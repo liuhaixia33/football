@@ -7,15 +7,17 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#4CAF50',
-  primaryLight: '#f0fdf4',
-  surface: '#ffffff',
-  bg: '#f9fafb',
-  text: '#1f2937',
-  text2: '#4b5563',
-  text3: '#9ca3af',
-  win: '#10b981',
-  lose: '#ef4444',
+  primary: '#00e472',
+  primaryDim: 'rgba(0,228,114,0.12)',
+  bg: '#0b0f18',
+  surface: '#131a27',
+  surface2: '#1a2235',
+  border: 'rgba(255,255,255,0.09)',
+  text: '#e8f0fb',
+  text2: '#7a8ca3',
+  text3: '#364a60',
+  win: '#00e472',
+  lose: '#ff4d5a',
 }
 
 const CATEGORIES = ['队费', '场地费', '装备费', '奖金', '其他']
@@ -65,115 +67,117 @@ export default function FinanceRecordPage() {
     }
   }
 
+  const labelStyle = {
+    fontSize: px(24), fontWeight: '600', color: C.text3,
+    marginBottom: px(8), display: 'block',
+    letterSpacing: '0.08em', textTransform: 'uppercase' as const,
+  }
+  const inputStyle = {
+    border: `1px solid ${C.border}`, borderRadius: px(12),
+    padding: `${px(14)} ${px(14)}`,
+    marginBottom: px(20), fontSize: px(30), background: C.surface2, color: C.text,
+  }
+
   return (
     <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
       <View style={{
-        background: C.surface, borderRadius: px(16), padding: px(24),
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        background: C.surface, borderRadius: px(16), padding: px(20),
+        border: `1px solid ${C.border}`,
       }}>
         <Text style={{
-          fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(20), display: 'block',
+          fontSize: px(40), fontWeight: '800', color: C.text,
+          marginBottom: px(24), display: 'block', letterSpacing: '-0.01em',
         }}>
           {t('finance_form.title')}
         </Text>
 
-        {/* 类型切换 */}
-        <View style={{ display: 'flex', marginBottom: px(20), gap: px(8) }}>
+        {/* 收入/支出切换 */}
+        <View style={{ display: 'flex', marginBottom: px(24), gap: px(10) }}>
           {(['INCOME', 'EXPENSE'] as const).map(typeVal => (
             <View
               key={typeVal}
               onClick={() => setType(typeVal)}
               style={{
-                flex: 1, textAlign: 'center', padding: px(10), borderRadius: px(12),
-                fontSize: px(14), fontWeight: type === typeVal ? '600' : '400',
+                flex: 1, textAlign: 'center', padding: px(12), borderRadius: px(12),
                 background: type === typeVal
-                  ? (typeVal === 'INCOME' ? C.primary : C.lose)
-                  : '#f3f4f6',
-                color: type === typeVal ? '#fff' : C.text2,
+                  ? (typeVal === 'INCOME' ? 'rgba(0,228,114,0.15)' : 'rgba(255,77,90,0.15)')
+                  : C.surface2,
+                border: type === typeVal
+                  ? `1.5px solid ${typeVal === 'INCOME' ? 'rgba(0,228,114,0.4)' : 'rgba(255,77,90,0.4)'}`
+                  : `1px solid ${C.border}`,
               }}
             >
-              <Text>{typeVal === 'INCOME' ? `+ ${t('finance_form.income')}` : `- ${t('finance_form.expense')}`}</Text>
+              <Text style={{
+                fontSize: px(30), fontWeight: '700',
+                color: type === typeVal
+                  ? (typeVal === 'INCOME' ? C.win : C.lose)
+                  : C.text2,
+              }}>
+                {typeVal === 'INCOME' ? `+ ${t('finance_form.income')}` : `- ${t('finance_form.expense')}`}
+              </Text>
             </View>
           ))}
         </View>
 
-        <Text style={{
-          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
-        }}>
-          {t('finance_form.amount')}
-        </Text>
+        <Text style={labelStyle}>{t('finance_form.amount')}</Text>
         <View style={{
-          display: 'flex', alignItems: 'center', border: '1.5px solid #e5e7eb',
-          borderRadius: px(12), padding: '12px 14px', marginBottom: px(16),
-          background: C.bg,
+          display: 'flex', alignItems: 'center',
+          border: `1px solid ${C.border}`, borderRadius: px(12),
+          padding: `${px(14)} ${px(14)}`, marginBottom: px(20),
+          background: C.surface2,
         }}>
-          <Text style={{ fontSize: px(20), fontWeight: '700', color: C.text, marginRight: px(4) }}>¥</Text>
+          <Text style={{ fontSize: px(44), fontWeight: '800', color: C.text, marginRight: px(4) }}>¥</Text>
           <Input
             value={amount}
             onInput={e => setAmount(e.detail.value)}
             type='digit'
             placeholder='0.00'
-            style={{ fontSize: px(22), fontWeight: '700', color: C.text, flex: 1, background: 'transparent' }}
+            style={{ fontSize: px(44), fontWeight: '800', color: C.text, flex: 1, background: 'transparent' }}
           />
         </View>
 
-        <Text style={{
-          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
-        }}>
-          {t('finance_form.category')}
-        </Text>
-        <View style={{ display: 'flex', flexWrap: 'wrap', gap: px(8), marginBottom: px(20) }}>
+        <Text style={labelStyle}>{t('finance_form.category')}</Text>
+        <View style={{ display: 'flex', flexWrap: 'wrap', gap: px(8), marginBottom: px(24) }}>
           {CATEGORIES.map(c => (
             <View
               key={c}
               onClick={() => setCategory(c)}
               style={{
-                padding: '6px 14px', borderRadius: '9999px', fontSize: px(13),
-                fontWeight: category === c ? '600' : '400',
-                border: `1.5px solid ${category === c ? C.primary : '#e5e7eb'}`,
+                padding: `${px(7)} ${px(14)}`, borderRadius: '9999px', fontSize: px(26),
+                border: `1.5px solid ${category === c ? 'rgba(0,228,114,0.4)' : C.border}`,
                 color: category === c ? C.primary : C.text2,
-                background: category === c ? C.primaryLight : C.surface,
+                background: category === c ? C.primaryDim : C.surface2,
+                fontWeight: category === c ? '700' : '400',
               }}
             >
-              <Text>{c}</Text>
+              <Text style={{ color: category === c ? C.primary : C.text2, fontWeight: category === c ? '700' : '400' }}>
+                {c}
+              </Text>
             </View>
           ))}
         </View>
 
-        <Text style={{
-          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
-        }}>
-          {t('finance_form.date')}
-        </Text>
+        <Text style={labelStyle}>{t('finance_form.date')}</Text>
         <Input
           value={recordDate}
           onInput={e => setRecordDate(e.detail.value)}
           placeholder='YYYY-MM-DD'
-          style={{
-            border: '1.5px solid #e5e7eb', borderRadius: px(12), padding: '12px 14px',
-            marginBottom: px(16), fontSize: px(15), background: C.bg, color: C.text,
-          }}
+          style={inputStyle}
         />
 
-        <Text style={{
-          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
-        }}>
-          {t('finance_form.desc')}
-        </Text>
+        <Text style={labelStyle}>{t('finance_form.desc')}</Text>
         <Input
           value={description}
           onInput={e => setDescription(e.detail.value)}
           placeholder={t('common.optional')}
-          style={{
-            border: '1.5px solid #e5e7eb', borderRadius: px(12), padding: '12px 14px',
-            marginBottom: px(32), fontSize: px(15), background: C.bg, color: C.text,
-          }}
+          style={{ ...inputStyle, marginBottom: px(32) }}
         />
 
         <Button
           style={{
-            background: C.primary, color: '#fff', borderRadius: '9999px',
-            border: 'none', fontSize: px(16), fontWeight: '600', padding: '10px 0',
+            background: C.primary, color: '#0b0f18', borderRadius: px(14),
+            border: 'none', fontSize: px(32), fontWeight: '700',
+            padding: `${px(14)} 0`,
           }}
           loading={loading}
           onClick={submit}

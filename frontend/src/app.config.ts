@@ -16,8 +16,8 @@ export default defineAppConfig({
   ],
   tabBar: {
     custom: true,
-    color: '#999999',
-    selectedColor: '#4CAF50',
+    color: '#364a60',
+    selectedColor: '#00e472',
     list: [
       { pagePath: 'pages/home/index', text: '首页' },
       { pagePath: 'pages/members/index', text: '队员' },
@@ -27,7 +27,7 @@ export default defineAppConfig({
   },
   window: {
     backgroundTextStyle: 'light',
-    navigationBarBackgroundColor: '#4CAF50',
+    navigationBarBackgroundColor: '#0b0f18',
     navigationBarTitleText: '足球队',
     navigationBarTextStyle: 'white',
   },

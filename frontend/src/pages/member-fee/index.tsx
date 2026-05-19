@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, Button, Input, Image } from '@tarojs/components'
+import { View, Text, Button, Input } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { financeApi } from '../../api/finance'
 import { useAuthStore } from '../../store/auth'
@@ -8,15 +8,17 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#4CAF50',
-  primaryLight: '#f0fdf4',
-  surface: '#ffffff',
-  bg: '#f9fafb',
-  text: '#1f2937',
-  text2: '#4b5563',
-  text3: '#9ca3af',
-  win: '#10b981',
-  lose: '#ef4444',
+  primary: '#00e472',
+  primaryDim: 'rgba(0,228,114,0.12)',
+  bg: '#0b0f18',
+  surface: '#131a27',
+  surface2: '#1a2235',
+  border: 'rgba(255,255,255,0.07)',
+  text: '#e8f0fb',
+  text2: '#7a8ca3',
+  text3: '#364a60',
+  win: '#00e472',
+  lose: '#ff4d5a',
 }
 
 export default function MemberFeePage() {
@@ -82,110 +84,121 @@ export default function MemberFeePage() {
       {/* Season switcher */}
       <View style={{
         background: C.surface, borderRadius: px(16), padding: px(16),
-        marginBottom: px(16), boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        marginBottom: px(14), border: `1px solid ${C.border}`,
       }}>
         <View style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: px(16),
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: px(20),
         }}>
-          <Text style={{
-            fontSize: px(24), color: C.primary, fontWeight: '300',
-            padding: '8px 16px', background: C.primaryLight, borderRadius: px(12),
-          }}
-            onClick={() => setSeason(s => s - 1)}>‹</Text>
-          <Text style={{ fontSize: px(20), fontWeight: '700', color: C.text }}>
+          <View
+            onClick={() => setSeason(s => s - 1)}
+            style={{
+              width: px(40), height: px(40), borderRadius: px(10),
+              background: C.surface2, border: `1px solid ${C.border}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: px(40), color: C.text2, lineHeight: '1' }}>‹</Text>
+          </View>
+          <Text style={{ fontSize: px(40), fontWeight: '800', color: C.text, letterSpacing: '-0.01em' }}>
             {season} 赛季
           </Text>
-          <Text style={{
-            fontSize: px(24), color: C.primary, fontWeight: '300',
-            padding: '8px 16px', background: C.primaryLight, borderRadius: px(12),
-          }}
-            onClick={() => setSeason(s => s + 1)}>›</Text>
+          <View
+            onClick={() => setSeason(s => s + 1)}
+            style={{
+              width: px(40), height: px(40), borderRadius: px(10),
+              background: C.surface2, border: `1px solid ${C.border}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Text style={{ fontSize: px(40), color: C.text2, lineHeight: '1' }}>›</Text>
+          </View>
         </View>
       </View>
 
-      {/* Set fee amount (captain only) */}
+      {/* Set fee (captain only) */}
       {currentRole === 'CAPTAIN' && (
         <View style={{
           background: C.surface, borderRadius: px(16), padding: px(16),
-          marginBottom: px(16), display: 'flex', gap: px(10), alignItems: 'center',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+          marginBottom: px(14), border: `1px solid ${C.border}`,
         }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{
-              fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(6), display: 'block',
-            }}>
-              设置本赛季每人应缴金额
-            </Text>
-            <Input
-              value={feeAmount}
-              onInput={e => setFeeAmount(e.detail.value)}
-              type='digit'
-              placeholder='0.00'
+          <Text style={{
+            fontSize: px(24), fontWeight: '600', color: C.text3, marginBottom: px(10),
+            display: 'block', letterSpacing: '0.08em', textTransform: 'uppercase',
+          }}>
+            设置每人应缴金额
+          </Text>
+          <View style={{ display: 'flex', gap: px(10), alignItems: 'center' }}>
+            <View style={{ flex: 1, display: 'flex', alignItems: 'center',
+                           border: `1px solid ${C.border}`, borderRadius: px(12),
+                           padding: `${px(10)} ${px(12)}`, background: C.surface2 }}>
+              <Text style={{ fontSize: px(32), fontWeight: '700', color: C.text, marginRight: px(4) }}>¥</Text>
+              <Input
+                value={feeAmount}
+                onInput={e => setFeeAmount(e.detail.value)}
+                type='digit'
+                placeholder='0.00'
+                style={{ fontSize: px(32), fontWeight: '700', color: C.text, flex: 1, background: 'transparent' }}
+              />
+            </View>
+            <Button
+              size='mini'
               style={{
-                border: '1.5px solid #e5e7eb', borderRadius: px(10), padding: '10px 12px',
-                fontSize: px(15), background: C.bg, color: C.text,
+                background: C.primary, color: '#0b0f18', border: 'none',
+                borderRadius: px(10), fontSize: px(26), fontWeight: '700',
+                padding: `${px(10)} ${px(16)}`,
               }}
-            />
+              onClick={handleSetFee}
+            >
+              {t('member_fee.set_fee')}
+            </Button>
           </View>
-          <Button
-            size='mini'
-            style={{
-              background: C.primary, color: '#fff', border: 'none',
-              borderRadius: '9999px', fontSize: px(13), fontWeight: '600',
-              padding: '8px 18px', marginTop: px(18),
-            }}
-            onClick={handleSetFee}
-          >
-            {t('member_fee.set_fee')}
-          </Button>
         </View>
       )}
 
       {/* Fee list */}
       <View style={{
-        background: C.surface, borderRadius: px(16), padding: px(16),
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        background: C.surface, borderRadius: px(16), padding: `${px(16)} ${px(14)}`,
+        border: `1px solid ${C.border}`,
       }}>
         <Text style={{
-          fontSize: px(15), fontWeight: '700', color: C.text,
-          marginBottom: px(12), display: 'block',
+          fontSize: px(24), fontWeight: '700', color: C.text3,
+          marginBottom: px(14), display: 'block',
+          letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>
           队员缴费情况
         </Text>
 
-        {fees.map(f => (
+        {fees.map((f, idx) => (
           <View
             key={f.userId}
             style={{
-              display: 'flex', alignItems: 'center', padding: '12px 0',
-              borderBottom: '1px solid #f3f4f6',
+              display: 'flex', alignItems: 'center',
+              padding: `${px(12)} 0`,
+              borderBottom: idx < fees.length - 1 ? `1px solid ${C.border}` : 'none',
             }}
           >
-            {f.avatarUrl
-              ? <Image src={f.avatarUrl} style={{
-                  width: px(36), height: px(36), borderRadius: '50%',
-                  marginRight: px(12), border: '2px solid #f3f4f6',
-                }} />
-              : <View style={{
-                  width: px(36), height: px(36), borderRadius: '50%',
-                  background: '#e5e7eb', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', marginRight: px(12),
-                }}>
-                  <Text style={{ fontSize: px(14) }}>👤</Text>
-                </View>
-            }
+            <View style={{
+              width: px(38), height: px(38), borderRadius: '50%',
+              background: `hsl(${((f.userId * 137) % 360)}, 40%, 20%)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginRight: px(12), border: `2px solid ${C.border}`, flexShrink: 0,
+            }}>
+              <Text style={{ fontSize: px(32) }}>👤</Text>
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: px(14), fontWeight: '600', color: C.text, display: 'block', marginBottom: px(2) }}>
+              <Text style={{ fontSize: px(28), fontWeight: '600', color: C.text,
+                             display: 'block', marginBottom: px(2) }}>
                 {f.nickname}
               </Text>
-              <Text style={{ fontSize: px(12), color: C.text3 }}>
+              <Text style={{ fontSize: px(24), color: C.text3 }}>
                 {t('member_fee.paid')} ¥{f.amountPaid} / {t('member_fee.due')} ¥{f.amountDue}
               </Text>
             </View>
             {f.isPaid ? (
               <Text style={{
-                fontSize: px(12), fontWeight: '600', color: C.win,
-                background: '#ecfdf5', borderRadius: '9999px', padding: '4px 12px',
+                fontSize: px(24), fontWeight: '700', color: C.win,
+                background: 'rgba(0,228,114,0.12)', borderRadius: '9999px', padding: '4px 12px',
+                border: '1px solid rgba(0,228,114,0.2)',
               }}>
                 ✓ {t('member_fee.is_paid')}
               </Text>
@@ -193,8 +206,8 @@ export default function MemberFeePage() {
               <Button
                 size='mini'
                 style={{
-                  background: C.primaryLight, color: C.primary, border: 'none',
-                  borderRadius: '9999px', fontSize: px(12), fontWeight: '500',
+                  background: C.primaryDim, color: C.primary, border: '1px solid rgba(0,228,114,0.2)',
+                  borderRadius: '9999px', fontSize: px(24), fontWeight: '600',
                   padding: '4px 12px',
                 }}
                 onClick={() => handleMarkFee(f.userId, f.amountDue)}
@@ -203,8 +216,8 @@ export default function MemberFeePage() {
               </Button>
             ) : (
               <Text style={{
-                fontSize: px(12), fontWeight: '500', color: C.lose,
-                background: '#fef2f2', borderRadius: '9999px', padding: '4px 12px',
+                fontSize: px(24), fontWeight: '600', color: C.lose,
+                background: 'rgba(255,77,90,0.1)', borderRadius: '9999px', padding: '4px 12px',
               }}>
                 未付
               </Text>
@@ -212,10 +225,10 @@ export default function MemberFeePage() {
           </View>
         ))}
         {fees.length === 0 && (
-          <View style={{ textAlign: 'center', padding: '40px 24px' }}>
-            <Text style={{ fontSize: px(32), display: 'block', marginBottom: px(8) }}>💰</Text>
-            <Text style={{ fontSize: px(14), color: C.text3 }}>
-              {currentRole === 'CAPTAIN' ? '本赛季暂无队费记录，请先设置应缴金额' : '本赛季暂无队费记录'}
+          <View style={{ textAlign: 'center', padding: `${px(36)} ${px(24)}` }}>
+            <Text style={{ fontSize: px(60), display: 'block', marginBottom: px(10) }}>💰</Text>
+            <Text style={{ fontSize: px(28), color: C.text3 }}>
+              {currentRole === 'CAPTAIN' ? '本赛季暂无记录，请先设置应缴金额' : '本赛季暂无队费记录'}
             </Text>
           </View>
         )}

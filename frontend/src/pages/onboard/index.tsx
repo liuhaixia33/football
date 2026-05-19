@@ -4,13 +4,15 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#4CAF50',
-  primaryLight: '#f0fdf4',
-  surface: '#ffffff',
-  bg: '#f9fafb',
-  text: '#1f2937',
-  text2: '#4b5563',
-  text3: '#9ca3af',
+  primary: '#00e472',
+  primaryDim: 'rgba(0,228,114,0.12)',
+  bg: '#0b0f18',
+  surface: '#131a27',
+  surface2: '#1a2235',
+  border: 'rgba(255,255,255,0.07)',
+  text: '#e8f0fb',
+  text2: '#7a8ca3',
+  text3: '#364a60',
 }
 
 export default function OnboardPage() {
@@ -18,36 +20,47 @@ export default function OnboardPage() {
   return (
     <View style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', height: '100%', padding: px(32), background: C.bg,
+      justifyContent: 'center', height: '100%', padding: px(24), background: C.bg,
     }}>
       <View style={{
-        background: C.surface, borderRadius: px(20), padding: '40px 32px',
-        width: '100%', maxWidth: px(360), textAlign: 'center',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
+        background: C.surface,
+        borderRadius: px(24),
+        padding: `${px(40)} ${px(28)}`,
+        width: '100%',
+        textAlign: 'center',
+        border: `1px solid ${C.border}`,
       }}>
+        {/* Icon */}
         <View style={{
-          width: px(80), height: px(80), borderRadius: px(20),
-          background: C.primaryLight, display: 'flex', alignItems: 'center',
-          justifyContent: 'center', margin: '0 auto 20px',
+          width: px(88), height: px(88), borderRadius: '50%',
+          background: C.primaryDim,
+          border: `2px solid rgba(0,228,114,0.25)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          margin: '0 auto',
+          marginBottom: px(20),
         }}>
-          <Text style={{ fontSize: px(40) }}>⚽</Text>
+          <Text style={{ fontSize: px(80) }}>⚽</Text>
         </View>
+
         <Text style={{
-          fontSize: px(20), fontWeight: '700', color: C.text, marginBottom: px(8), display: 'block',
+          fontSize: px(46), fontWeight: '800', color: C.text,
+          marginBottom: px(10), display: 'block',
+          letterSpacing: '-0.02em',
         }}>
           欢迎加入足球队
         </Text>
         <Text style={{
-          fontSize: px(14), color: C.text3, marginBottom: px(32),
-          display: 'block', lineHeight: '1.6',
+          fontSize: px(28), color: C.text2, marginBottom: px(36),
+          display: 'block', lineHeight: '1.7',
         }}>
-          你还没有加入任何球队，创建新球队或通过邀请码加入已有球队
+          创建新球队或通过邀请码加入已有球队
         </Text>
+
         <Button
           style={{
-            background: C.primary, color: '#fff', borderRadius: '9999px',
+            background: C.primary, color: '#0b0f18', borderRadius: px(14),
             width: '100%', marginBottom: px(12), border: 'none',
-            fontSize: px(16), fontWeight: '600', padding: '10px 0',
+            fontSize: px(32), fontWeight: '700', padding: `${px(14)} 0`,
           }}
           onClick={() => Taro.navigateTo({ url: '/pages/create-team/index' })}
         >
@@ -55,9 +68,10 @@ export default function OnboardPage() {
         </Button>
         <Button
           style={{
-            background: C.surface, color: C.primary, border: `1.5px solid ${C.primary}`,
-            borderRadius: '9999px', width: '100%', fontSize: px(16),
-            fontWeight: '600', padding: '10px 0',
+            background: 'transparent', color: C.primary,
+            border: `1.5px solid rgba(0,228,114,0.4)`,
+            borderRadius: px(14), width: '100%', fontSize: px(32),
+            fontWeight: '600', padding: `${px(14)} 0`,
           }}
           onClick={() => Taro.navigateTo({ url: '/pages/join-team/index' })}
         >

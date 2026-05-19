@@ -1,106 +1,268 @@
 import { useState } from 'react'
-import { View, Text, ScrollView } from '@tarojs/components'
+import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
-import type { ActivityRes } from '../../types/api'
+import type { ActivityRes, ActivityDetailRes, RegStatus } from '../../types/api'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#4CAF50',
-  primaryLight: '#f0fdf4',
-  surface: '#ffffff',
-  bg: '#f9fafb',
-  text: '#1f2937',
-  text2: '#4b5563',
-  text3: '#9ca3af',
-  win: '#10b981',
-  draw: '#f59e0b',
-  lose: '#ef4444',
+  primary: '#00e472',
+  primaryDim: 'rgba(0,228,114,0.12)',
+  bg: '#0b0f18',
+  surface: '#131a27',
+  surface2: '#1a2235',
+  border: 'rgba(255,255,255,0.07)',
+  text: '#e8f0fb',
+  text2: '#7a8ca3',
+  text3: '#364a60',
+  win: '#00e472',
+  draw: '#ffb700',
+  lose: '#ff4d5a',
 }
 
-function ActivityCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
-  const t = useT()
-  const statusMap: Record<string, { label: string; color: string; bg: string }> = {
-    FINISHED: { label: t('home.finished'), color: C.text3, bg: '#f3f4f6' },
-    CLOSED:   { label: t('home.closed'),   color: C.text3, bg: '#f3f4f6' },
-    OPEN:     { label: t('home.open'),     color: C.primary, bg: C.primaryLight },
-  }
-  const s = statusMap[a.status] ?? statusMap.OPEN
+const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-  const fmtDate = (iso: string) => {
-    const d = new Date(iso)
-    return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-  }
+// Hero card for the next upcoming activity — shows roster + RSVP buttons
+function FeaturedCard({
+  a,
+  detail,
+  onPress,
+  onRsvp,
+}: {
+  a: ActivityRes
+  detail: ActivityDetailRes | null
+  onPress: () => void
+  onRsvp: (status: RegStatus) => void
+}) {
+  const d = new Date(a.startTime)
+  const dateStr = `${d.getMonth() + 1}月${d.getDate()}日 周${WEEK[d.getDay()]}`
+  const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 
-  const statusBadge = (ms?: string) => {
-    if (ms === 'JOINED')     return { text: t('act.badge_joined'), color: C.win, bg: '#ecfdf5' }
-    if (ms === 'TENTATIVE')  return { text: t('act.badge_tentative'), color: C.draw, bg: '#fffbeb' }
-    if (ms === 'ABSENT')     return { text: t('act.badge_absent'), color: C.text3, bg: '#f3f4f6' }
-    return null
-  }
-  const sb = statusBadge(a.myStatus)
+  const joined = detail?.registrations.filter(r => r.status === 'JOINED') ?? []
+  const MAX_AV = 6
+  const extra = Math.max(0, joined.length - MAX_AV)
+  const visibleAv = joined.slice(0, MAX_AV)
+
+  const rsvpBtns: { status: RegStatus; label: string; color: string; dimBg: string }[] = [
+    { status: 'JOINED',    label: '参加', color: C.win,  dimBg: 'rgba(0,228,114,0.14)' },
+    { status: 'TENTATIVE', label: '观望', color: C.draw, dimBg: 'rgba(255,183,0,0.14)' },
+    { status: 'ABSENT',    label: '不去', color: C.lose, dimBg: 'rgba(255,77,90,0.12)' },
+  ]
 
   return (
     <View
       onClick={onPress}
       style={{
-        background: C.surface,
-        borderRadius: px(16),
-        padding: px(16),
-        marginBottom: px(12),
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        background: 'linear-gradient(150deg, #0c2b1b 0%, #0e1e30 55%, #0b0f18 100%)',
+        borderRadius: px(22),
+        marginBottom: px(14),
+        border: `1px solid rgba(0,228,114,0.22)`,
+        overflow: 'hidden',
       }}
     >
-      <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: px(12) }}>
-        <Text style={{ fontWeight: '700', fontSize: px(16), color: C.text, lineHeight: '1.4', flex: 1, paddingRight: px(12) }}>
+      {/* ── Top info section ── */}
+      <View style={{ padding: `${px(18)} ${px(18)} ${px(14)}` }}>
+        {/* Meta row */}
+        <View style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: px(14),
+        }}>
+          <View style={{ display: 'flex', alignItems: 'center', gap: px(8) }}>
+            <View style={{
+              width: px(7), height: px(7), borderRadius: '50%',
+              background: C.primary,
+              boxShadow: `0 0 6px ${C.primary}`,
+            }} />
+            <Text style={{ fontSize: px(26), color: C.text2, fontWeight: '500' }}>
+              {dateStr} · {timeStr}
+            </Text>
+          </View>
+          <Text style={{
+            fontSize: px(24), color: C.primary, fontWeight: '700',
+            background: C.primaryDim, borderRadius: '9999px', padding: '3px 12px',
+            border: '1px solid rgba(0,228,114,0.25)',
+          }}>
+            报名中
+          </Text>
+        </View>
+
+        {/* Title */}
+        <Text style={{
+          fontSize: px(48), fontWeight: '900', color: C.text,
+          display: 'block', letterSpacing: '-0.02em', lineHeight: '1.25',
+          marginBottom: px(10),
+        }}>
           {a.title}
         </Text>
-        <View style={{ display: 'flex', gap: px(8), flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          {sb && (
-            <Text style={{
-              fontSize: px(11), fontWeight: '500', color: sb.color, background: sb.bg,
-              borderRadius: '9999px', padding: '3px 10px',
-            }}>
-              {sb.text}
-            </Text>
-          )}
-          <Text style={{
-            fontSize: px(11), fontWeight: '500', color: s.color, background: s.bg,
-            borderRadius: '9999px', padding: '3px 10px',
-          }}>
-            {s.label}
+
+        {/* Location + capacity */}
+        <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <Text style={{ fontSize: px(28), color: C.text2, flex: 1 }} numberOfLines={1}>
+            📍 {a.location}
+          </Text>
+          <Text style={{ fontSize: px(26), color: C.text3, flexShrink: 0, marginLeft: px(10) }}>
+            {a.registeredCount}{a.maxPlayers ? `/${a.maxPlayers}` : ''} 人
           </Text>
         </View>
       </View>
 
-      <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(6) }}>
-        <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(4) }}>📍</Text>
-        <Text style={{ fontSize: px(13), color: C.text2 }}>{a.location}</Text>
-      </View>
-      <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(12) }}>
-        <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(4) }}>🕐</Text>
-        <Text style={{ fontSize: px(13), color: C.text2 }}>{fmtDate(a.startTime)}</Text>
+      {/* ── Roster strip ── */}
+      <View style={{
+        borderTop: `1px solid rgba(255,255,255,0.06)`,
+        borderBottom: `1px solid rgba(255,255,255,0.06)`,
+        padding: `${px(12)} ${px(18)}`,
+        display: 'flex', alignItems: 'center', gap: px(10),
+      }}>
+        <Text style={{ fontSize: px(24), color: C.text3, flexShrink: 0 }}>已报名</Text>
+
+        {/* Avatar stack */}
+        {visibleAv.length > 0 ? (
+          <View style={{ display: 'flex', flexDirection: 'row', flexShrink: 0 }}>
+            {visibleAv.map((r, i) => (
+              <View key={r.userId} style={{ marginLeft: i > 0 ? px(-12) : 0, zIndex: MAX_AV - i }}>
+                {r.avatarUrl ? (
+                  <Image src={r.avatarUrl} style={{
+                    width: px(40), height: px(40), borderRadius: '50%',
+                    border: '2px solid #0b0f18', display: 'block',
+                  }} />
+                ) : (
+                  <View style={{
+                    width: px(40), height: px(40), borderRadius: '50%',
+                    background: `hsl(${(r.userId * 137) % 360}, 40%, 22%)`,
+                    border: '2px solid #0b0f18',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Text style={{ fontSize: px(26), color: C.text2, fontWeight: '700' }}>
+                      {r.nickname.charAt(0)}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ))}
+            {extra > 0 && (
+              <View style={{
+                marginLeft: px(-12),
+                width: px(40), height: px(40), borderRadius: '50%',
+                background: C.surface2, border: '2px solid #0b0f18',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Text style={{ fontSize: px(22), color: C.text2, fontWeight: '700' }}>+{extra}</Text>
+              </View>
+            )}
+          </View>
+        ) : (
+          <Text style={{ fontSize: px(26), color: C.text3 }}>还没有人报名</Text>
+        )}
       </View>
 
-      <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <View style={{ display: 'flex', alignItems: 'center' }}>
-          <View style={{
-            width: px(6), height: px(6), borderRadius: '50%', background: C.primary, marginRight: px(6)
-          }} />
-          <Text style={{ fontSize: px(12), color: C.text3 }}>
-            已报名 {a.registeredCount}{a.maxPlayers ? `/${a.maxPlayers}` : ''} {t('home.players')}
-          </Text>
-        </View>
-        <Text style={{ fontSize: px(12), color: C.primary, fontWeight: '500' }}>查看详情 ›</Text>
+      {/* ── RSVP buttons ── */}
+      <View
+        onClick={e => e.stopPropagation()}
+        style={{ display: 'flex', padding: `${px(12)} ${px(14)}`, gap: px(8) }}
+      >
+        {rsvpBtns.map(btn => {
+          const active = a.myStatus === btn.status
+          return (
+            <View
+              key={btn.status}
+              onClick={(e) => { e.stopPropagation(); onRsvp(btn.status) }}
+              style={{
+                flex: 1, textAlign: 'center',
+                padding: `${px(12)} 0`,
+                borderRadius: px(14),
+                background: active ? btn.dimBg : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${active ? btn.color + '50' : C.border}`,
+              }}
+            >
+              <Text style={{
+                fontSize: px(30), fontWeight: active ? '800' : '500',
+                color: active ? btn.color : C.text3,
+              }}>
+                {btn.label}
+              </Text>
+            </View>
+          )
+        })}
       </View>
+    </View>
+  )
+}
+
+// Compact row card for past/secondary activities
+function CompactCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
+  const d = new Date(a.startTime)
+  const isOpen = a.status === 'OPEN'
+
+  return (
+    <View
+      onClick={onPress}
+      style={{
+        display: 'flex', alignItems: 'center', gap: px(12),
+        padding: `${px(12)} ${px(14)}`,
+        background: C.surface,
+        borderRadius: px(12),
+        marginBottom: px(8),
+        border: `1px solid ${C.border}`,
+      }}
+    >
+      {/* Date box */}
+      <View style={{
+        width: px(42), height: px(42), borderRadius: px(10),
+        background: C.surface2, flexShrink: 0,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Text style={{ fontSize: px(32), fontWeight: '800', color: isOpen ? C.primary : C.text2,
+                       display: 'block', lineHeight: '1.1' }}>
+          {d.getDate()}
+        </Text>
+        <Text style={{ fontSize: px(22), color: C.text3 }}>
+          {d.getMonth() + 1}月
+        </Text>
+      </View>
+
+      {/* Info */}
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={{ fontSize: px(28), fontWeight: '600', color: C.text,
+                       display: 'block', marginBottom: px(2) }}>
+          {a.title}
+        </Text>
+        <Text style={{ fontSize: px(24), color: C.text3 }} numberOfLines={1}>
+          📍 {a.location}
+        </Text>
+      </View>
+
+      {/* Status badge */}
+      <Text style={{
+        fontSize: px(22), fontWeight: '600', flexShrink: 0,
+        color: isOpen ? C.primary : C.text3,
+        background: isOpen ? C.primaryDim : 'rgba(255,255,255,0.05)',
+        borderRadius: '9999px', padding: '3px 9px',
+      }}>
+        {isOpen ? '报名中' : a.status === 'FINISHED' ? '已结束' : '已关闭'}
+      </Text>
+    </View>
+  )
+}
+
+function SectionLabel({ dot, label }: { dot?: string; label: string }) {
+  return (
+    <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(10), gap: px(7) }}>
+      {dot && <View style={{ width: px(6), height: px(6), borderRadius: '50%', background: dot }} />}
+      <Text style={{
+        fontSize: px(22), fontWeight: '700', color: dot ? dot : C.text3,
+        letterSpacing: '0.1em', textTransform: 'uppercase',
+      }}>
+        {label}
+      </Text>
     </View>
   )
 }
 
 export default function HomePage() {
   const [activities, setActivities] = useState<ActivityRes[]>([])
+  const [featuredDetail, setFeaturedDetail] = useState<ActivityDetailRes | null>(null)
   const [loading, setLoading] = useState(false)
   const t = useT()
   const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
@@ -111,6 +273,13 @@ export default function HomePage() {
     try {
       const data = await activityApi.list(currentTeamId)
       setActivities(data)
+      const first = data.find(a => a.status === 'OPEN')
+      if (first) {
+        const detail = await activityApi.detail(first.id)
+        setFeaturedDetail(detail)
+      } else {
+        setFeaturedDetail(null)
+      }
     } catch (e: unknown) {
       Taro.showToast({ title: e instanceof Error ? e.message : '加载失败', icon: 'none' })
     } finally {
@@ -120,55 +289,125 @@ export default function HomePage() {
 
   useDidShow(load)
 
+  const handleRsvp = async (activityId: number, status: RegStatus) => {
+    const currentStatus = activities.find(a => a.id === activityId)?.myStatus
+    try {
+      if (currentStatus === status) {
+        await activityApi.cancelRegister(activityId)
+      } else {
+        await activityApi.register(activityId, status)
+      }
+      await load()
+    } catch (e: unknown) {
+      Taro.showToast({ title: e instanceof Error ? e.message : '操作失败', icon: 'none' })
+    }
+  }
+
+  const upcoming = activities.filter(a => a.status === 'OPEN')
+  const past = activities.filter(a => a.status !== 'OPEN')
+  const [featured, ...restUpcoming] = upcoming
+
   return (
     <View style={{ height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>
       {/* Header */}
       <View style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        padding: '16px 16px 12px', background: C.surface,
-        borderBottom: '1px solid #f0f0f0',
+        padding: `${px(16)} ${px(16)} ${px(14)}`,
+        borderBottom: `1px solid ${C.border}`,
       }}>
-        <Text style={{ fontSize: px(22), fontWeight: '700', color: C.text }}>{t('tab.home')}</Text>
+        <Text style={{ fontSize: px(44), fontWeight: '800', color: C.text, letterSpacing: '-0.02em' }}>
+          {t('tab.home')}
+        </Text>
         {isCaptainOrAdmin() && (
-          <Text
-            style={{
-              fontSize: px(14), color: C.primary, fontWeight: '500',
-              background: C.primaryLight, borderRadius: '9999px', padding: '6px 14px',
-            }}
+          <View
             onClick={() => Taro.navigateTo({ url: '/pages/activity-create/index' })}
+            style={{
+              background: C.primary, borderRadius: '9999px',
+              padding: `${px(7)} ${px(16)}`,
+            }}
           >
-            + {t('home.create')}
-          </Text>
+            <Text style={{ fontSize: px(26), color: '#0b0f18', fontWeight: '700' }}>
+              + {t('home.create')}
+            </Text>
+          </View>
         )}
       </View>
 
-      <ScrollView scrollY style={{ flex: 1, padding: '12px 16px' }}>
-        {loading ? (
-          <Text style={{ textAlign: 'center', color: C.text3, padding: px(32), display: 'block' }}>
-            {t('common.loading')}
-          </Text>
-        ) : activities.length === 0 ? (
-          <View style={{
-            background: C.surface, borderRadius: px(16), padding: '48px 24px',
-            textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-          }}>
-            <Text style={{ fontSize: px(40), display: 'block', marginBottom: px(12) }}>⚽</Text>
-            <Text style={{ fontSize: px(15), color: C.text2, fontWeight: '500', display: 'block', marginBottom: px(4) }}>
-              暂无活动
-            </Text>
-            <Text style={{ fontSize: px(13), color: C.text3 }}>
-              {t('home.empty')}
-            </Text>
-          </View>
-        ) : (
-          activities.map(a => (
-            <ActivityCard
-              key={a.id}
-              a={a}
-              onPress={() => Taro.navigateTo({ url: `/pages/activity-detail/index?id=${a.id}` })}
-            />
-          ))
-        )}
+      <ScrollView scrollY style={{ flex: 1 }}>
+        <View style={{ padding: `${px(14)} ${px(14)} ${px(32)}` }}>
+          {loading ? (
+            <View style={{ padding: `${px(48)} 0`, textAlign: 'center' }}>
+              <Text style={{ color: C.text3 }}>{t('common.loading')}</Text>
+            </View>
+          ) : activities.length === 0 ? (
+            <View style={{
+              marginTop: px(24),
+              background: C.surface, borderRadius: px(20),
+              padding: `${px(56)} ${px(24)}`,
+              textAlign: 'center', border: `1px solid ${C.border}`,
+            }}>
+              <Text style={{ fontSize: px(94), display: 'block', marginBottom: px(16) }}>⚽</Text>
+              <Text style={{ fontSize: px(34), color: C.text, fontWeight: '800', display: 'block',
+                             marginBottom: px(8), letterSpacing: '-0.01em' }}>
+                暂无活动
+              </Text>
+              <Text style={{ fontSize: px(26), color: C.text3 }}>{t('home.empty')}</Text>
+            </View>
+          ) : (
+            <>
+              {/* Upcoming section */}
+              {upcoming.length > 0 && (
+                <View style={{ marginBottom: past.length > 0 ? px(6) : 0 }}>
+                  <SectionLabel dot={C.primary} label="即将开始" />
+                  {featured && (
+                    <FeaturedCard
+                      a={featured}
+                      detail={featuredDetail}
+                      onPress={() => Taro.navigateTo({ url: `/pages/activity-detail/index?id=${featured.id}` })}
+                      onRsvp={(status) => handleRsvp(featured.id, status)}
+                    />
+                  )}
+                  {restUpcoming.map(a => (
+                    <CompactCard
+                      key={a.id}
+                      a={a}
+                      onPress={() => Taro.navigateTo({ url: `/pages/activity-detail/index?id=${a.id}` })}
+                    />
+                  ))}
+                </View>
+              )}
+
+              {/* Divider between sections */}
+              {upcoming.length > 0 && past.length > 0 && (
+                <View style={{
+                  display: 'flex', alignItems: 'center', gap: px(10),
+                  margin: `${px(8)} 0 ${px(16)}`,
+                }}>
+                  <View style={{ flex: 1, height: '1px', background: C.border }} />
+                  <Text style={{ fontSize: px(22), color: C.text3, letterSpacing: '0.08em',
+                                 textTransform: 'uppercase', fontWeight: '600' }}>
+                    历史活动
+                  </Text>
+                  <View style={{ flex: 1, height: '1px', background: C.border }} />
+                </View>
+              )}
+
+              {/* Past section */}
+              {past.length > 0 && (
+                <View>
+                  {upcoming.length === 0 && <SectionLabel label="历史活动" />}
+                  {past.map(a => (
+                    <CompactCard
+                      key={a.id}
+                      a={a}
+                      onPress={() => Taro.navigateTo({ url: `/pages/activity-detail/index?id=${a.id}` })}
+                    />
+                  ))}
+                </View>
+              )}
+            </>
+          )}
+        </View>
       </ScrollView>
     </View>
   )

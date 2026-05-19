@@ -1,5 +1,6 @@
 package com.football.team.controller;
 
+import com.football.team.dto.req.UpdateProfileReq;
 import com.football.team.dto.res.ApiResponse;
 import com.football.team.dto.res.MyStatsRes;
 import com.football.team.dto.res.UserProfileRes;
@@ -30,5 +31,14 @@ public class UserController {
         User user = (User) req.getAttribute("currentUser");
         if (user == null) throw BusinessException.unauthorized("请先登录");
         return ApiResponse.ok(userService.getStats(user.getId(), teamId));
+    }
+
+    @PutMapping("/me")
+    public ApiResponse<Void> updateProfile(@RequestBody UpdateProfileReq req,
+                                           HttpServletRequest request) {
+        User user = (User) request.getAttribute("currentUser");
+        if (user == null) throw BusinessException.unauthorized("请先登录");
+        userService.updateProfile(user.getId(), req);
+        return ApiResponse.ok(null);
     }
 }

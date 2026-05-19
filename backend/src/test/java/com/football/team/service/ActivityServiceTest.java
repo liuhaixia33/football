@@ -82,6 +82,8 @@ class ActivityServiceTest {
         assertEquals("周六训练", result.getTitle());
         assertEquals("五人制球场", result.getLocation());
         assertEquals(ActivityType.TRAINING, result.getType());
+        assertEquals(java.time.LocalDateTime.of(2026, 6, 7, 9, 0), result.getStartTime());
+        verify(activityRepository).save(a);
     }
 
     @Test
@@ -94,7 +96,8 @@ class ActivityServiceTest {
         req.setType(ActivityType.MATCH); req.setTitle("x"); req.setLocation("x");
         req.setStartTime(java.time.LocalDateTime.now());
 
-        assertThrows(BusinessException.class, () -> activityService.updateActivity(2L, 1L, req));
+        BusinessException ex = assertThrows(BusinessException.class, () -> activityService.updateActivity(2L, 1L, req));
+        assertEquals(400, ex.getCode());
     }
 
     @Test
@@ -107,6 +110,7 @@ class ActivityServiceTest {
         req.setType(ActivityType.MATCH); req.setTitle("x"); req.setLocation("x");
         req.setStartTime(java.time.LocalDateTime.now());
 
-        assertThrows(BusinessException.class, () -> activityService.updateActivity(3L, 1L, req));
+        BusinessException ex = assertThrows(BusinessException.class, () -> activityService.updateActivity(3L, 1L, req));
+        assertEquals(404, ex.getCode());
     }
 }

@@ -41,7 +41,7 @@ export default function TeamSelectPage() {
         onClick={() => Taro.navigateTo({ url: '/pages/onboard/index' })}
         style={{ textAlign: 'center', padding: '16px', color: '#4CAF50', fontSize: '14px' }}
       >
-        + 加入或创建新球队
+        {i18n('my.join_create')}
       </View>
     </View>
   )

@@ -33,8 +33,8 @@ export default function LoginPage() {
       if (res.teams.length === 0) {
         Taro.reLaunch({ url: '/pages/onboard/index' })
       } else if (res.teams.length === 1) {
-        const t = res.teams[0]
-        useAuthStore.getState().setCurrentTeam(t.teamId, t.role)
+        const firstTeam = res.teams[0]
+        useAuthStore.getState().setCurrentTeam(firstTeam.teamId, firstTeam.role)
         Taro.reLaunch({ url: '/pages/home/index' })
       } else {
         Taro.reLaunch({ url: '/pages/team-select/index' })

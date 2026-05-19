@@ -4,6 +4,7 @@ export type ActivityType = 'MATCH' | 'TRAINING'
 export type ActivityStatus = 'OPEN' | 'CLOSED' | 'FINISHED'
 export type MatchOutcome = 'WIN' | 'DRAW' | 'LOSE'
 export type FinanceType = 'INCOME' | 'EXPENSE'
+export type RegStatus = 'JOINED' | 'TENTATIVE' | 'ABSENT'
 
 export interface TeamBrief {
   teamId: number
@@ -48,7 +49,7 @@ export interface ActivityRes {
   maxPlayers: number | null
   registeredCount: number
   status: ActivityStatus
-  iJoined: boolean
+  myStatus: RegStatus | null
 }
 
 export interface MatchResultRes {
@@ -60,7 +61,7 @@ export interface MatchResultRes {
 
 export interface ActivityDetailRes {
   activity: ActivityRes
-  registrations: Array<{ userId: number; nickname: string; avatarUrl: string }>
+  registrations: Array<{ userId: number; nickname: string; avatarUrl: string; status: RegStatus }>
   result: MatchResultRes | null
 }
 

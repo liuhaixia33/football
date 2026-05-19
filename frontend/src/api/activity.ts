@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { ActivityRes, ActivityDetailRes } from '../types/api'
+import type { ActivityRes, ActivityDetailRes, RegStatus } from '../types/api'
 
 export const activityApi = {
   list: (teamId: number) =>
@@ -10,8 +10,8 @@ export const activityApi = {
     type: string; title: string; location: string; startTime: string;
     opponent?: string; deadline?: string; maxPlayers?: number
   }) => api.post<ActivityRes>(`/api/v1/activities/team/${teamId}`, body as Record<string, unknown>),
-  register: (activityId: number) =>
-    api.post<void>(`/api/v1/activities/${activityId}/register`, undefined),
+  register: (activityId: number, status: RegStatus) =>
+    api.post<void>(`/api/v1/activities/${activityId}/register`, { status }),
   cancelRegister: (activityId: number) =>
     api.delete<void>(`/api/v1/activities/${activityId}/register`),
   close: (activityId: number) =>

@@ -3,6 +3,7 @@ import { View, Text, Input, Button } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
+import { useT } from '../../i18n/useT'
 
 const fmt = (iso: string) => {
   const d = new Date(iso)
@@ -40,6 +41,7 @@ export default function ActivityCreatePage() {
   const [loading, setLoading] = useState(false)
   const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
   const hasLoaded = useRef(false)
+  const t = useT()
 
   useEffect(() => {
     if (!isCaptainOrAdmin()) {
@@ -47,11 +49,11 @@ export default function ActivityCreatePage() {
       return
     }
     if (editId) {
-      Taro.setNavigationBarTitle({ title: '编辑活动' })
+      Taro.setNavigationBarTitle({ title: t('act_form.title_edit') })
     } else if (!resultFor) {
-      Taro.setNavigationBarTitle({ title: '发布活动' })
+      Taro.setNavigationBarTitle({ title: t('act_form.title_create') })
     } else {
-      Taro.setNavigationBarTitle({ title: '录入比分' })
+      Taro.setNavigationBarTitle({ title: t('act_form.title_result') })
     }
   }, [])
 
@@ -67,25 +69,25 @@ export default function ActivityCreatePage() {
         setStartTime(fmt(a.startTime))
         setDeadline(a.deadline ? fmt(a.deadline) : '')
         setMaxPlayers(a.maxPlayers != null ? String(a.maxPlayers) : '')
-      }).catch(() => Taro.showToast({ title: '加载活动失败', icon: 'none' }))
+      }).catch(() => Taro.showToast({ title: t('act_form.load_fail'), icon: 'none' }))
     }
   })
 
   const validateActivityForm = (): boolean => {
     if (!title.trim() || !location.trim() || !startTime) {
-      Taro.showToast({ title: '请填写必填项', icon: 'none' })
+      Taro.showToast({ title: t('act_form.err_required'), icon: 'none' })
       return false
     }
     if (isNaN(new Date(startTime).getTime())) {
-      Taro.showToast({ title: '开始时间格式错误，请使用 2026-06-01 09:00', icon: 'none' })
+      Taro.showToast({ title: t('act_form.err_start_fmt'), icon: 'none' })
       return false
     }
     if (deadline && isNaN(new Date(deadline).getTime())) {
-      Taro.showToast({ title: '截止时间格式错误', icon: 'none' })
+      Taro.showToast({ title: t('act_form.err_deadline_fmt'), icon: 'none' })
       return false
     }
     if (maxPlayers && (isNaN(Number(maxPlayers)) || Number(maxPlayers) <= 0 || !Number.isInteger(Number(maxPlayers)))) {
-      Taro.showToast({ title: '最大报名人数须为正整数', icon: 'none' })
+      Taro.showToast({ title: t('act_form.err_max_players'), icon: 'none' })
       return false
     }
     return true
@@ -108,10 +110,10 @@ export default function ActivityCreatePage() {
     try {
       if (editId) {
         await activityApi.update(Number(editId), buildActivityBody())
-        Taro.showToast({ title: '修改成功', icon: 'success' })
+        Taro.showToast({ title: t('act_form.success_edit'), icon: 'success' })
       } else {
         await activityApi.create(currentTeamId, buildActivityBody())
-        Taro.showToast({ title: '发布成功', icon: 'success' })
+        Taro.showToast({ title: t('act_form.success_create'), icon: 'success' })
       }
       setTimeout(() => Taro.navigateBack(), 1000)
     } catch (e: unknown) {
@@ -123,11 +125,11 @@ export default function ActivityCreatePage() {
 
   const submitResult = async () => {
     if (!ourScore || !oppScore) {
-      Taro.showToast({ title: '请输入比分', icon: 'none' })
+      Taro.showToast({ title: t('act_form.err_required'), icon: 'none' })
       return
     }
     if (isNaN(Number(ourScore)) || isNaN(Number(oppScore))) {
-      Taro.showToast({ title: '比分格式错误', icon: 'none' })
+      Taro.showToast({ title: t('act_form.err_score_fmt'), icon: 'none' })
       return
     }
     setLoading(true)
@@ -138,7 +140,7 @@ export default function ActivityCreatePage() {
         Number(oppScore),
         notes.trim() || undefined
       )
-      Taro.showToast({ title: '录入成功', icon: 'success' })
+      Taro.showToast({ title: t('act_form.success_score'), icon: 'success' })
       setTimeout(() => Taro.navigateBack(), 1000)
     } catch (e: unknown) {
       Taro.showToast({ title: e instanceof Error ? e.message : '录入失败', icon: 'none' })
@@ -150,7 +152,7 @@ export default function ActivityCreatePage() {
   if (resultFor) {
     return (
       <View style={{ padding: '16px' }}>
-        <Text style={labelStyle}>我方比分 *</Text>
+        <Text style={labelStyle}>{t('act_form.our_score')}</Text>
         <Input
           value={ourScore}
           onInput={e => setOurScore(e.detail.value)}
@@ -158,7 +160,7 @@ export default function ActivityCreatePage() {
           placeholder='0'
           style={inputStyle}
         />
-        <Text style={labelStyle}>对方比分 *</Text>
+        <Text style={labelStyle}>{t('act_form.opp_score')}</Text>
         <Input
           value={oppScore}
           onInput={e => setOppScore(e.detail.value)}
@@ -166,15 +168,15 @@ export default function ActivityCreatePage() {
           placeholder='0'
           style={inputStyle}
         />
-        <Text style={labelStyle}>备注</Text>
+        <Text style={labelStyle}>{t('act_form.notes')}</Text>
         <Input
           value={notes}
           onInput={e => setNotes(e.detail.value)}
-          placeholder='可选'
+          placeholder={t('common.optional')}
           style={{ ...inputStyle, marginBottom: '32px' }}
         />
         <Button style={btnStyle} loading={loading} onClick={submitResult}>
-          保存比分
+          {t('act_form.save_score')}
         </Button>
       </View>
     )
@@ -182,78 +184,78 @@ export default function ActivityCreatePage() {
 
   return (
     <View style={{ padding: '16px' }}>
-      <Text style={labelStyle}>类型 *</Text>
+      <Text style={labelStyle}>{t('act_form.type')}</Text>
       <View style={{ display: 'flex', marginBottom: '16px', gap: '8px' }}>
-        {(['MATCH', 'TRAINING'] as const).map(t => (
+        {(['MATCH', 'TRAINING'] as const).map(tp => (
           <View
-            key={t}
-            onClick={() => setType(t)}
+            key={tp}
+            onClick={() => setType(tp)}
             style={{
               flex: 1, textAlign: 'center', padding: '10px',
-              border: `1px solid ${type === t ? '#4CAF50' : '#e0e0e0'}`,
-              borderRadius: '8px', color: type === t ? '#4CAF50' : '#666'
+              border: `1px solid ${type === tp ? '#4CAF50' : '#e0e0e0'}`,
+              borderRadius: '8px', color: type === tp ? '#4CAF50' : '#666'
             }}
           >
-            <Text>{t === 'MATCH' ? '⚽ 比赛' : '🏃 训练'}</Text>
+            <Text>{tp === 'MATCH' ? t('act_form.match') : t('act_form.training')}</Text>
           </View>
         ))}
       </View>
 
-      <Text style={labelStyle}>标题 *</Text>
+      <Text style={labelStyle}>{t('act_form.label_title')}</Text>
       <Input
         value={title}
         onInput={e => setTitle(e.detail.value)}
-        placeholder='例如：周六联赛 vs 红星队'
+        placeholder={t('act_form.placeholder_title')}
         style={inputStyle}
       />
 
       {type === 'MATCH' && (
         <>
-          <Text style={labelStyle}>对手</Text>
+          <Text style={labelStyle}>{t('act_form.label_opponent')}</Text>
           <Input
             value={opponent}
             onInput={e => setOpponent(e.detail.value)}
-            placeholder='对手球队名称'
+            placeholder={t('act_form.placeholder_opponent')}
             style={inputStyle}
           />
         </>
       )}
 
-      <Text style={labelStyle}>地点 *</Text>
+      <Text style={labelStyle}>{t('act_form.label_location')}</Text>
       <Input
         value={location}
         onInput={e => setLocation(e.detail.value)}
-        placeholder='比赛/训练场地'
+        placeholder={t('act_form.placeholder_location')}
         style={inputStyle}
       />
 
-      <Text style={labelStyle}>开始时间 *</Text>
+      <Text style={labelStyle}>{t('act_form.label_start')}</Text>
       <Input
         value={startTime}
         onInput={e => setStartTime(e.detail.value)}
-        placeholder='2026-06-01 09:00'
+        placeholder={t('act_form.placeholder_start')}
         style={inputStyle}
       />
 
-      <Text style={labelStyle}>报名截止时间</Text>
+      <Text style={labelStyle}>{t('act_form.label_deadline')}</Text>
       <Input
         value={deadline}
         onInput={e => setDeadline(e.detail.value)}
-        placeholder='可选，例如 2026-05-31 23:59'
+        placeholder={t('act_form.placeholder_deadline')}
         style={inputStyle}
       />
 
-      <Text style={labelStyle}>最大报名人数</Text>
+      <Text style={labelStyle}>{t('act_form.label_max')}</Text>
       <Input
         value={maxPlayers}
         onInput={e => setMaxPlayers(e.detail.value)}
         type='number'
-        placeholder='可选，不填表示不限'
+        placeholder={t('act_form.placeholder_max')}
         style={{ ...inputStyle, marginBottom: '32px' }}
       />
 
       <Button style={btnStyle} loading={loading} onClick={submitActivity}>
-        {editId ? '保存修改' : '发布活动'}
+        {editId ? t('act_form.save') : t('act_form.publish')}
       </Button>
     </View>
   )

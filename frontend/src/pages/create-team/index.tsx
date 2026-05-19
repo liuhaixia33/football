@@ -1,13 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
+import { useT } from '../../i18n/useT'
 
 export default function CreateTeamPage() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const t = useT()
+
+  useEffect(() => {
+    Taro.setNavigationBarTitle({ title: t('create_team.title') })
+  }, [])
 
   const submit = async () => {
     if (!name.trim()) {
@@ -22,7 +29,7 @@ export default function CreateTeamPage() {
       const { userApi } = await import('../../api/user')
       const profile = await userApi.me()
       useAuthStore.getState().setTeams(profile.teams)
-      Taro.showToast({ title: '创建成功', icon: 'success' })
+      Taro.showToast({ title: t('create_team.success'), icon: 'success' })
       setTimeout(() => Taro.reLaunch({ url: '/pages/home/index' }), 1000)
     } catch (e: unknown) {
       Taro.showToast({ title: e instanceof Error ? e.message : '创建失败', icon: 'none' })
@@ -34,7 +41,7 @@ export default function CreateTeamPage() {
   return (
     <View style={{ padding: '16px' }}>
       <Text style={{ fontSize: '14px', color: '#666', marginBottom: '8px',
-                     display: 'block' }}>球队名称 *</Text>
+                     display: 'block' }}>{t('create_team.name')}</Text>
       <Input
         value={name}
         onInput={e => setName(e.detail.value)}
@@ -43,7 +50,7 @@ export default function CreateTeamPage() {
                  marginBottom: '16px', fontSize: '16px' }}
       />
       <Text style={{ fontSize: '14px', color: '#666', marginBottom: '8px',
-                     display: 'block' }}>球队简介</Text>
+                     display: 'block' }}>{t('create_team.desc')}</Text>
       <Input
         value={description}
         onInput={e => setDescription(e.detail.value)}
@@ -57,7 +64,7 @@ export default function CreateTeamPage() {
         loading={loading}
         onClick={submit}
       >
-        创建球队
+        {t('create_team.submit')}
       </Button>
     </View>
   )

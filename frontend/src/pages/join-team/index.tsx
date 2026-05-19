@@ -1,11 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { teamApi } from '../../api/team'
+import { useT } from '../../i18n/useT'
 
 export default function JoinTeamPage() {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const t = useT()
+
+  useEffect(() => {
+    Taro.setNavigationBarTitle({ title: t('join_team.title') })
+  }, [])
 
   const submit = async () => {
     if (!code.trim()) {
@@ -15,7 +22,7 @@ export default function JoinTeamPage() {
     setLoading(true)
     try {
       await teamApi.join(code.trim().toUpperCase())
-      Taro.showToast({ title: '申请已提交，等待审批', icon: 'success' })
+      Taro.showToast({ title: t('join_team.success'), icon: 'success' })
       setTimeout(() => Taro.navigateBack(), 1500)
     } catch (e: unknown) {
       Taro.showToast({ title: e instanceof Error ? e.message : '加入失败', icon: 'none' })
@@ -27,7 +34,7 @@ export default function JoinTeamPage() {
   return (
     <View style={{ padding: '16px' }}>
       <Text style={{ fontSize: '14px', color: '#666', marginBottom: '8px',
-                     display: 'block' }}>邀请码</Text>
+                     display: 'block' }}>{t('join_team.code')}</Text>
       <Input
         value={code}
         onInput={e => setCode(e.detail.value)}
@@ -43,7 +50,7 @@ export default function JoinTeamPage() {
         loading={loading}
         onClick={submit}
       >
-        申请加入
+        {t('join_team.submit')}
       </Button>
     </View>
   )

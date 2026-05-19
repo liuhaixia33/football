@@ -35,10 +35,10 @@ class OssServiceTest {
 
         verify(ossClient).putObject(
             eq("test-bucket"),
-            argThat(key -> key.startsWith("avatars/42_") && key.endsWith(".jpg")),
+            argThat(key -> key.startsWith("avatar/42_") && key.endsWith(".jpg")),
             any(InputStream.class)
         );
-        assertThat(url).startsWith("https://test.oss.aliyuncs.com/avatars/42_");
+        assertThat(url).startsWith("https://test.oss.aliyuncs.com/avatar/42_");
         assertThat(url).endsWith(".jpg");
     }
 

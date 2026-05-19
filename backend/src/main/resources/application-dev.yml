@@ -13,11 +13,11 @@ wechat:
   app-secret: ${WECHAT_APP_SECRET:dev_mock}
 
 oss:
-  endpoint: https://oss-cn-hangzhou.aliyuncs.com
-  access-key-id: ${OSS_KEY_ID:your-key-id}
-  access-key-secret: ${OSS_KEY_SECRET:your-key-secret}
-  bucket-name: your-bucket-name
-  base-url: https://your-bucket.oss-cn-hangzhou.aliyuncs.com
+  endpoint: https://oss-cn-beijing.aliyuncs.com
+  access-key-id: ${OSS_KEY_ID:your-access-key-id}
+  access-key-secret: ${OSS_KEY_SECRET:your-access-key-secret}
+  bucket-name: ball-mini
+  base-url: https://ball-mini.oss-cn-beijing.aliyuncs.com
 
 logging:
   level:

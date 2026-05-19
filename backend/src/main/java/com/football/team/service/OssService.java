@@ -17,7 +17,7 @@ public class OssService {
 
     public String uploadAvatar(MultipartFile file, Long userId) throws IOException {
         String ext = getExtension(file.getOriginalFilename());
-        String key = "avatars/" + userId + "_" + System.currentTimeMillis() + ext;
+        String key = "avatar/" + userId + "_" + System.currentTimeMillis() + ext;
         ossClient.putObject(ossProperties.getBucketName(), key, file.getInputStream());
         return ossProperties.getBaseUrl() + "/" + key;
     }

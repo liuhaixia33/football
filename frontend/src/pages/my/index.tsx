@@ -3,11 +3,15 @@ import { View, Text, Button } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { userApi } from '../../api/user'
 import { useAuthStore } from '../../store/auth'
+import { useT } from '../../i18n/useT'
+import { useLangStore } from '../../store/lang'
 import type { MyStatsRes, MemberRole } from '../../types/api'
 
 export default function MyPage() {
   const [stats, setStats] = useState<MyStatsRes | null>(null)
   const { nickname, currentTeamId, currentRole, teams, setCurrentTeam, setTeams, clear } = useAuthStore()
+  const t = useT()
+  const { language, setLanguage } = useLangStore()
 
   const load = async () => {
     if (!currentTeamId) return
@@ -15,7 +19,7 @@ export default function MyPage() {
       const s = await userApi.stats(currentTeamId)
       setStats(s)
     } catch {
-      // stats load failure is non-critical, silently ignore
+      // stats load failure is non-critical
     }
     try {
       const profile = await userApi.me()
@@ -32,10 +36,13 @@ export default function MyPage() {
     Taro.reLaunch({ url: '/pages/home/index' })
   }
 
+  const roleLabel = (role: MemberRole) =>
+    role === 'CAPTAIN' ? t('my.captain') : role === 'ADMIN' ? t('my.admin') : t('my.player')
+
   const logout = () => {
     Taro.showModal({
-      title: '退出登录',
-      content: '确定要退出登录吗？',
+      title: t('my.logout_title'),
+      content: t('my.logout_content'),
       success: ({ confirm }) => {
         if (confirm) {
           clear()
@@ -47,13 +54,13 @@ export default function MyPage() {
 
   const leaveTeam = () => {
     if (currentRole === 'CAPTAIN') {
-      Taro.showToast({ title: '队长请先转让队长身份', icon: 'none' })
+      Taro.showToast({ title: t('my.leave_captain'), icon: 'none' })
       return
     }
     if (!currentTeamId) return
     Taro.showModal({
-      title: '退出球队',
-      content: '确定要退出当前球队吗？',
+      title: t('my.leave_title'),
+      content: t('my.leave_content'),
       success: async ({ confirm }) => {
         if (!confirm) return
         try {
@@ -65,9 +72,20 @@ export default function MyPage() {
             Taro.reLaunch({ url: '/pages/login/index' })
           }, 1000)
         } catch (e: unknown) {
-          Taro.showToast({ title: e instanceof Error ? e.message : '操作失败', icon: 'none' })
+          Taro.showToast({ title: e instanceof Error ? e.message : t('common.error'), icon: 'none' })
         }
       }
+    })
+  }
+
+  const switchLanguage = () => {
+    Taro.showActionSheet({
+      itemList: [t('my.lang_zh'), t('my.lang_en')],
+      success: ({ tapIndex }) => {
+        const lang: 'zh' | 'en' = tapIndex === 0 ? 'zh' : 'en'
+        setLanguage(lang)
+        Taro.setNavigationBarTitle({ title: lang === 'zh' ? '我的' : 'My' })
+      },
     })
   }
 
@@ -82,8 +100,7 @@ export default function MyPage() {
             {nickname ?? '球员'}
           </Text>
           <Text style={{ fontSize: '13px', color: 'rgba(255,255,255,.7)' }}>
-            {currentRole === 'CAPTAIN' ? '队长' :
-             currentRole === 'ADMIN' ? '管理员' : '队员'}
+            {roleLabel(currentRole ?? 'PLAYER')}
           </Text>
         </View>
       </View>
@@ -93,13 +110,13 @@ export default function MyPage() {
         <View style={{ background: '#fff', margin: '12px 16px', borderRadius: '8px',
                        padding: '16px' }}>
           <Text style={{ fontSize: '15px', fontWeight: 'bold', display: 'block',
-                         marginBottom: '12px' }}>本队战绩</Text>
+                         marginBottom: '12px' }}>{t('my.stats')}</Text>
           <View style={{ display: 'flex', textAlign: 'center' }}>
             {[
-              { label: '场数', value: stats.totalMatches, color: '#333' },
-              { label: '胜', value: stats.wins, color: '#4CAF50' },
-              { label: '平', value: stats.draws, color: '#FF9800' },
-              { label: '负', value: stats.losses, color: '#f44336' },
+              { label: t('my.matches'), value: stats.totalMatches, color: '#333' },
+              { label: t('my.wins'),    value: stats.wins,         color: '#4CAF50' },
+              { label: t('my.draws'),   value: stats.draws,        color: '#FF9800' },
+              { label: t('my.losses'),  value: stats.losses,       color: '#f44336' },
             ].map(s => (
               <View key={s.label} style={{ flex: 1 }}>
                 <Text style={{ fontSize: '24px', fontWeight: 'bold', color: s.color,
@@ -117,23 +134,21 @@ export default function MyPage() {
       <View style={{ background: '#fff', margin: '0 16px 12px', borderRadius: '8px',
                      padding: '16px' }}>
         <Text style={{ fontSize: '15px', fontWeight: 'bold', display: 'block',
-                       marginBottom: '12px' }}>我的球队</Text>
-        {teams.map(t => (
+                       marginBottom: '12px' }}>{t('my.teams')}</Text>
+        {teams.map(tm => (
           <View
-            key={t.teamId}
-            onClick={() => switchTeam(t.teamId, t.role)}
+            key={tm.teamId}
+            onClick={() => switchTeam(tm.teamId, tm.role)}
             style={{ display: 'flex', alignItems: 'center', padding: '10px 0',
                      borderBottom: '1px solid #f5f5f5' }}
           >
             <Text style={{ fontSize: '24px', marginRight: '12px' }}>⚽</Text>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: '14px', display: 'block' }}>{t.teamName}</Text>
-              <Text style={{ fontSize: '12px', color: '#999' }}>
-                {t.role === 'CAPTAIN' ? '队长' : t.role === 'ADMIN' ? '管理员' : '队员'}
-              </Text>
+              <Text style={{ fontSize: '14px', display: 'block' }}>{tm.teamName}</Text>
+              <Text style={{ fontSize: '12px', color: '#999' }}>{roleLabel(tm.role)}</Text>
             </View>
-            {t.teamId === currentTeamId && (
-              <Text style={{ fontSize: '12px', color: '#4CAF50' }}>当前</Text>
+            {tm.teamId === currentTeamId && (
+              <Text style={{ fontSize: '12px', color: '#4CAF50' }}>{t('my.current')}</Text>
             )}
           </View>
         ))}
@@ -141,8 +156,20 @@ export default function MyPage() {
           onClick={() => Taro.navigateTo({ url: '/pages/onboard/index' })}
           style={{ textAlign: 'center', padding: '12px 0', color: '#4CAF50', fontSize: '14px' }}
         >
-          + 加入或创建新球队
+          {t('my.join_create')}
         </View>
+      </View>
+
+      {/* Language switcher */}
+      <View
+        onClick={switchLanguage}
+        style={{ background: '#fff', margin: '0 16px 12px', borderRadius: '8px',
+                 padding: '14px 16px', display: 'flex', alignItems: 'center' }}
+      >
+        <Text style={{ flex: 1, fontSize: '14px' }}>{t('my.language')}</Text>
+        <Text style={{ fontSize: '14px', color: '#999' }}>
+          {language === 'zh' ? t('my.lang_zh') : t('my.lang_en')} ›
+        </Text>
       </View>
 
       {/* Action buttons */}
@@ -152,14 +179,14 @@ export default function MyPage() {
                    borderRadius: '8px', fontSize: '14px' }}
           onClick={leaveTeam}
         >
-          退出当前球队
+          {t('my.leave')}
         </Button>
         <Button
           style={{ background: '#f5f5f5', color: '#999', border: 'none',
                    borderRadius: '8px', fontSize: '14px' }}
           onClick={logout}
         >
-          退出登录
+          {t('my.logout')}
         </Button>
       </View>
     </View>

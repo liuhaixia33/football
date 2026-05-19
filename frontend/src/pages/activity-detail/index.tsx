@@ -1,15 +1,25 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Button, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
 import type { ActivityDetailRes } from '../../types/api'
 
 export default function ActivityDetailPage() {
   const [detail, setDetail] = useState<ActivityDetailRes | null>(null)
-  const { isCaptainOrAdmin } = useAuthStore()
+  const { isCaptainOrAdmin, currentTeamId } = useAuthStore()
 
   const activityId = Number(Taro.getCurrentInstance().router?.params?.id)
+
+  useShareAppMessage(() => ({
+    title: detail?.activity.title ?? '球队活动',
+    path: `/pages/activity-detail/index?id=${activityId}&teamId=${currentTeamId}`,
+    imageUrl: '/assets/images/share-cover.png',
+  }))
+
+  useDidShow(() => {
+    Taro.showShareMenu({ withShareTicket: false, menus: ['shareAppMessage'] } as Parameters<typeof Taro.showShareMenu>[0])
+  })
 
   useEffect(() => {
     if (!activityId) return
@@ -242,6 +252,19 @@ export default function ActivityDetailPage() {
             录入比分
           </Button>
         )}
+        <Button
+          openType='share'
+          style={{
+            background: '#fff',
+            color: '#07C160',
+            border: '1px solid #07C160',
+            borderRadius: '8px',
+            marginTop: '8px',
+            fontSize: '14px',
+          }}
+        >
+          分享给好友
+        </Button>
       </View>
     </ScrollView>
   )

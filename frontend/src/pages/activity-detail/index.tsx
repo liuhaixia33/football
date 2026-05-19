@@ -18,7 +18,7 @@ export default function ActivityDetailPage() {
   }))
 
   useDidShow(() => {
-    Taro.showShareMenu({ withShareTicket: false, menus: ['shareAppMessage'] } as Parameters<typeof Taro.showShareMenu>[0])
+    Taro.showShareMenu({ withShareTicket: false, showShareItems: ['shareAppMessage'] })
   })
 
   useEffect(() => {

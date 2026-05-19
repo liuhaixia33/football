@@ -113,6 +113,23 @@ public class ActivityService {
         regRepository.save(reg);
     }
 
+    public Activity updateActivity(Long activityId, Long teamId, CreateActivityReq req) {
+        Activity a = activityRepository.findById(activityId)
+            .orElseThrow(() -> BusinessException.notFound("活动不存在"));
+        if (!a.getTeamId().equals(teamId))
+            throw BusinessException.notFound("活动不存在");
+        if (a.getStatus() != ActivityStatus.OPEN)
+            throw BusinessException.badRequest("已封闭的活动不可修改");
+        a.setType(req.getType());
+        a.setTitle(req.getTitle());
+        a.setOpponent(req.getOpponent());
+        a.setLocation(req.getLocation());
+        a.setStartTime(req.getStartTime());
+        a.setDeadline(req.getDeadline());
+        a.setMaxPlayers(req.getMaxPlayers());
+        return activityRepository.save(a);
+    }
+
     public void closeActivity(Long activityId, Long teamId) {
         Activity a = activityRepository.findById(activityId)
             .orElseThrow(() -> BusinessException.notFound("活动不存在"));

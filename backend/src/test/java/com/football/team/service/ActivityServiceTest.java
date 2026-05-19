@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.football.team.dto.req.CreateActivityReq;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,5 +63,50 @@ class ActivityServiceTest {
         activityService.recordResult(1L, req, 1L);
 
         verify(matchResultRepository).save(argThat(r -> r.getOutcome() == MatchOutcome.WIN));
+    }
+
+    @Test
+    void updateActivity_success_updatesAllFields() {
+        Activity a = new Activity(); a.setId(1L); a.setTeamId(1L); a.setStatus(ActivityStatus.OPEN);
+        when(activityRepository.findById(1L)).thenReturn(Optional.of(a));
+        when(activityRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        CreateActivityReq req = new CreateActivityReq();
+        req.setType(ActivityType.TRAINING);
+        req.setTitle("周六训练");
+        req.setLocation("五人制球场");
+        req.setStartTime(java.time.LocalDateTime.of(2026, 6, 7, 9, 0));
+
+        Activity result = activityService.updateActivity(1L, 1L, req);
+
+        assertEquals("周六训练", result.getTitle());
+        assertEquals("五人制球场", result.getLocation());
+        assertEquals(ActivityType.TRAINING, result.getType());
+    }
+
+    @Test
+    void updateActivity_closedActivity_throwsBadRequest() {
+        Activity a = new Activity();
+        a.setId(2L); a.setTeamId(1L); a.setStatus(ActivityStatus.CLOSED);
+        when(activityRepository.findById(2L)).thenReturn(Optional.of(a));
+
+        CreateActivityReq req = new CreateActivityReq();
+        req.setType(ActivityType.MATCH); req.setTitle("x"); req.setLocation("x");
+        req.setStartTime(java.time.LocalDateTime.now());
+
+        assertThrows(BusinessException.class, () -> activityService.updateActivity(2L, 1L, req));
+    }
+
+    @Test
+    void updateActivity_wrongTeam_throwsNotFound() {
+        Activity a = new Activity();
+        a.setId(3L); a.setTeamId(99L); a.setStatus(ActivityStatus.OPEN);
+        when(activityRepository.findById(3L)).thenReturn(Optional.of(a));
+
+        CreateActivityReq req = new CreateActivityReq();
+        req.setType(ActivityType.MATCH); req.setTitle("x"); req.setLocation("x");
+        req.setStartTime(java.time.LocalDateTime.now());
+
+        assertThrows(BusinessException.class, () -> activityService.updateActivity(3L, 1L, req));
     }
 }

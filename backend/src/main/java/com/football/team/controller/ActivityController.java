@@ -2,6 +2,7 @@ package com.football.team.controller;
 
 import com.football.team.dto.req.CreateActivityReq;
 import com.football.team.dto.req.RecordResultReq;
+import com.football.team.dto.req.RegisterReq;
 import com.football.team.dto.res.ActivityDetailRes;
 import com.football.team.dto.res.ActivityRes;
 import com.football.team.dto.res.ApiResponse;
@@ -52,10 +53,11 @@ public class ActivityController {
 
     @PostMapping("/{activityId}/register")
     @RequireRole(MemberRole.PLAYER)
-    public ApiResponse<Void> register(HttpServletRequest req, @PathVariable Long activityId) {
+    public ApiResponse<Void> register(HttpServletRequest req, @PathVariable Long activityId,
+                                      @RequestBody @Valid RegisterReq body) {
         User user = (User) req.getAttribute("currentUser");
         Long teamId = (Long) req.getAttribute("currentTeamId");
-        activityService.register(activityId, user.getId(), teamId);
+        activityService.register(activityId, user.getId(), teamId, body);
         return ApiResponse.ok(null);
     }
 

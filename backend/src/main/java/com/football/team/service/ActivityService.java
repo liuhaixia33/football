@@ -2,10 +2,12 @@ package com.football.team.service;
 
 import com.football.team.dto.req.CreateActivityReq;
 import com.football.team.dto.req.RecordResultReq;
+import com.football.team.dto.req.RegisterReq;
+import com.football.team.dto.res.RegistrationRes;
 import com.football.team.dto.res.ActivityDetailRes;
 import com.football.team.dto.res.ActivityRes;
-import com.football.team.dto.res.MemberRes;
 import com.football.team.dto.res.MatchResultRes;
+import com.football.team.dto.res.RegistrationRes;
 import com.football.team.entity.*;
 import com.football.team.enums.*;
 import com.football.team.exception.BusinessException;
@@ -53,11 +55,14 @@ public class ActivityService {
         if (!a.getTeamId().equals(teamId))
             throw BusinessException.notFound("活动不存在");
 
-        List<MemberRes> regs = regRepository.findByActivityIdAndStatus(activityId, RegStatus.JOINED)
+        List<RegistrationRes> regs = regRepository.findByActivityIdAndStatusIn(
+                activityId, List.of(RegStatus.JOINED, RegStatus.TENTATIVE, RegStatus.ABSENT))
             .stream().map(r -> {
                 User u = userRepository.findById(r.getUserId()).orElseThrow();
-                return MemberRes.builder().userId(u.getId())
-                    .nickname(u.getNickname()).avatarUrl(u.getAvatarUrl()).build();
+                return RegistrationRes.builder()
+                    .userId(u.getId()).nickname(u.getNickname())
+                    .avatarUrl(u.getAvatarUrl()).status(r.getStatus().name())
+                    .build();
             }).toList();
 
         MatchResultRes result = matchResultRepository.findByActivityId(activityId)
@@ -73,7 +78,7 @@ public class ActivityService {
             .build();
     }
 
-    public void register(Long activityId, Long userId, Long teamId) {
+    public void register(Long activityId, Long userId, Long teamId, RegisterReq req) {
         Activity a = activityRepository.findById(activityId)
             .orElseThrow(() -> BusinessException.notFound("活动不存在"));
         if (!a.getTeamId().equals(teamId))
@@ -83,20 +88,20 @@ public class ActivityService {
         if (a.getDeadline() != null && LocalDateTime.now().isAfter(a.getDeadline()))
             throw BusinessException.badRequest("报名已截止");
 
-        long count = regRepository.countByActivityIdAndStatus(activityId, RegStatus.JOINED);
-        if (a.getMaxPlayers() != null && count >= a.getMaxPlayers())
-            throw BusinessException.badRequest("报名人数已满");
+        if (req.getStatus() == RegStatus.JOINED) {
+            long count = regRepository.countByActivityIdAndStatus(activityId, RegStatus.JOINED);
+            if (a.getMaxPlayers() != null && count >= a.getMaxPlayers())
+                throw BusinessException.badRequest("报名人数已满");
+        }
 
         regRepository.findByActivityIdAndUserId(activityId, userId).ifPresentOrElse(reg -> {
-            if (reg.getStatus() == RegStatus.JOINED)
-                throw BusinessException.badRequest("您已报名");
-            reg.setStatus(RegStatus.JOINED);
+            reg.setStatus(req.getStatus());
             regRepository.save(reg);
         }, () -> {
             ActivityRegistration reg = new ActivityRegistration();
             reg.setActivityId(activityId);
             reg.setUserId(userId);
-            reg.setStatus(RegStatus.JOINED);
+            reg.setStatus(req.getStatus());
             regRepository.save(reg);
         });
     }
@@ -107,7 +112,7 @@ public class ActivityService {
         if (!a.getTeamId().equals(teamId))
             throw BusinessException.notFound("活动不存在");
         ActivityRegistration reg = regRepository.findByActivityIdAndUserId(activityId, userId)
-            .filter(r -> r.getStatus() == RegStatus.JOINED)
+            .filter(r -> r.getStatus() != RegStatus.CANCELLED)
             .orElseThrow(() -> BusinessException.notFound("未找到报名记录"));
         reg.setStatus(RegStatus.CANCELLED);
         regRepository.save(reg);
@@ -168,14 +173,16 @@ public class ActivityService {
 
     public ActivityRes toActivityRes(Activity a, Long currentUserId) {
         long count = regRepository.countByActivityIdAndStatus(a.getId(), RegStatus.JOINED);
-        boolean iJoined = regRepository.findByActivityIdAndUserId(a.getId(), currentUserId)
-            .map(r -> r.getStatus() == RegStatus.JOINED).orElse(false);
+        String myStatus = regRepository.findByActivityIdAndUserId(a.getId(), currentUserId)
+            .filter(r -> r.getStatus() != RegStatus.CANCELLED)
+            .map(r -> r.getStatus().name())
+            .orElse(null);
         return ActivityRes.builder()
             .id(a.getId()).type(a.getType().name()).title(a.getTitle())
             .opponent(a.getOpponent()).location(a.getLocation())
             .startTime(a.getStartTime()).deadline(a.getDeadline())
             .maxPlayers(a.getMaxPlayers()).registeredCount(count)
-            .status(a.getStatus().name()).iJoined(iJoined)
+            .status(a.getStatus().name()).myStatus(myStatus)
             .build();
     }
 }

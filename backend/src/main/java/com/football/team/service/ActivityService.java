@@ -7,7 +7,6 @@ import com.football.team.dto.res.RegistrationRes;
 import com.football.team.dto.res.ActivityDetailRes;
 import com.football.team.dto.res.ActivityRes;
 import com.football.team.dto.res.MatchResultRes;
-import com.football.team.dto.res.RegistrationRes;
 import com.football.team.entity.*;
 import com.football.team.enums.*;
 import com.football.team.exception.BusinessException;

@@ -51,7 +51,7 @@ export default function CreateTeamPage() {
     <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
       <View style={{
         background: C.surface, borderRadius: px(16), padding: px(24),
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
       }}>
         <Text style={{
           fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(8), display: 'block',

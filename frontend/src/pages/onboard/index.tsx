@@ -23,7 +23,7 @@ export default function OnboardPage() {
       <View style={{
         background: C.surface, borderRadius: px(20), padding: '40px 32px',
         width: '100%', maxWidth: px(360), textAlign: 'center',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
       }}>
         <View style={{
           width: px(80), height: px(80), borderRadius: px(20),

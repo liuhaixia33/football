@@ -139,7 +139,7 @@ export default function MembersPage() {
               style={{
                 background: C.surface, borderRadius: px(16), padding: '14px 16px',
                 marginBottom: px(10), display: 'flex', alignItems: 'center',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
               }}
             >
               {m.avatarUrl
@@ -149,9 +149,9 @@ export default function MembersPage() {
                   }} />
                 : <View style={{
                     width: px(44), height: px(44), borderRadius: '50%', marginRight: px(12),
-                    background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Text style={{ fontSize: px(18) }}>👤</Text>
+                    <Text style={{ fontSize: px(18) }}>⚽</Text>
                   </View>
               }
               <View style={{ flex: 1 }}>
@@ -221,7 +221,7 @@ export default function MembersPage() {
         {list.length === 0 && (
           <View style={{
             background: C.surface, borderRadius: px(16), padding: '48px 24px',
-            textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
           }}>
             <Text style={{ fontSize: px(32), display: 'block', marginBottom: px(8) }}>👥</Text>
             <Text style={{ fontSize: px(14), color: C.text3 }}>{t('members.empty')}</Text>

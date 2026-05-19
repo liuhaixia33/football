@@ -82,7 +82,7 @@ export default function MemberFeePage() {
       {/* Season switcher */}
       <View style={{
         background: C.surface, borderRadius: px(16), padding: px(16),
-        marginBottom: px(16), boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        marginBottom: px(16), boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
       }}>
         <View style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: px(16),
@@ -108,7 +108,7 @@ export default function MemberFeePage() {
         <View style={{
           background: C.surface, borderRadius: px(16), padding: px(16),
           marginBottom: px(16), display: 'flex', gap: px(10), alignItems: 'center',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
         }}>
           <View style={{ flex: 1 }}>
             <Text style={{
@@ -144,7 +144,7 @@ export default function MemberFeePage() {
       {/* Fee list */}
       <View style={{
         background: C.surface, borderRadius: px(16), padding: px(16),
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
       }}>
         <Text style={{
           fontSize: px(15), fontWeight: '700', color: C.text,

@@ -156,7 +156,7 @@ export default function MyPage() {
           background: C.surface,
           borderRadius: px(20),
           padding: px(28),
-          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
           display: 'flex',
           alignItems: 'center',
           gap: px(20),
@@ -233,7 +233,7 @@ export default function MyPage() {
                          marginBottom: px(12), letterSpacing: '0.05em', textTransform: 'uppercase' }}>
             {t('my.stats')}
           </Text>
-          <View style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
             {[
               { label: t('my.matches'), value: stats.totalMatches, color: C.text,
                 bg: '#f0fdf4', icon: '⚽' },
@@ -243,23 +243,28 @@ export default function MyPage() {
                 bg: '#fffbeb', icon: '🤝' },
               { label: t('my.losses'), value: stats.losses, color: C.lose,
                 bg: '#fef2f2', icon: '💔' },
-            ].map(s => (
+            ].map((s, i) => (
               <View key={s.label} style={{
-                width: '48%',
+                width: '50%',
+                paddingRight: i % 2 === 0 ? px(6) : 0,
+                paddingLeft: i % 2 === 1 ? px(6) : 0,
                 marginBottom: px(12),
-                background: C.surface,
-                borderRadius: px(16),
-                padding: px(16),
-                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
               }}>
-                <Text style={{ fontSize: px(20), marginBottom: px(8) }}>{s.icon}</Text>
-                <Text style={{ fontSize: px(28), fontWeight: '700', color: s.color,
-                               display: 'block', lineHeight: 1.1 }}>
-                  {s.value}
-                </Text>
-                <Text style={{ fontSize: px(13), color: C.text3, marginTop: px(4) }}>
-                  {s.label}
-                </Text>
+                <View style={{
+                  background: C.surface,
+                  borderRadius: px(16),
+                  padding: px(16),
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                }}>
+                  <Text style={{ fontSize: px(18), marginBottom: px(6) }}>{s.icon}</Text>
+                  <Text style={{ fontSize: px(24), fontWeight: '700', color: s.color,
+                                 display: 'block', lineHeight: '1.2' }}>
+                    {s.value}
+                  </Text>
+                  <Text style={{ fontSize: px(12), color: C.text3, marginTop: px(4) }}>
+                    {s.label}
+                  </Text>
+                </View>
               </View>
             ))}
           </View>
@@ -278,7 +283,7 @@ export default function MyPage() {
           background: C.surface,
           borderRadius: px(20),
           padding: '8px 8px 8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
         }}>
           {teams.map((tm, idx) => (
             <View key={tm.teamId}>
@@ -377,7 +382,7 @@ export default function MyPage() {
         <View style={{
           background: C.surface,
           borderRadius: px(20),
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
           overflow: 'hidden',
         }}>
           {/* Language */}

@@ -59,12 +59,13 @@ export default function LoginPage() {
   return (
     <View style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', height: '100%', background: C.bg, padding: px(32),
+      justifyContent: 'flex-start', height: '100%', background: C.bg,
+      paddingTop: px(80), paddingLeft: px(32), paddingRight: px(32), paddingBottom: px(32),
     }}>
       <View style={{
-        background: C.surface, borderRadius: px(20), padding: '32px 24px',
+        background: C.surface, borderRadius: px(20), padding: `${px(28)} ${px(24)}`,
         width: '100%', maxWidth: px(360),
-        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.10)',
       }}>
         <Text style={{
           fontSize: px(24), fontWeight: '700', color: C.text,
@@ -99,7 +100,7 @@ export default function LoginPage() {
                   background: C.bg, display: 'flex', alignItems: 'center',
                   justifyContent: 'center', border: '2px dashed #d1d5db',
                 }}>
-                  <Text style={{ fontSize: px(36) }}>📷</Text>
+                  <Text style={{ fontSize: px(24) }}>📷</Text>
                 </View>
             }
           </Button>

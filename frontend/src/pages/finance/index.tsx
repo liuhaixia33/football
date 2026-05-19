@@ -122,17 +122,19 @@ export default function FinancePage() {
         {/* 收支记录 */}
         <View style={{
           background: C.surface, borderRadius: px(16), padding: px(16),
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
         }}>
           <Text style={{ fontSize: px(15), fontWeight: '700', color: C.text, display: 'block', marginBottom: px(12) }}>
             收支记录
           </Text>
-          {summary?.records.map(r => (
+          {summary?.records.map((r, idx) => (
             <View
               key={r.id}
               style={{
-                display: 'flex', alignItems: 'center', padding: '12px 0',
-                borderBottom: '1px solid #f3f4f6',
+                display: 'flex', alignItems: 'center', padding: px(14),
+                marginBottom: idx < summary.records.length - 1 ? px(8) : 0,
+                background: '#fafafa',
+                borderRadius: px(12),
               }}
             >
               <View style={{

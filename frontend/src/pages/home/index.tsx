@@ -50,14 +50,14 @@ function ActivityCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
         borderRadius: px(16),
         padding: px(16),
         marginBottom: px(12),
-        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
       }}
     >
       <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: px(12) }}>
         <Text style={{ fontWeight: '700', fontSize: px(16), color: C.text, lineHeight: '1.4', flex: 1, paddingRight: px(12) }}>
           {a.title}
         </Text>
-        <View style={{ display: 'flex', gap: px(6), flexShrink: 0 }}>
+        <View style={{ display: 'flex', gap: px(8), flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {sb && (
             <Text style={{
               fontSize: px(11), fontWeight: '500', color: sb.color, background: sb.bg,
@@ -150,7 +150,7 @@ export default function HomePage() {
         ) : activities.length === 0 ? (
           <View style={{
             background: C.surface, borderRadius: px(16), padding: '48px 24px',
-            textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
           }}>
             <Text style={{ fontSize: px(40), display: 'block', marginBottom: px(12) }}>⚽</Text>
             <Text style={{ fontSize: px(15), color: C.text2, fontWeight: '500', display: 'block', marginBottom: px(4) }}>

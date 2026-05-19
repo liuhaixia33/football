@@ -59,7 +59,7 @@ export default function TeamSelectPage() {
             style={{
               background: C.surface, borderRadius: px(16), padding: '16px 20px',
               marginBottom: px(12), display: 'flex', alignItems: 'center',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
             }}
           >
             <View style={{

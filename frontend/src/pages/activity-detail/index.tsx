@@ -102,7 +102,7 @@ export default function ActivityDetailPage() {
   const Section = ({ title, children, extra }: { title: string; children: any; extra?: any }) => (
     <View style={{
       background: C.surface, borderRadius: px(16), padding: px(16), marginBottom: px(12),
-      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
     }}>
       <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: px(12) }}>
         <Text style={{ fontSize: px(15), fontWeight: '700', color: C.text }}>{title}</Text>
@@ -155,7 +155,7 @@ export default function ActivityDetailPage() {
         {/* 基本信息 */}
         <View style={{
           background: C.surface, borderRadius: px(16), padding: px(20), marginBottom: px(12),
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
         }}>
           <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: px(12) }}>
             <Text style={{ fontSize: px(20), fontWeight: '700', color: C.text, lineHeight: '1.4', flex: 1, paddingRight: px(12) }}>
@@ -197,7 +197,7 @@ export default function ActivityDetailPage() {
         {detail.result && (
           <View style={{
             background: C.surface, borderRadius: px(16), padding: px(20), marginBottom: px(12),
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)', textAlign: 'center',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)', textAlign: 'center',
           }}>
             <Text style={{ fontSize: px(13), color: C.text3, display: 'block', marginBottom: px(8) }}>
               {t('act.result')}
@@ -221,7 +221,7 @@ export default function ActivityDetailPage() {
         {isOpen && (
           <View style={{
             background: C.surface, borderRadius: px(16), padding: px(16), marginBottom: px(12),
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
           }}>
             <Text style={{ fontSize: px(13), color: C.text3, marginBottom: px(12), display: 'block' }}>选择你的状态</Text>
             <View style={{ display: 'flex' }}>

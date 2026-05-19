@@ -2,6 +2,9 @@ import { Component } from 'react'
 import { View, Text } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { useAuthStore } from '../store/auth'
+import { useLangStore } from '../store/lang'
+import { zh } from '../i18n/zh'
+import { en } from '../i18n/en'
 import './index.scss'
 
 interface TabItem {
@@ -10,21 +13,19 @@ interface TabItem {
   icon: string
 }
 
-const CAPTAIN_ADMIN_TABS: TabItem[] = [
-  { path: '/pages/home/index',    text: '首页', icon: '🏠' },
-  { path: '/pages/members/index', text: '队员', icon: '👥' },
-  { path: '/pages/finance/index', text: '财务', icon: '💰' },
-  { path: '/pages/my/index',      text: '我的', icon: '👤' },
-]
-
-const PLAYER_TABS: TabItem[] = [
-  { path: '/pages/home/index',    text: '活动', icon: '📅' },
-  { path: '/pages/members/index', text: '球队', icon: '⚽' },
-  { path: '/pages/my/index',      text: '我的', icon: '👤' },
-]
-
 export default class CustomTabBar extends Component {
-  getTabs(): TabItem[] {
+  getTabs(t: (key: string) => string): TabItem[] {
+    const CAPTAIN_ADMIN_TABS: TabItem[] = [
+      { path: '/pages/home/index',    text: t('tab.home'),    icon: '🏠' },
+      { path: '/pages/members/index', text: t('tab.members'), icon: '👥' },
+      { path: '/pages/finance/index', text: t('tab.finance'), icon: '💰' },
+      { path: '/pages/my/index',      text: t('tab.my'),      icon: '👤' },
+    ]
+    const PLAYER_TABS: TabItem[] = [
+      { path: '/pages/home/index',    text: t('tab.home'),    icon: '📅' },
+      { path: '/pages/members/index', text: t('tab.members'), icon: '⚽' },
+      { path: '/pages/my/index',      text: t('tab.my'),      icon: '👤' },
+    ]
     const role = useAuthStore.getState().currentRole
     return role === 'CAPTAIN' || role === 'ADMIN' ? CAPTAIN_ADMIN_TABS : PLAYER_TABS
   }
@@ -41,7 +42,10 @@ export default class CustomTabBar extends Component {
   }
 
   render() {
-    const tabs = this.getTabs()
+    const { language } = useLangStore.getState()
+    const dict = language === 'zh' ? zh : en
+    const t = (key: string) => (dict as Record<string, string>)[key] ?? key
+    const tabs = this.getTabs(t)
     const selected = this.getCurrentIndex(tabs)
 
     return (

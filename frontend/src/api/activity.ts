@@ -18,4 +18,8 @@ export const activityApi = {
     api.put<void>(`/api/v1/activities/${activityId}/close`, undefined),
   recordResult: (activityId: number, ourScore: number, oppScore: number, notes?: string) =>
     api.put<void>(`/api/v1/activities/${activityId}/result`, { ourScore, oppScore, notes }),
+  update: (activityId: number, body: {
+    type: string; title: string; location: string; startTime: string;
+    opponent?: string; deadline?: string; maxPlayers?: number
+  }) => api.put<ActivityRes>(`/api/v1/activities/${activityId}`, body as Record<string, unknown>),
 }

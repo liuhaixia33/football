@@ -1,9 +1,9 @@
 .tab-bar {
   display: flex;
-  height: 50px;
+  height: 64px;
   border-top: 1px solid #e0e0e0;
   background: #fff;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-in-bottom);
 }
 
 .tab-item {
@@ -13,19 +13,21 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  padding-top: 4px;
 
   .tab-icon {
-    font-size: 22px;
+    font-size: 26px;
     line-height: 1.2;
   }
 
   .tab-text {
-    font-size: 10px;
+    font-size: 12px;
     color: #999;
-    margin-top: 2px;
+    margin-top: 4px;
   }
 
   &.active .tab-text {
     color: #4CAF50;
+    font-weight: 500;
   }
 }

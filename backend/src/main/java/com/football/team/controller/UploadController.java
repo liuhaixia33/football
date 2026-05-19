@@ -24,10 +24,10 @@ public class UploadController {
             @RequestParam("file") MultipartFile file,
             HttpServletRequest req) {
         User user = (User) req.getAttribute("currentUser");
-        if (user == null) throw BusinessException.unauthorized("请先登录");
         if (file.isEmpty()) throw BusinessException.badRequest("文件不能为空");
         try {
-            String url = ossService.uploadAvatar(file, user.getId());
+            Long userId = user != null ? user.getId() : null;
+            String url = ossService.uploadAvatar(file, userId);
             return ApiResponse.ok(Map.of("url", url));
         } catch (IOException e) {
             throw BusinessException.badRequest("上传失败");

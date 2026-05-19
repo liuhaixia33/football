@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(teamContextInterceptor)
             .addPathPatterns("/api/v1/**")
-            .excludePathPatterns("/api/v1/auth/**");
+            .excludePathPatterns("/api/v1/auth/**", "/api/v1/upload/avatar");
     }
 
     @Bean

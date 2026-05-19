@@ -5,59 +5,95 @@ import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
 import type { ActivityRes } from '../../types/api'
+import { px } from '../../utils/style'
+
+const C = {
+  primary: '#4CAF50',
+  primaryLight: '#f0fdf4',
+  surface: '#ffffff',
+  bg: '#f9fafb',
+  text: '#1f2937',
+  text2: '#4b5563',
+  text3: '#9ca3af',
+  win: '#10b981',
+  draw: '#f59e0b',
+  lose: '#ef4444',
+}
 
 function ActivityCard({ a, onPress }: { a: ActivityRes; onPress: () => void }) {
   const t = useT()
-  const statusLabel = (status: string) => {
-    if (status === 'FINISHED') return t('home.finished')
-    if (status === 'CLOSED')   return t('home.closed')
-    return t('home.open')
+  const statusMap: Record<string, { label: string; color: string; bg: string }> = {
+    FINISHED: { label: t('home.finished'), color: C.text3, bg: '#f3f4f6' },
+    CLOSED:   { label: t('home.closed'),   color: C.text3, bg: '#f3f4f6' },
+    OPEN:     { label: t('home.open'),     color: C.primary, bg: C.primaryLight },
   }
-  const label = statusLabel(a.status)
-  const openLabel = t('home.open')
-  const labelColor = label === openLabel ? '#4CAF50' : '#999'
+  const s = statusMap[a.status] ?? statusMap.OPEN
+
+  const fmtDate = (iso: string) => {
+    const d = new Date(iso)
+    return `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
+
+  const statusBadge = (ms?: string) => {
+    if (ms === 'JOINED')     return { text: t('act.badge_joined'), color: C.win, bg: '#ecfdf5' }
+    if (ms === 'TENTATIVE')  return { text: t('act.badge_tentative'), color: C.draw, bg: '#fffbeb' }
+    if (ms === 'ABSENT')     return { text: t('act.badge_absent'), color: C.text3, bg: '#f3f4f6' }
+    return null
+  }
+  const sb = statusBadge(a.myStatus)
 
   return (
     <View
       onClick={onPress}
       style={{
-        background: '#fff',
-        borderRadius: '8px',
-        padding: '16px',
-        marginBottom: '12px',
-        boxShadow: '0 1px 4px rgba(0,0,0,.08)',
+        background: C.surface,
+        borderRadius: px(16),
+        padding: px(16),
+        marginBottom: px(12),
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
       }}
     >
-      <View style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <Text style={{ fontWeight: 'bold', fontSize: '16px' }}>{a.title}</Text>
-        <Text style={{ fontSize: '12px', color: labelColor }}>{label}</Text>
-      </View>
-      <Text style={{ fontSize: '13px', color: '#666', display: 'block' }}>
-        📍 {a.location}
-      </Text>
-      <Text style={{ fontSize: '13px', color: '#666', display: 'block', marginTop: '4px' }}>
-        🕐{' '}
-        {new Date(a.startTime).toLocaleString('zh-CN', {
-          month: 'numeric',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}
-      </Text>
-      <View style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-        <Text style={{ fontSize: '12px', color: '#999' }}>
-          已报名 {a.registeredCount}
-          {a.maxPlayers ? `/${a.maxPlayers}` : ''}{t('home.players')}
+      <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: px(12) }}>
+        <Text style={{ fontWeight: '700', fontSize: px(16), color: C.text, lineHeight: '1.4', flex: 1, paddingRight: px(12) }}>
+          {a.title}
         </Text>
-        {a.myStatus === 'JOINED' && (
-          <Text style={{ fontSize: '12px', color: '#4CAF50' }}>{t('act.badge_joined')}</Text>
-        )}
-        {a.myStatus === 'TENTATIVE' && (
-          <Text style={{ fontSize: '12px', color: '#FF9800' }}>{t('act.badge_tentative')}</Text>
-        )}
-        {a.myStatus === 'ABSENT' && (
-          <Text style={{ fontSize: '12px', color: '#999' }}>{t('act.badge_absent')}</Text>
-        )}
+        <View style={{ display: 'flex', gap: px(6), flexShrink: 0 }}>
+          {sb && (
+            <Text style={{
+              fontSize: px(11), fontWeight: '500', color: sb.color, background: sb.bg,
+              borderRadius: '9999px', padding: '3px 10px',
+            }}>
+              {sb.text}
+            </Text>
+          )}
+          <Text style={{
+            fontSize: px(11), fontWeight: '500', color: s.color, background: s.bg,
+            borderRadius: '9999px', padding: '3px 10px',
+          }}>
+            {s.label}
+          </Text>
+        </View>
+      </View>
+
+      <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(6) }}>
+        <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(4) }}>📍</Text>
+        <Text style={{ fontSize: px(13), color: C.text2 }}>{a.location}</Text>
+      </View>
+      <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(12) }}>
+        <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(4) }}>🕐</Text>
+        <Text style={{ fontSize: px(13), color: C.text2 }}>{fmtDate(a.startTime)}</Text>
+      </View>
+
+      <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <View style={{ display: 'flex', alignItems: 'center' }}>
+          <View style={{
+            width: px(6), height: px(6), borderRadius: '50%', background: C.primary, marginRight: px(6)
+          }} />
+          <Text style={{ fontSize: px(12), color: C.text3 }}>
+            已报名 {a.registeredCount}{a.maxPlayers ? `/${a.maxPlayers}` : ''} {t('home.players')}
+          </Text>
+        </View>
+        <Text style={{ fontSize: px(12), color: C.primary, fontWeight: '500' }}>查看详情 ›</Text>
       </View>
     </View>
   )
@@ -85,50 +121,45 @@ export default function HomePage() {
   useDidShow(load)
 
   return (
-    <View style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <View
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '12px 16px',
-          background: '#fff',
-          borderBottom: '1px solid #f0f0f0',
-        }}
-      >
-        <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{t('tab.home')}</Text>
+    <View style={{ height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>
+      {/* Header */}
+      <View style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '16px 16px 12px', background: C.surface,
+        borderBottom: '1px solid #f0f0f0',
+      }}>
+        <Text style={{ fontSize: px(22), fontWeight: '700', color: C.text }}>{t('tab.home')}</Text>
         {isCaptainOrAdmin() && (
           <Text
-            style={{ fontSize: '14px', color: '#4CAF50' }}
+            style={{
+              fontSize: px(14), color: C.primary, fontWeight: '500',
+              background: C.primaryLight, borderRadius: '9999px', padding: '6px 14px',
+            }}
             onClick={() => Taro.navigateTo({ url: '/pages/activity-create/index' })}
           >
-            {t('home.create')}
+            + {t('home.create')}
           </Text>
         )}
       </View>
+
       <ScrollView scrollY style={{ flex: 1, padding: '12px 16px' }}>
         {loading ? (
-          <Text
-            style={{
-              textAlign: 'center',
-              color: '#999',
-              padding: '32px',
-              display: 'block',
-            }}
-          >
+          <Text style={{ textAlign: 'center', color: C.text3, padding: px(32), display: 'block' }}>
             {t('common.loading')}
           </Text>
         ) : activities.length === 0 ? (
-          <Text
-            style={{
-              textAlign: 'center',
-              color: '#999',
-              padding: '32px',
-              display: 'block',
-            }}
-          >
-            {t('home.empty')}
-          </Text>
+          <View style={{
+            background: C.surface, borderRadius: px(16), padding: '48px 24px',
+            textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <Text style={{ fontSize: px(40), display: 'block', marginBottom: px(12) }}>⚽</Text>
+            <Text style={{ fontSize: px(15), color: C.text2, fontWeight: '500', display: 'block', marginBottom: px(4) }}>
+              暂无活动
+            </Text>
+            <Text style={{ fontSize: px(13), color: C.text3 }}>
+              {t('home.empty')}
+            </Text>
+          </View>
         ) : (
           activities.map(a => (
             <ActivityCard

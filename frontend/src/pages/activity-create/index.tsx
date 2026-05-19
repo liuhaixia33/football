@@ -4,22 +4,23 @@ import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
+import { px } from '../../utils/style'
+
+const C = {
+  primary: '#4CAF50',
+  primaryLight: '#f0fdf4',
+  surface: '#ffffff',
+  bg: '#f9fafb',
+  text: '#1f2937',
+  text2: '#4b5563',
+  text3: '#9ca3af',
+}
 
 const fmt = (iso: string) => {
   const d = new Date(iso)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
-
-const labelStyle = { fontSize: '14px', color: '#666', marginBottom: '8px', display: 'block' } as const
-const inputStyle = {
-  border: '1px solid #e0e0e0', borderRadius: '8px', padding: '12px',
-  marginBottom: '16px', fontSize: '15px', background: '#fafafa'
-} as const
-const btnStyle = {
-  background: '#4CAF50', color: '#fff', borderRadius: '8px',
-  border: 'none', fontSize: '16px'
-} as const
 
 export default function ActivityCreatePage() {
   const params = Taro.getCurrentInstance().router?.params ?? {}
@@ -149,114 +150,137 @@ export default function ActivityCreatePage() {
     }
   }
 
+  const labelStyle = { fontSize: px(14), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block' } as const
+  const inputStyle = {
+    border: '1px solid #e5e7eb', borderRadius: px(12), padding: '12px 14px',
+    marginBottom: px(16), fontSize: px(15), background: C.bg, color: C.text,
+  } as const
+  const btnStyle = {
+    background: C.primary, color: '#fff', borderRadius: '9999px',
+    border: 'none', fontSize: px(16), fontWeight: '600',
+  } as const
+
   if (resultFor) {
     return (
-      <View style={{ padding: '16px' }}>
-        <Text style={labelStyle}>{t('act_form.our_score')}</Text>
-        <Input
-          value={ourScore}
-          onInput={e => setOurScore(e.detail.value)}
-          type='number'
-          placeholder='0'
-          style={inputStyle}
-        />
-        <Text style={labelStyle}>{t('act_form.opp_score')}</Text>
-        <Input
-          value={oppScore}
-          onInput={e => setOppScore(e.detail.value)}
-          type='number'
-          placeholder='0'
-          style={inputStyle}
-        />
-        <Text style={labelStyle}>{t('act_form.notes')}</Text>
-        <Input
-          value={notes}
-          onInput={e => setNotes(e.detail.value)}
-          placeholder={t('common.optional')}
-          style={{ ...inputStyle, marginBottom: '32px' }}
-        />
-        <Button style={btnStyle} loading={loading} onClick={submitResult}>
-          {t('act_form.save_score')}
-        </Button>
+      <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
+        <View style={{ background: C.surface, borderRadius: px(16), padding: px(20), boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <Text style={{ fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(20), display: 'block' }}>
+            录入比赛结果
+          </Text>
+          <Text style={labelStyle}>{t('act_form.our_score')}</Text>
+          <Input
+            value={ourScore}
+            onInput={e => setOurScore(e.detail.value)}
+            type='number'
+            placeholder='0'
+            style={{ ...inputStyle, fontSize: px(24), textAlign: 'center', fontWeight: '700' }}
+          />
+          <Text style={labelStyle}>{t('act_form.opp_score')}</Text>
+          <Input
+            value={oppScore}
+            onInput={e => setOppScore(e.detail.value)}
+            type='number'
+            placeholder='0'
+            style={{ ...inputStyle, fontSize: px(24), textAlign: 'center', fontWeight: '700' }}
+          />
+          <Text style={labelStyle}>{t('act_form.notes')}</Text>
+          <Input
+            value={notes}
+            onInput={e => setNotes(e.detail.value)}
+            placeholder={t('common.optional')}
+            style={{ ...inputStyle, marginBottom: px(32) }}
+          />
+          <Button style={btnStyle} loading={loading} onClick={submitResult}>
+            {t('act_form.save_score')}
+          </Button>
+        </View>
       </View>
     )
   }
 
   return (
-    <View style={{ padding: '16px' }}>
-      <Text style={labelStyle}>{t('act_form.type')}</Text>
-      <View style={{ display: 'flex', marginBottom: '16px', gap: '8px' }}>
-        {(['MATCH', 'TRAINING'] as const).map(tp => (
-          <View
-            key={tp}
-            onClick={() => setType(tp)}
-            style={{
-              flex: 1, textAlign: 'center', padding: '10px',
-              border: `1px solid ${type === tp ? '#4CAF50' : '#e0e0e0'}`,
-              borderRadius: '8px', color: type === tp ? '#4CAF50' : '#666'
-            }}
-          >
-            <Text>{tp === 'MATCH' ? t('act_form.match') : t('act_form.training')}</Text>
-          </View>
-        ))}
+    <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
+      <View style={{ background: C.surface, borderRadius: px(16), padding: px(20), boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <Text style={{ fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(20), display: 'block' }}>
+          {editId ? t('act_form.title_edit') : t('act_form.title_create')}
+        </Text>
+
+        <Text style={labelStyle}>{t('act_form.type')}</Text>
+        <View style={{ display: 'flex', marginBottom: px(16), gap: px(8) }}>
+          {(['MATCH', 'TRAINING'] as const).map(tp => (
+            <View
+              key={tp}
+              onClick={() => setType(tp)}
+              style={{
+                flex: 1, textAlign: 'center', padding: px(10),
+                border: `1.5px solid ${type === tp ? C.primary : '#e5e7eb'}`,
+                borderRadius: px(12), color: type === tp ? C.primary : C.text2,
+                background: type === tp ? C.primaryLight : C.surface,
+                fontWeight: type === tp ? '600' : '400',
+              }}
+            >
+              <Text>{tp === 'MATCH' ? t('act_form.match') : t('act_form.training')}</Text>
+            </View>
+          ))}
+        </View>
+
+        <Text style={labelStyle}>{t('act_form.label_title')}</Text>
+        <Input
+          value={title}
+          onInput={e => setTitle(e.detail.value)}
+          placeholder={t('act_form.placeholder_title')}
+          style={inputStyle}
+        />
+
+        {type === 'MATCH' && (
+          <>
+            <Text style={labelStyle}>{t('act_form.label_opponent')}</Text>
+            <Input
+              value={opponent}
+              onInput={e => setOpponent(e.detail.value)}
+              placeholder={t('act_form.placeholder_opponent')}
+              style={inputStyle}
+            />
+          </>
+        )}
+
+        <Text style={labelStyle}>{t('act_form.label_location')}</Text>
+        <Input
+          value={location}
+          onInput={e => setLocation(e.detail.value)}
+          placeholder={t('act_form.placeholder_location')}
+          style={inputStyle}
+        />
+
+        <Text style={labelStyle}>{t('act_form.label_start')}</Text>
+        <Input
+          value={startTime}
+          onInput={e => setStartTime(e.detail.value)}
+          placeholder={t('act_form.placeholder_start')}
+          style={inputStyle}
+        />
+
+        <Text style={labelStyle}>{t('act_form.label_deadline')}</Text>
+        <Input
+          value={deadline}
+          onInput={e => setDeadline(e.detail.value)}
+          placeholder={t('act_form.placeholder_deadline')}
+          style={inputStyle}
+        />
+
+        <Text style={labelStyle}>{t('act_form.label_max')}</Text>
+        <Input
+          value={maxPlayers}
+          onInput={e => setMaxPlayers(e.detail.value)}
+          type='number'
+          placeholder={t('act_form.placeholder_max')}
+          style={{ ...inputStyle, marginBottom: px(32) }}
+        />
+
+        <Button style={btnStyle} loading={loading} onClick={submitActivity}>
+          {editId ? t('act_form.save') : t('act_form.publish')}
+        </Button>
       </View>
-
-      <Text style={labelStyle}>{t('act_form.label_title')}</Text>
-      <Input
-        value={title}
-        onInput={e => setTitle(e.detail.value)}
-        placeholder={t('act_form.placeholder_title')}
-        style={inputStyle}
-      />
-
-      {type === 'MATCH' && (
-        <>
-          <Text style={labelStyle}>{t('act_form.label_opponent')}</Text>
-          <Input
-            value={opponent}
-            onInput={e => setOpponent(e.detail.value)}
-            placeholder={t('act_form.placeholder_opponent')}
-            style={inputStyle}
-          />
-        </>
-      )}
-
-      <Text style={labelStyle}>{t('act_form.label_location')}</Text>
-      <Input
-        value={location}
-        onInput={e => setLocation(e.detail.value)}
-        placeholder={t('act_form.placeholder_location')}
-        style={inputStyle}
-      />
-
-      <Text style={labelStyle}>{t('act_form.label_start')}</Text>
-      <Input
-        value={startTime}
-        onInput={e => setStartTime(e.detail.value)}
-        placeholder={t('act_form.placeholder_start')}
-        style={inputStyle}
-      />
-
-      <Text style={labelStyle}>{t('act_form.label_deadline')}</Text>
-      <Input
-        value={deadline}
-        onInput={e => setDeadline(e.detail.value)}
-        placeholder={t('act_form.placeholder_deadline')}
-        style={inputStyle}
-      />
-
-      <Text style={labelStyle}>{t('act_form.label_max')}</Text>
-      <Input
-        value={maxPlayers}
-        onInput={e => setMaxPlayers(e.detail.value)}
-        type='number'
-        placeholder={t('act_form.placeholder_max')}
-        style={{ ...inputStyle, marginBottom: '32px' }}
-      />
-
-      <Button style={btnStyle} loading={loading} onClick={submitActivity}>
-        {editId ? t('act_form.save') : t('act_form.publish')}
-      </Button>
     </View>
   )
 }

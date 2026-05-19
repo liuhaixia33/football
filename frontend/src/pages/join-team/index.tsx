@@ -3,11 +3,21 @@ import { View, Text, Input, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { teamApi } from '../../api/team'
 import { useT } from '../../i18n/useT'
+import { px } from '../../utils/style'
+
+const C = {
+  primary: '#4CAF50',
+  primaryLight: '#f0fdf4',
+  surface: '#ffffff',
+  bg: '#f9fafb',
+  text: '#1f2937',
+  text2: '#4b5563',
+  text3: '#9ca3af',
+}
 
 export default function JoinTeamPage() {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
-
   const t = useT()
 
   useEffect(() => {
@@ -32,26 +42,50 @@ export default function JoinTeamPage() {
   }
 
   return (
-    <View style={{ padding: '16px' }}>
-      <Text style={{ fontSize: '14px', color: '#666', marginBottom: '8px',
-                     display: 'block' }}>{t('join_team.code')}</Text>
-      <Input
-        value={code}
-        onInput={e => setCode(e.detail.value)}
-        placeholder='请输入 8 位邀请码'
-        maxlength={8}
-        style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '12px',
-                 marginBottom: '24px', fontSize: '20px', letterSpacing: '4px',
-                 textAlign: 'center' }}
-      />
-      <Button
-        style={{ background: '#4CAF50', color: '#fff', borderRadius: '8px',
-                 border: 'none', fontSize: '16px' }}
-        loading={loading}
-        onClick={submit}
-      >
-        {t('join_team.submit')}
-      </Button>
+    <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
+      <View style={{
+        background: C.surface, borderRadius: px(16), padding: px(24),
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      }}>
+        <Text style={{
+          fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(8), display: 'block',
+        }}>
+          {t('join_team.title')}
+        </Text>
+        <Text style={{
+          fontSize: px(13), color: C.text3, marginBottom: px(20), display: 'block',
+        }}>
+          向球队管理员索取邀请码，输入后即可申请加入
+        </Text>
+
+        <Text style={{
+          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
+        }}>
+          {t('join_team.code')}
+        </Text>
+        <Input
+          value={code}
+          onInput={e => setCode(e.detail.value)}
+          placeholder='请输入 8 位邀请码'
+          maxlength={8}
+          style={{
+            border: '1.5px solid #e5e7eb', borderRadius: px(12), padding: px(14),
+            marginBottom: px(24), fontSize: px(22), letterSpacing: px(6),
+            textAlign: 'center', background: C.bg, color: C.text,
+            fontWeight: '600',
+          }}
+        />
+        <Button
+          style={{
+            background: C.primary, color: '#fff', borderRadius: '9999px',
+            border: 'none', fontSize: px(16), fontWeight: '600', padding: '10px 0',
+          }}
+          loading={loading}
+          onClick={submit}
+        >
+          {t('join_team.submit')}
+        </Button>
+      </View>
     </View>
   )
 }

@@ -4,12 +4,22 @@ import Taro from '@tarojs/taro'
 import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
+import { px } from '../../utils/style'
+
+const C = {
+  primary: '#4CAF50',
+  primaryLight: '#f0fdf4',
+  surface: '#ffffff',
+  bg: '#f9fafb',
+  text: '#1f2937',
+  text2: '#4b5563',
+  text3: '#9ca3af',
+}
 
 export default function CreateTeamPage() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
-
   const t = useT()
 
   useEffect(() => {
@@ -25,7 +35,6 @@ export default function CreateTeamPage() {
     try {
       const team = await teamApi.create(name.trim(), description.trim() || undefined)
       useAuthStore.getState().setCurrentTeam(team.id, 'CAPTAIN')
-      // Refresh teams list
       const { userApi } = await import('../../api/user')
       const profile = await userApi.me()
       useAuthStore.getState().setTeams(profile.teams)
@@ -39,33 +48,63 @@ export default function CreateTeamPage() {
   }
 
   return (
-    <View style={{ padding: '16px' }}>
-      <Text style={{ fontSize: '14px', color: '#666', marginBottom: '8px',
-                     display: 'block' }}>{t('create_team.name')}</Text>
-      <Input
-        value={name}
-        onInput={e => setName(e.detail.value)}
-        placeholder='例如：胜利FC'
-        style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '12px',
-                 marginBottom: '16px', fontSize: '16px' }}
-      />
-      <Text style={{ fontSize: '14px', color: '#666', marginBottom: '8px',
-                     display: 'block' }}>{t('create_team.desc')}</Text>
-      <Input
-        value={description}
-        onInput={e => setDescription(e.detail.value)}
-        placeholder='可选，描述你的球队'
-        style={{ border: '1px solid #e0e0e0', borderRadius: '8px', padding: '12px',
-                 marginBottom: '32px', fontSize: '16px' }}
-      />
-      <Button
-        style={{ background: '#4CAF50', color: '#fff', borderRadius: '8px',
-                 border: 'none', fontSize: '16px' }}
-        loading={loading}
-        onClick={submit}
-      >
-        {t('create_team.submit')}
-      </Button>
+    <View style={{ padding: px(16), background: C.bg, minHeight: '100%' }}>
+      <View style={{
+        background: C.surface, borderRadius: px(16), padding: px(24),
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+      }}>
+        <Text style={{
+          fontSize: px(18), fontWeight: '700', color: C.text, marginBottom: px(8), display: 'block',
+        }}>
+          {t('create_team.title')}
+        </Text>
+        <Text style={{
+          fontSize: px(13), color: C.text3, marginBottom: px(20), display: 'block',
+        }}>
+          创建属于你的球队，邀请好友加入
+        </Text>
+
+        <Text style={{
+          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
+        }}>
+          {t('create_team.name')}
+        </Text>
+        <Input
+          value={name}
+          onInput={e => setName(e.detail.value)}
+          placeholder='例如：胜利FC'
+          style={{
+            border: '1.5px solid #e5e7eb', borderRadius: px(12), padding: '12px 14px',
+            marginBottom: px(16), fontSize: px(15), background: C.bg, color: C.text,
+          }}
+        />
+
+        <Text style={{
+          fontSize: px(13), fontWeight: '500', color: C.text2, marginBottom: px(8), display: 'block',
+        }}>
+          {t('create_team.desc')}
+        </Text>
+        <Input
+          value={description}
+          onInput={e => setDescription(e.detail.value)}
+          placeholder='可选，描述你的球队'
+          style={{
+            border: '1.5px solid #e5e7eb', borderRadius: px(12), padding: '12px 14px',
+            marginBottom: px(32), fontSize: px(15), background: C.bg, color: C.text,
+          }}
+        />
+
+        <Button
+          style={{
+            background: C.primary, color: '#fff', borderRadius: '9999px',
+            border: 'none', fontSize: px(16), fontWeight: '600', padding: '10px 0',
+          }}
+          loading={loading}
+          onClick={submit}
+        >
+          {t('create_team.submit')}
+        </Button>
+      </View>
     </View>
   )
 }

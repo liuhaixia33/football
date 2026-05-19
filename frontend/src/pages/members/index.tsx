@@ -5,18 +5,31 @@ import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
 import type { MemberRes } from '../../types/api'
+import { px } from '../../utils/style'
 
-function roleColor(role: string) {
-  return role === 'CAPTAIN' ? '#FF9800' : role === 'ADMIN' ? '#2196F3' : '#666'
+const C = {
+  primary: '#4CAF50',
+  primaryLight: '#f0fdf4',
+  surface: '#ffffff',
+  bg: '#f9fafb',
+  text: '#1f2937',
+  text2: '#4b5563',
+  text3: '#9ca3af',
+  win: '#10b981',
+  draw: '#f59e0b',
+  lose: '#ef4444',
+}
+
+function roleBadge(role: string) {
+  if (role === 'CAPTAIN') return { label: '队长', color: '#FF9800', bg: '#fff8e1' }
+  if (role === 'ADMIN')   return { label: '管理员', color: '#2196F3', bg: '#e3f2fd' }
+  return { label: '球员', color: C.text3, bg: '#f3f4f6' }
 }
 
 export default function MembersPage() {
   const [members, setMembers] = useState<MemberRes[]>([])
   const [tab, setTab] = useState<'active' | 'pending'>('active')
   const t = useT()
-
-  const roleLabel = (role: string) =>
-    role === 'CAPTAIN' ? t('members.captain') : role === 'ADMIN' ? t('members.admin') : t('members.player')
   const { currentTeamId, userId, currentRole, isCaptainOrAdmin } = useAuthStore()
 
   const load = async () => {
@@ -78,92 +91,141 @@ export default function MembersPage() {
   const list = tab === 'active' ? active : pending
 
   return (
-    <View style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <View style={{ height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>
+      {/* Header */}
+      <View style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '16px 16px 12px', background: C.surface,
+        borderBottom: '1px solid #f0f0f0',
+      }}>
+        <Text style={{ fontSize: px(22), fontWeight: '700', color: C.text }}>队员</Text>
+        <Text style={{ fontSize: px(13), color: C.text3 }}>
+          共 {active.length} 人
+        </Text>
+      </View>
+
       {/* Tab switcher */}
-      <View style={{ display: 'flex', background: '#fff', borderBottom: '1px solid #f0f0f0' }}>
+      <View style={{
+        display: 'flex', background: C.surface, padding: '12px 16px 0', gap: px(8),
+      }}>
         {[
-          { key: 'active', label: `${t('members.active')} (${active.length})` },
-          { key: 'pending', label: `${t('members.pending')} (${pending.length})` },
+          { key: 'active' as const, label: `${t('members.active')} ${active.length}` },
+          { key: 'pending' as const, label: `${t('members.pending')} ${pending.length}` },
         ].map(item => (
           <View
             key={item.key}
-            onClick={() => setTab(item.key as 'active' | 'pending')}
+            onClick={() => setTab(item.key)}
             style={{
-              flex: 1, textAlign: 'center', padding: '12px',
-              color: tab === item.key ? '#4CAF50' : '#666',
-              borderBottom: tab === item.key ? '2px solid #4CAF50' : '2px solid transparent',
-              fontSize: '14px'
+              padding: '8px 16px', borderRadius: '9999px',
+              background: tab === item.key ? C.primary : '#f3f4f6',
             }}
           >
-            <Text>{item.label}</Text>
+            <Text style={{
+              fontSize: px(14), fontWeight: tab === item.key ? '600' : '400',
+              color: tab === item.key ? '#fff' : C.text2,
+            }}>
+              {item.label}
+            </Text>
           </View>
         ))}
       </View>
 
       <ScrollView scrollY style={{ flex: 1, padding: '12px 16px' }}>
-        {list.map(m => (
-          <View
-            key={m.memberId}
-            style={{ background: '#fff', borderRadius: '8px', padding: '12px 16px',
-                     marginBottom: '8px', display: 'flex', alignItems: 'center' }}
-          >
-            {m.avatarUrl
-              ? <Image src={m.avatarUrl} style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '12px' }} />
-              : <Text style={{ fontSize: '32px', marginRight: '12px' }}>👤</Text>
-            }
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: '15px', fontWeight: 'bold', display: 'block' }}>
-                {m.nickname}
-              </Text>
-              <Text style={{ fontSize: '12px', color: roleColor(m.role) }}>
-                {roleLabel(m.role)}
-              </Text>
+        {list.map(m => {
+          const rb = roleBadge(m.role)
+          return (
+            <View
+              key={m.memberId}
+              style={{
+                background: C.surface, borderRadius: px(16), padding: '14px 16px',
+                marginBottom: px(10), display: 'flex', alignItems: 'center',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              }}
+            >
+              {m.avatarUrl
+                ? <Image src={m.avatarUrl} style={{
+                    width: px(44), height: px(44), borderRadius: '50%', marginRight: px(12),
+                    border: '2px solid #f3f4f6',
+                  }} />
+                : <View style={{
+                    width: px(44), height: px(44), borderRadius: '50%', marginRight: px(12),
+                    background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Text style={{ fontSize: px(18) }}>👤</Text>
+                  </View>
+              }
+              <View style={{ flex: 1 }}>
+                <View style={{ display: 'flex', alignItems: 'center', gap: px(6), marginBottom: px(4) }}>
+                  <Text style={{ fontSize: px(15), fontWeight: '600', color: C.text }}>{m.nickname}</Text>
+                  <Text style={{
+                    fontSize: px(11), fontWeight: '500', color: rb.color, background: rb.bg,
+                    borderRadius: '9999px', padding: '2px 8px',
+                  }}>
+                    {rb.label}
+                  </Text>
+                </View>
+                {m.userId === userId && (
+                  <Text style={{ fontSize: px(12), color: C.text3 }}>我</Text>
+                )}
+              </View>
+
+              {/* Pending approval actions */}
+              {tab === 'pending' && isCaptainOrAdmin() && (
+                <View style={{ display: 'flex', gap: px(8) }}>
+                  <Button
+                    size='mini'
+                    style={{
+                      background: C.primary, color: '#fff', border: 'none',
+                      borderRadius: '9999px', fontSize: px(12), padding: '4px 14px',
+                    }}
+                    onClick={() => reviewApply(m.memberId, true)}
+                  >{t('members.approve')}</Button>
+                  <Button
+                    size='mini'
+                    style={{
+                      background: '#f3f4f6', color: C.text3, border: 'none',
+                      borderRadius: '9999px', fontSize: px(12), padding: '4px 14px',
+                    }}
+                    onClick={() => reviewApply(m.memberId, false)}
+                  >{t('members.reject')}</Button>
+                </View>
+              )}
+
+              {/* Active member actions (captain only, not self, not other captain) */}
+              {tab === 'active' && currentRole === 'CAPTAIN' &&
+                m.userId !== userId && m.role !== 'CAPTAIN' && (
+                <View style={{ display: 'flex', gap: px(6) }}>
+                  <Button
+                    size='mini'
+                    style={{
+                      background: '#e3f2fd', color: '#1565C0', border: 'none',
+                      borderRadius: '9999px', fontSize: px(11), padding: '4px 10px',
+                    }}
+                    onClick={() => toggleAdmin(m.userId, m.role)}
+                  >
+                    {m.role === 'ADMIN' ? t('members.remove_admin') : t('members.set_admin')}
+                  </Button>
+                  <Button
+                    size='mini'
+                    style={{
+                      background: '#fee2e2', color: '#dc2626', border: 'none',
+                      borderRadius: '9999px', fontSize: px(11), padding: '4px 10px',
+                    }}
+                    onClick={() => removeMember(m.userId)}
+                  >{t('members.remove')}</Button>
+                </View>
+              )}
             </View>
-
-            {/* Pending approval actions */}
-            {tab === 'pending' && isCaptainOrAdmin() && (
-              <View style={{ display: 'flex', gap: '8px' }}>
-                <Button
-                  size='mini'
-                  style={{ background: '#4CAF50', color: '#fff', border: 'none',
-                           borderRadius: '4px', fontSize: '12px' }}
-                  onClick={() => reviewApply(m.memberId, true)}
-                >{t('members.approve')}</Button>
-                <Button
-                  size='mini'
-                  style={{ background: '#f5f5f5', color: '#999', border: 'none',
-                           borderRadius: '4px', fontSize: '12px' }}
-                  onClick={() => reviewApply(m.memberId, false)}
-                >{t('members.reject')}</Button>
-              </View>
-            )}
-
-            {/* Active member actions (captain only, not self, not other captain) */}
-            {tab === 'active' && currentRole === 'CAPTAIN' &&
-              m.userId !== userId && m.role !== 'CAPTAIN' && (
-              <View style={{ display: 'flex', gap: '6px' }}>
-                <Button
-                  size='mini'
-                  style={{ background: '#E3F2FD', color: '#1565C0', border: 'none',
-                           borderRadius: '4px', fontSize: '11px' }}
-                  onClick={() => toggleAdmin(m.userId, m.role)}
-                >
-                  {m.role === 'ADMIN' ? t('members.remove_admin') : t('members.set_admin')}
-                </Button>
-                <Button
-                  size='mini'
-                  style={{ background: '#FFEBEE', color: '#C62828', border: 'none',
-                           borderRadius: '4px', fontSize: '11px' }}
-                  onClick={() => removeMember(m.userId)}
-                >{t('members.remove')}</Button>
-              </View>
-            )}
-          </View>
-        ))}
+          )
+        })}
         {list.length === 0 && (
-          <Text style={{ textAlign: 'center', color: '#999', display: 'block', padding: '32px' }}>
-            {t('members.empty')}
-          </Text>
+          <View style={{
+            background: C.surface, borderRadius: px(16), padding: '48px 24px',
+            textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <Text style={{ fontSize: px(32), display: 'block', marginBottom: px(8) }}>👥</Text>
+            <Text style={{ fontSize: px(14), color: C.text3 }}>{t('members.empty')}</Text>
+          </View>
         )}
       </ScrollView>
     </View>

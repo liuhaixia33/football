@@ -5,6 +5,20 @@ import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
 import type { ActivityDetailRes, RegStatus } from '../../types/api'
 import { useT } from '../../i18n/useT'
+import { px } from '../../utils/style'
+
+const C = {
+  primary: '#4CAF50',
+  primaryLight: '#f0fdf4',
+  surface: '#ffffff',
+  bg: '#f9fafb',
+  text: '#1f2937',
+  text2: '#4b5563',
+  text3: '#9ca3af',
+  win: '#10b981',
+  draw: '#f59e0b',
+  lose: '#ef4444',
+}
 
 export default function ActivityDetailPage() {
   const [detail, setDetail] = useState<ActivityDetailRes | null>(null)
@@ -33,8 +47,8 @@ export default function ActivityDetailPage() {
 
   if (!detail) {
     return (
-      <View style={{ padding: '32px', textAlign: 'center' }}>
-        <Text style={{ color: '#999' }}>{t('common.loading')}</Text>
+      <View style={{ padding: px(32), textAlign: 'center' }}>
+        <Text style={{ color: C.text3 }}>{t('common.loading')}</Text>
       </View>
     )
   }
@@ -71,59 +85,133 @@ export default function ActivityDetailPage() {
   const tentative = detail.registrations.filter(r => r.status === 'TENTATIVE')
   const absent = detail.registrations.filter(r => r.status === 'ABSENT')
 
+  const fmtDate = (iso: string) => new Date(iso).toLocaleString('zh-CN')
+
   const btnStyle = (active: boolean) => ({
-    flex: '1',
-    background: active ? '#4CAF50' : '#fff',
-    color: active ? '#fff' : '#666',
-    border: active ? 'none' : '1px solid #e0e0e0',
-    borderRadius: '8px',
-    fontSize: '14px',
-    marginRight: '8px',
+    flex: 1,
+    background: active ? C.primary : '#fff',
+    color: active ? '#fff' : C.text2,
+    border: active ? 'none' : '1px solid #e5e7eb',
+    borderRadius: '9999px',
+    fontSize: px(14),
+    fontWeight: active ? '600' : '400',
+    marginRight: px(8),
+    padding: '10px 0',
   })
 
+  const Section = ({ title, children, extra }: { title: string; children: any; extra?: any }) => (
+    <View style={{
+      background: C.surface, borderRadius: px(16), padding: px(16), marginBottom: px(12),
+      boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+    }}>
+      <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: px(12) }}>
+        <Text style={{ fontSize: px(15), fontWeight: '700', color: C.text }}>{title}</Text>
+        {extra}
+      </View>
+      {children}
+    </View>
+  )
+
+  const RegGroup = ({ label, list, color }: { label: string; list: typeof joined; color: string }) => {
+    if (list.length === 0) return null
+    return (
+      <View style={{ marginBottom: px(12) }}>
+        <View style={{
+          display: 'flex', alignItems: 'center', marginBottom: px(8),
+        }}>
+          <View style={{ width: px(6), height: px(6), borderRadius: '50%', background: color, marginRight: px(8) }} />
+          <Text style={{ fontSize: px(13), fontWeight: '600', color }}>
+            {label}（{list.length}人）
+          </Text>
+        </View>
+        <View style={{ display: 'flex', flexWrap: 'wrap', gap: px(8) }}>
+          {list.map(r => (
+            <View key={r.userId} style={{
+              display: 'flex', alignItems: 'center', background: '#f9fafb',
+              borderRadius: '9999px', padding: '4px 10px 4px 4px',
+            }}>
+              {r.avatarUrl
+                ? <Image src={r.avatarUrl} style={{
+                    width: px(24), height: px(24), borderRadius: '50%', marginRight: px(6),
+                  }} />
+                : <View style={{
+                    width: px(24), height: px(24), borderRadius: '50%', background: '#e5e7eb',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: px(6),
+                  }}>
+                    <Text style={{ fontSize: px(12) }}>👤</Text>
+                  </View>
+              }
+              <Text style={{ fontSize: px(13), color: C.text }}>{r.nickname}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    )
+  }
+
   return (
-    <ScrollView scrollY style={{ height: '100vh' }}>
-      <View style={{ padding: '16px' }}>
+    <ScrollView scrollY style={{ height: '100%', background: C.bg }}>
+      <View style={{ padding: '12px 16px 24px' }}>
         {/* 基本信息 */}
-        <View style={{ background: '#fff', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
-          <Text style={{ fontSize: '20px', fontWeight: 'bold', display: 'block', marginBottom: '12px' }}>
-            {a.title}
-          </Text>
+        <View style={{
+          background: C.surface, borderRadius: px(16), padding: px(20), marginBottom: px(12),
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        }}>
+          <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: px(12) }}>
+            <Text style={{ fontSize: px(20), fontWeight: '700', color: C.text, lineHeight: '1.4', flex: 1, paddingRight: px(12) }}>
+              {a.title}
+            </Text>
+            <Text style={{
+              fontSize: px(11), fontWeight: '500',
+              color: isOpen ? C.primary : C.text3,
+              background: isOpen ? C.primaryLight : '#f3f4f6',
+              borderRadius: '9999px', padding: '4px 10px', flexShrink: 0,
+            }}>
+              {isOpen ? '报名中' : a.status === 'FINISHED' ? '已结束' : '已关闭'}
+            </Text>
+          </View>
+
           {a.opponent && (
-            <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '6px' }}>
-              {t('act.vs')}{a.opponent}
-            </Text>
+            <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(8) }}>
+              <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(6), width: px(20) }}>⚔️</Text>
+              <Text style={{ fontSize: px(14), color: C.text2 }}>{t('act.vs')}{a.opponent}</Text>
+            </View>
           )}
-          <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '6px' }}>
-            {t('act.location')}{a.location}
-          </Text>
-          <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '6px' }}>
-            {t('act.start')}{new Date(a.startTime).toLocaleString('zh-CN')}
-          </Text>
+          <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(8) }}>
+            <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(6), width: px(20) }}>📍</Text>
+            <Text style={{ fontSize: px(14), color: C.text2 }}>{a.location}</Text>
+          </View>
+          <View style={{ display: 'flex', alignItems: 'center', marginBottom: px(8) }}>
+            <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(6), width: px(20) }}>🕐</Text>
+            <Text style={{ fontSize: px(14), color: C.text2 }}>{fmtDate(a.startTime)}</Text>
+          </View>
           {a.deadline && (
-            <Text style={{ fontSize: '14px', color: '#999', display: 'block' }}>
-              {t('act.deadline')}{new Date(a.deadline).toLocaleString('zh-CN')}
-            </Text>
+            <View style={{ display: 'flex', alignItems: 'center' }}>
+              <Text style={{ fontSize: px(13), color: C.text3, marginRight: px(6), width: px(20) }}>⏰</Text>
+              <Text style={{ fontSize: px(13), color: C.text3 }}>报名截止 {fmtDate(a.deadline)}</Text>
+            </View>
           )}
         </View>
 
         {/* 比赛结果 */}
         {detail.result && (
-          <View style={{ background: '#fff', borderRadius: '8px', padding: '16px', marginBottom: '12px', textAlign: 'center' }}>
-            <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '8px' }}>
+          <View style={{
+            background: C.surface, borderRadius: px(16), padding: px(20), marginBottom: px(12),
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)', textAlign: 'center',
+          }}>
+            <Text style={{ fontSize: px(13), color: C.text3, display: 'block', marginBottom: px(8) }}>
               {t('act.result')}
             </Text>
-            <Text style={{ fontSize: '36px', fontWeight: 'bold' }}>
+            <Text style={{ fontSize: px(40), fontWeight: '800', color: C.text, display: 'block', marginBottom: px(4) }}>
               {detail.result.ourScore} : {detail.result.oppScore}
             </Text>
-            <Text
-              style={{
-                fontSize: '16px',
-                color: detail.result.outcome === 'WIN' ? '#4CAF50' : detail.result.outcome === 'LOSE' ? '#f44336' : '#FF9800',
-                display: 'block',
-                marginTop: '4px',
-              }}
-            >
+            <Text style={{
+              fontSize: px(14), fontWeight: '600',
+              color: detail.result.outcome === 'WIN' ? C.win : detail.result.outcome === 'LOSE' ? C.lose : C.draw,
+              display: 'inline-block',
+              background: detail.result.outcome === 'WIN' ? '#ecfdf5' : detail.result.outcome === 'LOSE' ? '#fef2f2' : '#fffbeb',
+              borderRadius: '9999px', padding: '4px 14px',
+            }}>
               {detail.result.outcome === 'WIN' ? t('act.win') : detail.result.outcome === 'LOSE' ? t('act.lose') : t('act.draw')}
             </Text>
           </View>
@@ -131,115 +219,90 @@ export default function ActivityDetailPage() {
 
         {/* 三档报名按钮 */}
         {isOpen && (
-          <View style={{ display: 'flex', marginBottom: '12px' }}>
-            <Button style={btnStyle(a.myStatus === 'JOINED')} onClick={() => handleRegister('JOINED')}>
-              {t('act.status_joined')}
-            </Button>
-            <Button style={btnStyle(a.myStatus === 'TENTATIVE')} onClick={() => handleRegister('TENTATIVE')}>
-              {t('act.status_tentative')}
-            </Button>
-            <Button style={{ ...btnStyle(a.myStatus === 'ABSENT'), marginRight: '0' }} onClick={() => handleRegister('ABSENT')}>
-              {t('act.status_absent')}
-            </Button>
+          <View style={{
+            background: C.surface, borderRadius: px(16), padding: px(16), marginBottom: px(12),
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          }}>
+            <Text style={{ fontSize: px(13), color: C.text3, marginBottom: px(12), display: 'block' }}>选择你的状态</Text>
+            <View style={{ display: 'flex' }}>
+              <Button style={btnStyle(a.myStatus === 'JOINED')} onClick={() => handleRegister('JOINED')}>
+                {t('act.status_joined')}
+              </Button>
+              <Button style={btnStyle(a.myStatus === 'TENTATIVE')} onClick={() => handleRegister('TENTATIVE')}>
+                {t('act.status_tentative')}
+              </Button>
+              <Button style={{ ...btnStyle(a.myStatus === 'ABSENT'), marginRight: '0' }} onClick={() => handleRegister('ABSENT')}>
+                {t('act.status_absent')}
+              </Button>
+            </View>
           </View>
         )}
 
-        {/* 报名名单（分组） */}
-        <View style={{ background: '#fff', borderRadius: '8px', padding: '16px', marginBottom: '12px' }}>
-          <Text style={{ fontWeight: 'bold', marginBottom: '12px', display: 'block' }}>
-            {t('act.registrations')}（{a.registeredCount}{a.maxPlayers ? `/${a.maxPlayers}` : ''}人）
-          </Text>
-
-          {/* JOINED 组 */}
-          {joined.length > 0 && (
-            <View style={{ marginBottom: '12px' }}>
-              <Text style={{ fontSize: '13px', color: '#4CAF50', display: 'block', marginBottom: '6px' }}>
-                {t('act.joined_count')}（{joined.length}人）
-              </Text>
-              {joined.map(r => (
-                <View key={r.userId} style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-                  {r.avatarUrl
-                    ? <Image src={r.avatarUrl} style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '8px' }} />
-                    : <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
-                  }
-                  <Text style={{ fontSize: '14px' }}>{r.nickname}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          {/* TENTATIVE 组 */}
-          {tentative.length > 0 && (
-            <View style={{ marginBottom: '12px' }}>
-              <Text style={{ fontSize: '13px', color: '#FF9800', display: 'block', marginBottom: '6px' }}>
-                {t('act.tentative_count')}（{tentative.length}人）
-              </Text>
-              {tentative.map(r => (
-                <View key={r.userId} style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-                  {r.avatarUrl
-                    ? <Image src={r.avatarUrl} style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '8px' }} />
-                    : <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
-                  }
-                  <Text style={{ fontSize: '14px' }}>{r.nickname}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          {/* ABSENT 组 */}
-          {absent.length > 0 && (
-            <View>
-              <Text style={{ fontSize: '13px', color: '#999', display: 'block', marginBottom: '6px' }}>
-                {t('act.absent_count')}（{absent.length}人）
-              </Text>
-              {absent.map(r => (
-                <View key={r.userId} style={{ display: 'flex', alignItems: 'center', marginBottom: '6px' }}>
-                  {r.avatarUrl
-                    ? <Image src={r.avatarUrl} style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '8px' }} />
-                    : <Text style={{ fontSize: '20px', marginRight: '8px' }}>👤</Text>
-                  }
-                  <Text style={{ fontSize: '14px' }}>{r.nickname}</Text>
-                </View>
-              ))}
-            </View>
-          )}
+        {/* 报名名单 */}
+        <Section
+          title={t('act.registrations')}
+          extra={
+            <Text style={{ fontSize: px(13), color: C.text3 }}>
+              {a.registeredCount}{a.maxPlayers ? `/${a.maxPlayers}` : ''}人
+            </Text>
+          }
+        >
+          <RegGroup label={t('act.joined_count')} list={joined} color={C.win} />
+          <RegGroup label={t('act.tentative_count')} list={tentative} color={C.draw} />
+          <RegGroup label={t('act.absent_count')} list={absent} color={C.text3} />
 
           {detail.registrations.length === 0 && (
-            <Text style={{ color: '#999', fontSize: '14px' }}>{t('act.no_regs')}</Text>
+            <Text style={{ color: C.text3, fontSize: px(14), textAlign: 'center', padding: px(16) }}>
+              {t('act.no_regs')}
+            </Text>
           )}
-        </View>
+        </Section>
 
-        {/* 管理员操作按钮 */}
-        {isCaptainOrAdmin() && isOpen && (
+        {/* 管理员操作 + 分享 */}
+        <View style={{ display: 'flex', flexDirection: 'column', gap: px(8) }}>
+          {isCaptainOrAdmin() && isOpen && (
+            <Button
+              style={{
+                background: '#fff', color: C.text3, border: '1px solid #e5e7eb',
+                borderRadius: '9999px', fontSize: px(14), padding: '10px 0',
+              }}
+              onClick={handleClose}
+            >
+              {t('act.close')}
+            </Button>
+          )}
+          {isCaptainOrAdmin() && a.status === 'OPEN' && (
+            <Button
+              style={{
+                background: '#2196F3', color: '#fff', border: 'none',
+                borderRadius: '9999px', fontSize: px(14), padding: '10px 0',
+              }}
+              onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?editId=${activityId}` })}
+            >
+              {t('act.edit')}
+            </Button>
+          )}
+          {isCaptainOrAdmin() && a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
+            <Button
+              style={{
+                background: C.draw, color: '#fff', border: 'none',
+                borderRadius: '9999px', fontSize: px(14), padding: '10px 0',
+              }}
+              onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?resultFor=${activityId}` })}
+            >
+              {t('act.record')}
+            </Button>
+          )}
           <Button
-            style={{ background: '#fff', color: '#999', border: '1px solid #e0e0e0', borderRadius: '8px', marginTop: '8px', fontSize: '14px' }}
-            onClick={handleClose}
+            openType='share'
+            style={{
+              background: C.primaryLight, color: C.primary, border: 'none',
+              borderRadius: '9999px', fontSize: px(14), padding: '10px 0',
+            }}
           >
-            {t('act.close')}
+            {t('act.share')}
           </Button>
-        )}
-        {isCaptainOrAdmin() && a.status === 'OPEN' && (
-          <Button
-            style={{ background: '#2196F3', color: '#fff', border: 'none', borderRadius: '8px', marginTop: '8px', fontSize: '14px' }}
-            onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?editId=${activityId}` })}
-          >
-            {t('act.edit')}
-          </Button>
-        )}
-        {isCaptainOrAdmin() && a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
-          <Button
-            style={{ background: '#FF9800', color: '#fff', border: 'none', borderRadius: '8px', marginTop: '8px', fontSize: '14px' }}
-            onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?resultFor=${activityId}` })}
-          >
-            {t('act.record')}
-          </Button>
-        )}
-        <Button
-          openType='share'
-          style={{ background: '#fff', color: '#07C160', border: '1px solid #07C160', borderRadius: '8px', marginTop: '8px', fontSize: '14px' }}
-        >
-          {t('act.share')}
-        </Button>
+        </View>
       </View>
     </ScrollView>
   )

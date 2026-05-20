@@ -6,74 +6,106 @@ import type { GroupingRes, GroupDto } from '../../types/api'
 
 const CANVAS_ID = 'grouping-poster'
 const W = 375
-const PITCH_H = 540
+const HEADER_H = 68   // outside-pitch title area
+const PITCH_H = 520
+const CANVAS_H = HEADER_H + PITCH_H
 const LINE_C = 'rgba(255,255,255,0.68)'
 const GRASS_A = '#1d6030'
 const GRASS_B = '#226835'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function drawPitch(ctx: any) {
+function drawHeader(ctx: any, title: string, startTime: string, location: string) {
+  ctx.setFillStyle('#0d1117')
+  ctx.fillRect(0, 0, W, HEADER_H)
+
+  // Thin green accent line at bottom of header
+  ctx.setFillStyle('#00e472')
+  ctx.fillRect(0, HEADER_H - 2, W, 2)
+
+  ctx.setFillStyle('#ffffff')
+  ctx.setFontSize(16)
+  ctx.setTextAlign('center')
+  ctx.fillText(title || '训练分组', W / 2, 26)
+
+  if (startTime || location) {
+    const d = startTime ? new Date(startTime) : null
+    const timeStr = d
+      ? `${d.getMonth() + 1}月${d.getDate()}日  ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+      : ''
+    const infoStr = [timeStr, location].filter(Boolean).join('    ')
+    ctx.setFontSize(11)
+    ctx.setFillStyle('rgba(255,255,255,0.55)')
+    ctx.fillText(infoStr, W / 2, 50)
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function drawPitch(ctx: any, yo: number) {
+  // Grass stripes
   for (let i = 0; i < 8; i++) {
     ctx.setFillStyle(i % 2 === 0 ? GRASS_A : GRASS_B)
-    ctx.fillRect(0, (i / 8) * PITCH_H, W, PITCH_H / 8 + 1)
+    ctx.fillRect(0, yo + (i / 8) * PITCH_H, W, PITCH_H / 8 + 1)
   }
 
   ctx.setStrokeStyle(LINE_C)
   ctx.setLineWidth(1.5)
-  ctx.strokeRect(16, 16, W - 32, PITCH_H - 32)
+  ctx.strokeRect(16, yo + 16, W - 32, PITCH_H - 32)
 
+  // Center line
   ctx.beginPath()
-  ctx.moveTo(16, PITCH_H / 2)
-  ctx.lineTo(W - 16, PITCH_H / 2)
+  ctx.moveTo(16, yo + PITCH_H / 2)
+  ctx.lineTo(W - 16, yo + PITCH_H / 2)
   ctx.stroke()
 
+  // Center circle
   ctx.beginPath()
-  ctx.arc(W / 2, PITCH_H / 2, 44, 0, 2 * Math.PI)
+  ctx.arc(W / 2, yo + PITCH_H / 2, 44, 0, 2 * Math.PI)
   ctx.stroke()
 
   ctx.setFillStyle(LINE_C)
   ctx.beginPath()
-  ctx.arc(W / 2, PITCH_H / 2, 3, 0, 2 * Math.PI)
+  ctx.arc(W / 2, yo + PITCH_H / 2, 3, 0, 2 * Math.PI)
   ctx.fill()
 
   const pw = (W - 32) * 0.56
   const penX = (W - pw) / 2
   const penH = PITCH_H * 0.165
-  ctx.strokeRect(penX, 16, pw, penH)
-  ctx.strokeRect(penX, PITCH_H - 16 - penH, pw, penH)
+  ctx.strokeRect(penX, yo + 16, pw, penH)
+  ctx.strokeRect(penX, yo + PITCH_H - 16 - penH, pw, penH)
 
   const gw = (W - 32) * 0.26
   const goalX = (W - gw) / 2
   const goalH = PITCH_H * 0.075
-  ctx.strokeRect(goalX, 16, gw, goalH)
-  ctx.strokeRect(goalX, PITCH_H - 16 - goalH, gw, goalH)
+  ctx.strokeRect(goalX, yo + 16, gw, goalH)
+  ctx.strokeRect(goalX, yo + PITCH_H - 16 - goalH, gw, goalH)
 
-  ctx.beginPath(); ctx.arc(W / 2, 16 + penH * 0.72, 2.5, 0, 2 * Math.PI); ctx.fill()
-  ctx.beginPath(); ctx.arc(W / 2, PITCH_H - 16 - penH * 0.72, 2.5, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(W / 2, yo + 16 + penH * 0.72, 2.5, 0, 2 * Math.PI); ctx.fill()
+  ctx.beginPath(); ctx.arc(W / 2, yo + PITCH_H - 16 - penH * 0.72, 2.5, 0, 2 * Math.PI); ctx.fill()
 
   ctx.setLineWidth(1)
   ;[
-    [16, 16, 0, Math.PI / 2],
-    [W - 16, 16, Math.PI / 2, Math.PI],
-    [16, PITCH_H - 16, (3 * Math.PI) / 2, 2 * Math.PI],
-    [W - 16, PITCH_H - 16, Math.PI, (3 * Math.PI) / 2],
+    [16, yo + 16, 0, Math.PI / 2],
+    [W - 16, yo + 16, Math.PI / 2, Math.PI],
+    [16, yo + PITCH_H - 16, (3 * Math.PI) / 2, 2 * Math.PI],
+    [W - 16, yo + PITCH_H - 16, Math.PI, (3 * Math.PI) / 2],
   ].forEach(([x, y, s, e]) => {
     ctx.beginPath(); ctx.arc(x, y, 10, s, e); ctx.stroke()
   })
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function drawGroup(ctx: any, group: GroupDto, yTop: number, halfH: number, isTopTeam: boolean, color: string) {
+function drawGroupPlayers(ctx: any, group: GroupDto, yo: number, halfH: number, isTopTeam: boolean, color: string) {
   const members = group.members
   const n = members.length
+  if (n === 0) return
   const DOT_R = 14
 
-  // Content bounds — keep away from banner and center line
-  const contentY1 = isTopTeam ? yTop + 54 : yTop + 22
-  const contentY2 = isTopTeam ? yTop + halfH - 22 : yTop + halfH - 54
+  // Content bounds within this half (leave room for corner labels)
+  const contentY1 = isTopTeam ? yo + 46 : yo + 16
+  const contentY2 = isTopTeam ? yo + halfH - 16 : yo + halfH - 46
 
   const colsPerRow = n <= 3 ? n : n <= 6 ? Math.ceil(n / 2) : n <= 9 ? Math.ceil(n / 3) : 4
-  const rows = colsPerRow > 0 ? Math.ceil(n / colsPerRow) : 0
+  const rows = Math.ceil(n / colsPerRow)
 
   members.forEach((m, i) => {
     const rowIdx = Math.floor(i / colsPerRow)
@@ -87,8 +119,8 @@ function drawGroup(ctx: any, group: GroupDto, yTop: number, halfH: number, isTop
       y = (contentY1 + contentY2) / 2
     } else {
       const rowSpacing = (contentY2 - contentY1) / (rows - 1)
-      // Top team: row 0 nearest center line (contentY2), last row near goal
-      // Bottom team: row 0 nearest center line (contentY1), last row near goal
+      // Top team: row 0 nearest center (contentY2), rows go toward goal (up)
+      // Bottom team: row 0 nearest center (contentY1), rows go toward goal (down)
       y = isTopTeam
         ? contentY2 - rowIdx * rowSpacing
         : contentY1 + rowIdx * rowSpacing
@@ -109,15 +141,27 @@ function drawGroup(ctx: any, group: GroupDto, yTop: number, halfH: number, isTop
     ctx.setTextAlign('center')
     ctx.fillText(name, x, y + 4)
   })
+}
 
-  // Group name banner
-  const bannerY = isTopTeam ? yTop + 14 : yTop + halfH - 46
-  ctx.setFillStyle('rgba(0,0,0,0.6)')
-  ctx.fillRect(16, bannerY, W - 32, 32)
-  ctx.setFillStyle(color)
-  ctx.setFontSize(14)
-  ctx.setTextAlign('center')
-  ctx.fillText(group.name, W / 2, bannerY + 22)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function drawGroupLabel(ctx: any, group: GroupDto, yo: number, halfH: number, isTopTeam: boolean, color: string) {
+  if (isTopTeam) {
+    // Top-left corner
+    ctx.setFillStyle('rgba(0,0,0,0.55)')
+    ctx.fillRect(16, yo + 16, 120, 28)
+    ctx.setFillStyle(color)
+    ctx.setFontSize(13)
+    ctx.setTextAlign('left')
+    ctx.fillText(`  ${group.name}`, 20, yo + 35)
+  } else {
+    // Bottom-right corner
+    ctx.setFillStyle('rgba(0,0,0,0.55)')
+    ctx.fillRect(W - 136, yo + halfH - 44, 120, 28)
+    ctx.setFillStyle(color)
+    ctx.setFontSize(13)
+    ctx.setTextAlign('right')
+    ctx.fillText(`${group.name}  `, W - 20, yo + halfH - 24)
+  }
 }
 
 export default function GroupingPosterPage() {
@@ -145,34 +189,24 @@ export default function GroupingPosterPage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ctx: any = Taro.createCanvasContext(CANVAS_ID)
 
-      drawPitch(ctx)
+      // 1. Header (outside pitch)
+      drawHeader(ctx, title, startTime, location)
 
+      // 2. Pitch (starts at HEADER_H)
+      drawPitch(ctx, HEADER_H)
+
+      // 3. Players + corner labels per group
       const COLORS = ['#4effa8', '#ffd740', '#ff6e40', '#40d4ff']
       const n = res.groups.length
       const halfH = PITCH_H / Math.max(n, 1)
 
       res.groups.forEach((g, idx) => {
-        drawGroup(ctx, g, idx * halfH, halfH, idx === 0, COLORS[idx % COLORS.length])
+        const yo = HEADER_H + idx * halfH
+        const isTopTeam = idx === 0
+        const color = COLORS[idx % COLORS.length]
+        drawGroupPlayers(ctx, g, yo, halfH, isTopTeam, color)
+        drawGroupLabel(ctx, g, yo, halfH, isTopTeam, color)
       })
-
-      // Title overlay (drawn on top of pitch)
-      const titleBarH = startTime || location ? 52 : 36
-      ctx.setFillStyle('rgba(0,0,0,0.62)')
-      ctx.fillRect(0, 0, W, titleBarH)
-      ctx.setFillStyle('#ffffff')
-      ctx.setFontSize(15)
-      ctx.setTextAlign('center')
-      ctx.fillText(title || '训练分组', W / 2, 22)
-      if (startTime || location) {
-        const d = startTime ? new Date(startTime) : null
-        const timeStr = d
-          ? `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-          : ''
-        const infoStr = [timeStr, location].filter(Boolean).join('  ')
-        ctx.setFontSize(11)
-        ctx.setFillStyle('rgba(255,255,255,0.7)')
-        ctx.fillText(infoStr, W / 2, 42)
-      }
 
       ctx.draw(false, () => {
         Taro.canvasToTempFilePath({
@@ -206,7 +240,7 @@ export default function GroupingPosterPage() {
       </Text>
       <Canvas
         canvasId={CANVAS_ID}
-        style={{ width: `${W}px`, height: `${PITCH_H}px`, borderRadius: '8px', display: 'block' }}
+        style={{ width: `${W}px`, height: `${CANVAS_H}px`, borderRadius: '8px', display: 'block' }}
       />
       {!drawing && tempFilePath && (
         <View style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>

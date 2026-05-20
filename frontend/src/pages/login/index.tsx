@@ -122,7 +122,7 @@ export default function LoginPage() {
           onBlur={(e) => setNickname(e.detail.value)}
           placeholder={t('login.nickname_placeholder')}
           style={{
-            width: '100%',
+            width: px(380),
             height: px(56),
             background: C.surface,
             borderRadius: px(14),
@@ -136,6 +136,7 @@ export default function LoginPage() {
         <Button
           style={{
             width: '100%',
+            marginTop: px(16),
             background: canLogin ? C.primary : 'rgba(255,255,255,0.07)',
             color: canLogin ? '#0b0f18' : C.text3,
             borderRadius: px(16),

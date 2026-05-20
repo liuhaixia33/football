@@ -17,6 +17,8 @@ export default function GroupingPosterPage() {
 
   const [grouping, setGrouping] = useState<GroupingRes | null>(null)
   const [canvasH, setCanvasH] = useState(500)
+  const [tempFilePath, setTempFilePath] = useState<string | null>(null)
+  const [drawing, setDrawing] = useState(true)
 
   useEffect(() => {
     groupingApi.getGrouping(activityId)
@@ -34,6 +36,8 @@ export default function GroupingPosterPage() {
   }
 
   function drawPoster(res: GroupingRes) {
+    setDrawing(true)
+    setTempFilePath(null)
     const h = calcHeight(res)
     setCanvasH(h)
 
@@ -82,26 +86,57 @@ export default function GroupingPosterPage() {
       ctx.draw(false, () => {
         Taro.canvasToTempFilePath({
           canvasId: CANVAS_ID,
-          success: (res) => {
-            Taro.previewImage({ urls: [res.tempFilePath] })
+          success: (r) => {
+            setTempFilePath(r.tempFilePath)
+            setDrawing(false)
           },
-          fail: () => Taro.showToast({ title: '生成失败', icon: 'none' }),
+          fail: () => {
+            setDrawing(false)
+            Taro.showToast({ title: '生成失败', icon: 'none' })
+          },
         })
       })
     }, 300)
   }
 
+  async function handleSaveToAlbum() {
+    if (!tempFilePath) return
+    try {
+      await Taro.saveImageToPhotosAlbum({ filePath: tempFilePath })
+      Taro.showToast({ title: '已保存到相册', icon: 'success' })
+    } catch {
+      Taro.showToast({ title: '保存失败，请授权相册权限', icon: 'none' })
+    }
+  }
+
+  function handleShareToGroup() {
+    if (!tempFilePath) return
+    Taro.showShareImageMenu({ path: tempFilePath })
+  }
+
   return (
     <View style={{ padding: '16px' }}>
       <Text style={{ fontSize: '14px', color: '#666', display: 'block', marginBottom: '12px' }}>
-        海报生成中，请稍候...长按图片可保存或转发到微信群。
+        {drawing ? '海报生成中，请稍候...' : '海报已生成，可保存或分享到微信群。'}
       </Text>
       <Canvas
         canvasId={CANVAS_ID}
         style={{ width: `${W}px`, height: `${canvasH}px`, border: '1px solid #e0e0e0', borderRadius: '8px' }}
       />
+      {!drawing && tempFilePath && (
+        <View style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+          <Button
+            style={{ flex: '1', background: '#4CAF50', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px' }}
+            onClick={handleSaveToAlbum}
+          >保存到相册</Button>
+          <Button
+            style={{ flex: '1', background: '#07c160', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px' }}
+            onClick={handleShareToGroup}
+          >分享到群</Button>
+        </View>
+      )}
       <Button
-        style={{ marginTop: '16px', background: '#4CAF50', color: '#fff', border: 'none', borderRadius: '8px' }}
+        style={{ marginTop: '10px', background: '#fff', color: '#4CAF50', border: '1px solid #4CAF50', borderRadius: '8px', fontSize: '14px' }}
         onClick={() => grouping && drawPoster(grouping)}
       >重新生成</Button>
     </View>

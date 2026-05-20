@@ -250,7 +250,7 @@ export default function GroupingPage() {
           )}
           <Button
             style={{ flex: '1', background: '#fff', color: '#4CAF50', border: '1px solid #4CAF50', borderRadius: '8px', fontSize: '14px' }}
-            onClick={() => Taro.navigateTo({ url: `/pages/grouping/poster?activityId=${activityId}` })}
+            onClick={() => Taro.navigateTo({ url: `/pages/grouping/poster?activityId=${activityId}&title=${encodeURIComponent(activityTitle)}&startTime=${encodeURIComponent(activityTime)}&location=${encodeURIComponent(activityLocation)}` })}
           >生成海报</Button>
         </View>
 

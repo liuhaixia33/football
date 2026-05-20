@@ -103,3 +103,21 @@ export interface MyStatsRes {
   draws: number
   losses: number
 }
+
+export interface GroupMemberDto {
+  userId: number
+  nickname: string
+  avatarUrl: string
+}
+
+export interface GroupDto {
+  id: number
+  index: number
+  name: string
+  members: GroupMemberDto[]
+}
+
+export interface GroupingRes {
+  groups: GroupDto[]
+  ungrouped: GroupMemberDto[]
+}

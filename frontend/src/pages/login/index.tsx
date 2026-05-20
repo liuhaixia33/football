@@ -97,55 +97,35 @@ export default function LoginPage() {
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
       }}>
 
-        {/* Avatar row */}
-        <View style={{
-          display: 'flex', alignItems: 'center', gap: px(16),
-          marginBottom: px(24),
-          background: C.surface,
-          borderRadius: px(16),
-          padding: `${px(14)} ${px(16)}`,
-          border: `1px solid ${C.border}`,
-        }}>
+        {/* Avatar */}
+        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: px(32) }}>
           <Button
             openType="chooseAvatar"
             onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
-            style={{ background: 'transparent', border: 'none', padding: 0,
-                     width: px(56), height: px(56), borderRadius: '50%', flexShrink: 0 }}
+            style={{ background: 'transparent', border: 'none', padding: 0 }}
           >
             {avatarDisplay
               ? <Image src={avatarDisplay} style={{
-                  width: px(56), height: px(56), borderRadius: '50%',
-                  border: `2px solid ${C.primary}`,
+                  width: px(120), height: px(120), borderRadius: '50%',
+                  border: `3px solid ${C.primary}`,
+                  display: 'block',
                 }} />
               : <View style={{
-                  width: px(56), height: px(56), borderRadius: '50%',
+                  width: px(120), height: px(120), borderRadius: '50%',
                   background: C.surface2, border: `2px dashed rgba(0,228,114,0.35)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Text style={{ fontSize: px(46) }}>📷</Text>
+                  <Text style={{ fontSize: px(72) }}>📷</Text>
                 </View>
             }
           </Button>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: px(28), fontWeight: '600', color: C.text, display: 'block', marginBottom: px(2) }}>
-              头像
-            </Text>
-            <Text style={{ fontSize: px(24), color: C.text3 }}>
-              {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
-            </Text>
-          </View>
-          <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
+          <Text style={{ fontSize: px(24), color: C.text3, marginTop: px(10) }}>
+            {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
+          </Text>
         </View>
 
         {/* Nickname */}
-        <View style={{ marginBottom: px(8) }}>
-          <Text style={{
-            fontSize: px(24), fontWeight: '700', color: C.text3,
-            marginBottom: px(8), display: 'block',
-            letterSpacing: '0.08em', textTransform: 'uppercase',
-          }}>
-            昵称
-          </Text>
+        <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(8) }}>
           <Input
             type="nickname"
             value={nickname}
@@ -153,6 +133,7 @@ export default function LoginPage() {
             onBlur={(e) => setNickname(e.detail.value)}
             placeholder={t('login.nickname_placeholder')}
             style={{
+              width: px(400),
               height: px(52),
               background: C.surface,
               borderRadius: px(14),
@@ -160,6 +141,7 @@ export default function LoginPage() {
               fontSize: px(32),
               border: `1px solid ${C.border}`,
               color: C.text,
+              textAlign: 'center',
             }}
           />
         </View>

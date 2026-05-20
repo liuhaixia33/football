@@ -282,72 +282,78 @@ export default function ActivityDetailPage() {
         </View>
 
         {/* ── Admin actions ── */}
-        {(isCaptainOrAdmin()) && (
-          <View style={{ padding: `${px(16)} ${px(18)} ${isOpen ? px(16 + RSVP_H) : px(40)}` }}>
-            <View style={{ display: 'flex', flexDirection: 'column', gap: px(10) }}>
-              {isCaptainOrAdmin() && isOpen && (
+        {isCaptainOrAdmin() && (
+          <View style={{ padding: `${px(16)} ${px(18)} ${isOpen ? px(16 + RSVP_H) : px(40)}`, display: 'flex', flexDirection: 'column', gap: px(10) }}>
+
+            {/* 管理类：关闭 + 编辑 并排（OPEN 状态） */}
+            {a.status === 'OPEN' && (
+              <View style={{ display: 'flex', gap: px(10) }}>
                 <Button
                   style={{
-                    background: 'rgba(255,255,255,0.05)', color: C.text2,
+                    flex: 1, background: 'rgba(255,255,255,0.05)', color: C.text2,
                     border: `1px solid ${C.border}`, borderRadius: px(12),
-                    fontSize: px(28), padding: `${px(13)} 0`,
+                    fontSize: px(27), padding: `${px(12)} 0`,
                   }}
                   onClick={handleClose}
                 >
                   {t('act.close')}
                 </Button>
-              )}
-              {isCaptainOrAdmin() && a.status === 'OPEN' && (
                 <Button
                   style={{
-                    background: 'rgba(77,166,255,0.12)', color: '#4da6ff',
-                    border: '1px solid rgba(77,166,255,0.25)', borderRadius: px(12),
-                    fontSize: px(28), padding: `${px(13)} 0`,
+                    flex: 1, background: 'rgba(77,166,255,0.1)', color: '#4da6ff',
+                    border: '1px solid rgba(77,166,255,0.22)', borderRadius: px(12),
+                    fontSize: px(27), padding: `${px(12)} 0`,
                   }}
                   onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?editId=${activityId}` })}
                 >
                   {t('act.edit')}
                 </Button>
-              )}
-              {isCaptainOrAdmin() && a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
-                <Button
-                  style={{
-                    background: 'rgba(255,183,0,0.12)', color: C.draw,
-                    border: '1px solid rgba(255,183,0,0.25)', borderRadius: px(12),
-                    fontSize: px(28), padding: `${px(13)} 0`,
-                  }}
-                  onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?resultFor=${activityId}` })}
-                >
-                  {t('act.record')}
-                </Button>
-              )}
-              {isCaptainOrAdmin() && a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
-                <Button
-                  style={{
-                    background: 'rgba(0,228,114,0.12)', color: '#00e472',
-                    border: '1px solid rgba(0,228,114,0.25)', borderRadius: px(12),
-                    fontSize: px(28), padding: `${px(13)} 0`,
-                  }}
-                  onClick={() =>
-                    Taro.navigateTo({
-                      url: `/pages/grouping/index?activityId=${activityId}&title=${encodeURIComponent(a.title)}&startTime=${encodeURIComponent(a.startTime)}&location=${encodeURIComponent(a.location ?? '')}&status=${a.status}`,
-                    })
-                  }
-                >
-                  分组管理
-                </Button>
-              )}
+              </View>
+            )}
+
+            {/* 主操作：记录比赛（MATCH + CLOSED） */}
+            {a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
               <Button
-                openType='share'
                 style={{
-                  background: C.primaryDim, color: C.primary,
-                  border: `1px solid rgba(0,228,114,0.18)`, borderRadius: px(12),
+                  background: 'rgba(255,183,0,0.12)', color: C.draw,
+                  border: '1px solid rgba(255,183,0,0.25)', borderRadius: px(12),
                   fontSize: px(28), padding: `${px(13)} 0`,
                 }}
+                onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?resultFor=${activityId}` })}
               >
-                {t('act.share')}
+                {t('act.record')}
               </Button>
-            </View>
+            )}
+
+            {/* 主操作：分组管理（TRAINING） */}
+            {a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
+              <Button
+                style={{
+                  background: 'rgba(0,228,114,0.12)', color: C.primary,
+                  border: '1px solid rgba(0,228,114,0.25)', borderRadius: px(12),
+                  fontSize: px(28), padding: `${px(13)} 0`,
+                }}
+                onClick={() =>
+                  Taro.navigateTo({
+                    url: `/pages/grouping/index?activityId=${activityId}&title=${encodeURIComponent(a.title)}&startTime=${encodeURIComponent(a.startTime)}&location=${encodeURIComponent(a.location ?? '')}&status=${a.status}`,
+                  })
+                }
+              >
+                分组管理
+              </Button>
+            )}
+
+            {/* 次要：分享 */}
+            <Button
+              openType='share'
+              style={{
+                background: 'transparent', color: C.text3,
+                border: `1px solid ${C.border}`, borderRadius: px(12),
+                fontSize: px(26), padding: `${px(10)} 0`,
+              }}
+            >
+              {t('act.share')}
+            </Button>
           </View>
         )}
 

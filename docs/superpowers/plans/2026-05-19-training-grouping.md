@@ -465,8 +465,6 @@ class GroupingServiceTest {
             return g;
         });
         when(groupMemberRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        when(regRepository.findByActivityIdAndStatus(eq(10L), eq(RegStatus.JOINED)))
-            .thenReturn(regs);
         when(userRepository.findById(anyLong())).thenAnswer(inv -> {
             User u = new User();
             u.setId(inv.getArgument(0));
@@ -1304,7 +1302,7 @@ onClick={async () => {
 - [ ] **Step 4: 创建海报页**
 
 ```tsx
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, Button, Canvas } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { groupingApi } from '../../api/grouping'

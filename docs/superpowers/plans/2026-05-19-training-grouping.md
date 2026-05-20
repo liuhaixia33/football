@@ -914,28 +914,15 @@ pages: [
 
 - [ ] **Step 3: 在活动详情页添加"分组管理"入口**
 
-在 `frontend/src/pages/activity-detail/index.tsx` 中，在 `isCaptainOrAdmin` 和 `isTraining` 条件下渲染按钮。
-
-首先在组件顶部（`const isOpen = ...` 之后）添加：
+页面已更新为暗色主题（使用 `px()` 工具函数和 `C` 颜色常量）。在 `frontend/src/pages/activity-detail/index.tsx` 中，找到 admin actions 区域的 `<View style={{ display: 'flex', flexDirection: 'column', gap: px(10) }}>` flex 列，在"记录比赛"按钮块（`a.type === 'MATCH' && a.status !== 'OPEN'`）之后、分享按钮（`openType='share'`）之前插入：
 
 ```tsx
-const isTraining = a.type === 'TRAINING'
-const canManageGrouping = isCaptainOrAdmin() && isTraining && (a.status === 'OPEN' || a.status === 'CLOSED')
-```
-
-然后在关闭报名按钮（`{isCaptainOrAdmin() && isOpen && ...}` 块）之后，添加分组管理按钮：
-
-```tsx
-{canManageGrouping && (
+{isCaptainOrAdmin() && a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
   <Button
     style={{
-      width: '100%',
-      background: '#fff',
-      color: '#4CAF50',
-      border: '1px solid #4CAF50',
-      borderRadius: '8px',
-      fontSize: '14px',
-      marginBottom: '12px',
+      background: 'rgba(0,228,114,0.12)', color: '#00e472',
+      border: '1px solid rgba(0,228,114,0.25)', borderRadius: px(12),
+      fontSize: px(28), padding: `${px(13)} 0`,
     }}
     onClick={() =>
       Taro.navigateTo({

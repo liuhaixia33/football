@@ -8,6 +8,7 @@ import com.football.team.enums.MemberRole;
 import com.football.team.security.RequireRole;
 import com.football.team.service.GroupingService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,7 @@ public class GroupingController {
     @RequireRole(MemberRole.ADMIN)
     public ApiResponse<GroupingRes> saveGrouping(HttpServletRequest req,
                                                   @PathVariable Long activityId,
-                                                  @RequestBody SaveGroupingReq body) {
+                                                  @RequestBody @Valid SaveGroupingReq body) {
         Long teamId = (Long) req.getAttribute("currentTeamId");
         return ApiResponse.ok(groupingService.saveGrouping(activityId, teamId, body));
     }
@@ -39,7 +40,7 @@ public class GroupingController {
     @RequireRole(MemberRole.ADMIN)
     public ApiResponse<GroupingRes> randomGrouping(HttpServletRequest req,
                                                     @PathVariable Long activityId,
-                                                    @RequestBody RandomGroupingReq body) {
+                                                    @RequestBody @Valid RandomGroupingReq body) {
         Long teamId = (Long) req.getAttribute("currentTeamId");
         return ApiResponse.ok(groupingService.randomGrouping(activityId, teamId, body));
     }

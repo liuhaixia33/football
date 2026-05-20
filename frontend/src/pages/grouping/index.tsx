@@ -71,23 +71,6 @@ export default function GroupingPage() {
     }
   }
 
-  function handleGroupCountChange(count: number) {
-    if (!isOpen) return
-    const defaultNames = ['第1组', '第2组', '第3组', '第4组']
-    const newGroups: LocalGroup[] = []
-    for (let i = 0; i < count; i++) {
-      if (i < groups.length) newGroups.push(groups[i])
-      else newGroups.push({ index: i, name: defaultNames[i], members: [] })
-    }
-    if (count < groups.length) {
-      const removed = groups.slice(count).flatMap(g => g.members)
-      setUngrouped(prev => [...prev, ...removed])
-    }
-    setGroups(newGroups)
-    setGroupCount(count)
-    setDirty(true)
-  }
-
   function handlePlayerClick(member: GroupMemberDto, fromGroupIndex: number | null) {
     if (!isOpen) return
     setSelected({ member, fromGroupIndex })
@@ -137,30 +120,12 @@ export default function GroupingPage() {
     <ScrollView scrollY style={{ height: '100vh', background: '#f5f5f5' }}>
       <View style={{ padding: '12px' }}>
 
-        {/* 组数 + 随机按钮 */}
+        {/* 随机按钮 */}
         {isOpen && (
-          <View style={{ display: 'flex', alignItems: 'center', marginBottom: '12px', background: '#fff', borderRadius: '8px', padding: '12px' }}>
-            <Text style={{ fontSize: '14px', color: '#333', marginRight: '12px' }}>分组数：</Text>
-            {[2, 3, 4].map(n => (
-              <Button
-                key={n}
-                style={{
-                  padding: '4px 12px',
-                  marginRight: '6px',
-                  borderRadius: '16px',
-                  fontSize: '14px',
-                  background: groupCount === n ? '#4CAF50' : '#f0f0f0',
-                  color: groupCount === n ? '#fff' : '#333',
-                  border: 'none',
-                }}
-                onClick={() => handleGroupCountChange(n)}
-              >{n}</Button>
-            ))}
-            <Button
-              style={{ marginLeft: 'auto', padding: '4px 12px', borderRadius: '16px', fontSize: '13px', background: '#4CAF50', color: '#fff', border: 'none' }}
-              onClick={handleRandom}
-            >一键随机</Button>
-          </View>
+          <Button
+            style={{ width: '100%', marginBottom: '12px', borderRadius: '8px', fontSize: '14px', background: '#4CAF50', color: '#fff', border: 'none' }}
+            onClick={handleRandom}
+          >一键随机分组</Button>
         )}
 
         {/* 各分组卡片 */}

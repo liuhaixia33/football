@@ -1,0 +1,66 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build backend
+        working-directory: ./backend
+        run: mvn clean package -DskipTests
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/team-backend-1.0.0.jar
+
+      - name: Deploy to ECS
+        if: github.ref == 'refs/heads/main'
+        env:
+          ECS_HOST: ${{ secrets.ECS_HOST }}
+          ECS_USER: ${{ secrets.ECS_USER }}
+          ECS_PASS: ${{ secrets.ECS_PASS }}
+        run: |
+          sudo apt-get install -y sshpass
+          sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no \
+            backend/target/team-backend-1.0.0.jar \
+            "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar"
+          sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no "$ECS_USER@$ECS_HOST" \
+            "systemctl restart football-team"
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install & build
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build:weapp
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/

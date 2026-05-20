@@ -14,6 +14,7 @@ export default defineAppConfig({
     'pages/member-fee/index',
     'pages/my/index',
     'pages/grouping/index',
+    'pages/grouping/poster',
   ],
   tabBar: {
     custom: true,

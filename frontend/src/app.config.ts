@@ -13,6 +13,7 @@ export default defineAppConfig({
     'pages/finance-record/index',
     'pages/member-fee/index',
     'pages/my/index',
+    'pages/grouping/index',
   ],
   tabBar: {
     custom: true,

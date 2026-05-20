@@ -321,6 +321,22 @@ export default function ActivityDetailPage() {
                   {t('act.record')}
                 </Button>
               )}
+              {isCaptainOrAdmin() && a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
+                <Button
+                  style={{
+                    background: 'rgba(0,228,114,0.12)', color: '#00e472',
+                    border: '1px solid rgba(0,228,114,0.25)', borderRadius: px(12),
+                    fontSize: px(28), padding: `${px(13)} 0`,
+                  }}
+                  onClick={() =>
+                    Taro.navigateTo({
+                      url: `/pages/grouping/index?activityId=${activityId}&title=${encodeURIComponent(a.title)}&startTime=${encodeURIComponent(a.startTime)}&location=${encodeURIComponent(a.location ?? '')}&status=${a.status}`,
+                    })
+                  }
+                >
+                  分组管理
+                </Button>
+              )}
               <Button
                 openType='share'
                 style={{

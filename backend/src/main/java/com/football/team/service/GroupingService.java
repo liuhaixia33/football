@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +35,14 @@ public class GroupingService {
 
         List<ActivityGroup> groups = groupRepository.findByActivityIdOrderByGroupIndex(activityId);
 
-        Set<Long> groupedUserIds = groups.stream()
-            .flatMap(g -> groupMemberRepository.findByGroupId(g.getId()).stream())
+        Map<Long, List<ActivityGroupMember>> membersByGroup = groups.stream()
+            .collect(Collectors.toMap(
+                ActivityGroup::getId,
+                g -> groupMemberRepository.findByGroupId(g.getId())
+            ));
+
+        Set<Long> groupedUserIds = membersByGroup.values().stream()
+            .flatMap(Collection::stream)
             .map(ActivityGroupMember::getUserId)
             .collect(Collectors.toSet());
 
@@ -43,7 +50,7 @@ public class GroupingService {
             .stream().map(ActivityRegistration::getUserId).toList();
 
         List<GroupingRes.GroupDto> groupDtos = groups.stream().map(g -> {
-            List<GroupingRes.MemberDto> members = groupMemberRepository.findByGroupId(g.getId())
+            List<GroupingRes.MemberDto> members = membersByGroup.getOrDefault(g.getId(), List.of())
                 .stream().map(m -> toMemberDto(m.getUserId())).toList();
             return GroupingRes.GroupDto.builder()
                 .id(g.getId()).index(g.getGroupIndex()).name(g.getGroupName())
@@ -157,7 +164,8 @@ public class GroupingService {
     }
 
     private GroupingRes.MemberDto toMemberDto(Long userId) {
-        User u = userRepository.findById(userId).orElseThrow();
+        User u = userRepository.findById(userId)
+            .orElseThrow(() -> BusinessException.notFound("用户不存在: " + userId));
         return GroupingRes.MemberDto.builder()
             .userId(u.getId()).nickname(u.getNickname()).avatarUrl(u.getAvatarUrl())
             .build();

@@ -59,97 +59,82 @@ export default function LoginPage() {
   }
 
   return (
-    <View style={{ height: '100%', background: C.bg, display: 'flex', flexDirection: 'column' }}>
+    <View style={{ height: '100%', background: 'linear-gradient(180deg, #0e2d1e 0%, #0b0f18 40%)', display: 'flex', flexDirection: 'column' }}>
 
-      {/* ── Top brand area: ~40% height ── */}
+      {/* ── Brand ── */}
       <View style={{
-        flex: 2,
         display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'flex-end',
-        paddingBottom: px(32),
-        background: 'linear-gradient(180deg, #0e2d1e 0%, #0b0f18 100%)',
+        alignItems: 'center', justifyContent: 'center',
+        paddingTop: px(80), paddingBottom: px(24),
       }}>
-        {/* Ball icon */}
         <View style={{
-          width: px(100), height: px(100), borderRadius: '50%',
+          width: px(88), height: px(88), borderRadius: '50%',
           background: C.primaryDim,
           border: `2px solid rgba(0,228,114,0.25)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginBottom: px(20),
+          marginBottom: px(16),
         }}>
-          <Text style={{ fontSize: px(94) }}>⚽</Text>
+          <Text style={{ fontSize: px(80) }}>⚽</Text>
         </View>
         <Text style={{
-          fontSize: px(52), fontWeight: '900', color: C.text, display: 'block',
+          fontSize: px(48), fontWeight: '900', color: C.text,
           textAlign: 'center', letterSpacing: '-0.02em', marginBottom: px(6),
         }}>
           {t('login.title')}
         </Text>
-        <Text style={{ fontSize: px(28), color: C.text2, textAlign: 'center', display: 'block' }}>
+        <Text style={{ fontSize: px(26), color: C.text2, textAlign: 'center' }}>
           加入你的球队，记录每一场比赛
         </Text>
       </View>
 
-      {/* ── Form area: ~60% height ── */}
-      <View style={{
-        flex: 3,
-        padding: `${px(32)} ${px(24)} ${px(48)}`,
-        display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',
-      }}>
+      {/* ── Avatar ── */}
+      <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <Button
+          openType="chooseAvatar"
+          onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
+          style={{ background: 'transparent', border: 'none', padding: 0 }}
+        >
+          {avatarDisplay
+            ? <Image src={avatarDisplay} style={{
+                width: px(140), height: px(140), borderRadius: '50%',
+                border: `3px solid ${C.primary}`,
+                display: 'block',
+              }} />
+            : <View style={{
+                width: px(140), height: px(140), borderRadius: '50%',
+                background: C.surface2, border: `2px dashed rgba(0,228,114,0.35)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Text style={{ fontSize: px(80) }}>📷</Text>
+              </View>
+          }
+        </Button>
+        <Text style={{ fontSize: px(24), color: C.text3, marginTop: px(12) }}>
+          {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
+        </Text>
+      </View>
 
-        {/* Avatar */}
-        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: px(32) }}>
-          <Button
-            openType="chooseAvatar"
-            onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
-            style={{ background: 'transparent', border: 'none', padding: 0 }}
-          >
-            {avatarDisplay
-              ? <Image src={avatarDisplay} style={{
-                  width: px(120), height: px(120), borderRadius: '50%',
-                  border: `3px solid ${C.primary}`,
-                  display: 'block',
-                }} />
-              : <View style={{
-                  width: px(120), height: px(120), borderRadius: '50%',
-                  background: C.surface2, border: `2px dashed rgba(0,228,114,0.35)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Text style={{ fontSize: px(72) }}>📷</Text>
-                </View>
-            }
-          </Button>
-          <Text style={{ fontSize: px(24), color: C.text3, marginTop: px(10) }}>
-            {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
-          </Text>
-        </View>
-
-        {/* Nickname */}
-        <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(8) }}>
-          <Input
-            type="nickname"
-            value={nickname}
-            onInput={(e) => setNickname(e.detail.value)}
-            onBlur={(e) => setNickname(e.detail.value)}
-            placeholder={t('login.nickname_placeholder')}
-            style={{
-              width: px(400),
-              height: px(52),
-              background: C.surface,
-              borderRadius: px(14),
-              padding: `0 ${px(16)}`,
-              fontSize: px(32),
-              border: `1px solid ${C.border}`,
-              color: C.text,
-              textAlign: 'center',
-            }}
-          />
-        </View>
-
-        {/* Login button */}
+      {/* ── Nickname + Login button ── */}
+      <View style={{ padding: `0 ${px(40)} ${px(64)}`, display: 'flex', flexDirection: 'column', gap: px(20) }}>
+        <Input
+          type="nickname"
+          value={nickname}
+          onInput={(e) => setNickname(e.detail.value)}
+          onBlur={(e) => setNickname(e.detail.value)}
+          placeholder={t('login.nickname_placeholder')}
+          style={{
+            height: px(56),
+            background: C.surface,
+            borderRadius: px(14),
+            padding: `0 ${px(20)}`,
+            fontSize: px(32),
+            border: `1px solid ${C.border}`,
+            color: C.text,
+            textAlign: 'center',
+          }}
+        />
         <Button
           style={{
-            marginTop: px(32),
             background: canLogin ? C.primary : 'rgba(255,255,255,0.07)',
             color: canLogin ? '#0b0f18' : C.text3,
             borderRadius: px(16),

@@ -2,7 +2,7 @@
   display: flex;
   align-items: flex-start;
   height: calc(80px + env(safe-area-inset-bottom));
-  background: #131a27;
+  background: #0d1a0f;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   padding-top: 4px;
   padding-bottom: env(safe-area-inset-bottom);
@@ -27,7 +27,7 @@
 
   .tab-text {
     font-size: 22rpx;
-    color: #3d526a;
+    color: #3a5a40;
     margin-top: 4px;
     font-weight: 500;
     letter-spacing: 0.03em;
@@ -41,12 +41,12 @@
       left: 20%;
       right: 20%;
       height: 2px;
-      background: #00e472;
+      background: #4ade80;
       border-radius: 0 0 2px 2px;
     }
 
     .tab-text {
-      color: #00e472;
+      color: #4ade80;
       font-weight: 600;
     }
   }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { View, Text, Input, Button } from '@tarojs/components'
+import { View, Text, Input, Button, Picker } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
@@ -7,15 +7,15 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.09)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
   draw: '#ffb700',
 }
 
@@ -23,6 +23,53 @@ const fmt = (iso: string) => {
   const d = new Date(iso)
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+// 从 "YYYY-MM-DD HH:mm" 拆出日期和时间部分
+const splitDT = (v: string) => {
+  const [date = '', time = ''] = v.split(' ')
+  return { date, time }
+}
+
+// 两个 Picker 拼合的日期时间选择器
+function DateTimeField({
+  value, onChange, inputStyle,
+}: { value: string; onChange: (v: string) => void; inputStyle: React.CSSProperties }) {
+  const { date, time } = splitDT(value)
+  const todayStr = fmt(new Date().toISOString()).split(' ')[0]
+
+  return (
+    <View style={{ display: 'flex', gap: px(8), marginBottom: px(20) }}>
+      <Picker
+        mode='date'
+        value={date || todayStr}
+        onChange={e => {
+          const d = e.detail.value as string
+          onChange(`${d} ${time || '09:00'}`)
+        }}
+      >
+        <View style={{ ...inputStyle, marginBottom: 0, flex: 1, display: 'flex', alignItems: 'center' }}>
+          <Text style={{ fontSize: px(30), color: date ? C.text : C.text3 }}>
+            {date || '选择日期'}
+          </Text>
+        </View>
+      </Picker>
+      <Picker
+        mode='time'
+        value={time || '09:00'}
+        onChange={e => {
+          const t = e.detail.value as string
+          onChange(`${date || todayStr} ${t}`)
+        }}
+      >
+        <View style={{ ...inputStyle, marginBottom: 0, width: px(110), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontSize: px(30), color: time ? C.text : C.text3 }}>
+            {time || '时间'}
+          </Text>
+        </View>
+      </Picker>
+    </View>
+  )
 }
 
 export default function ActivityCreatePage() {
@@ -82,11 +129,11 @@ export default function ActivityCreatePage() {
       Taro.showToast({ title: t('act_form.err_required'), icon: 'none' })
       return false
     }
-    if (isNaN(new Date(startTime).getTime())) {
+    if (!startTime.includes(' ') || isNaN(new Date(startTime.replace(' ', 'T')).getTime())) {
       Taro.showToast({ title: t('act_form.err_start_fmt'), icon: 'none' })
       return false
     }
-    if (deadline && isNaN(new Date(deadline).getTime())) {
+    if (deadline && isNaN(new Date(deadline.replace(' ', 'T')).getTime())) {
       Taro.showToast({ title: t('act_form.err_deadline_fmt'), icon: 'none' })
       return false
     }
@@ -97,13 +144,15 @@ export default function ActivityCreatePage() {
     return true
   }
 
+  const toISO = (v: string) => new Date(v.replace(' ', 'T') + ':00').toISOString()
+
   const buildActivityBody = () => ({
     type,
     title: title.trim(),
     location: location.trim(),
-    startTime: new Date(startTime).toISOString(),
+    startTime: toISO(startTime),
     opponent: type === 'MATCH' ? (opponent.trim() || undefined) : undefined,
-    deadline: deadline ? new Date(deadline).toISOString() : undefined,
+    deadline: deadline ? toISO(deadline) : undefined,
     maxPlayers: maxPlayers ? Number(maxPlayers) : undefined,
   })
 
@@ -205,7 +254,7 @@ export default function ActivityCreatePage() {
           />
           <Button
             style={{
-              background: C.primary, color: '#0b0f18', borderRadius: px(14),
+              background: C.primary, color: '#0f1010', borderRadius: px(14),
               border: 'none', fontSize: px(32), fontWeight: '700',
               padding: `${px(14)} 0`,
             }}
@@ -283,20 +332,10 @@ export default function ActivityCreatePage() {
         />
 
         <Text style={labelStyle}>{t('act_form.label_start')}</Text>
-        <Input
-          value={startTime}
-          onInput={e => setStartTime(e.detail.value)}
-          placeholder={t('act_form.placeholder_start')}
-          style={inputStyle}
-        />
+        <DateTimeField value={startTime} onChange={setStartTime} inputStyle={inputStyle} />
 
         <Text style={labelStyle}>{t('act_form.label_deadline')}</Text>
-        <Input
-          value={deadline}
-          onInput={e => setDeadline(e.detail.value)}
-          placeholder={t('act_form.placeholder_deadline')}
-          style={inputStyle}
-        />
+        <DateTimeField value={deadline} onChange={setDeadline} inputStyle={inputStyle} />
 
         <Text style={labelStyle}>{t('act_form.label_max')}</Text>
         <Input
@@ -309,7 +348,7 @@ export default function ActivityCreatePage() {
 
         <Button
           style={{
-            background: C.primary, color: '#0b0f18', borderRadius: px(14),
+            background: C.primary, color: '#0f1010', borderRadius: px(14),
             border: 'none', fontSize: px(32), fontWeight: '700',
             padding: `${px(14)} 0`,
           }}

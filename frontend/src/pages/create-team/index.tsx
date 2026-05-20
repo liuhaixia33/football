@@ -7,15 +7,15 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.09)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
 }
 
 export default function CreateTeamPage() {
@@ -106,7 +106,7 @@ export default function CreateTeamPage() {
 
         <Button
           style={{
-            background: C.primary, color: '#0b0f18', borderRadius: px(14),
+            background: C.primary, color: '#0f1010', borderRadius: px(14),
             border: 'none', fontSize: px(32), fontWeight: '700',
             padding: `${px(14)} 0`,
           }}

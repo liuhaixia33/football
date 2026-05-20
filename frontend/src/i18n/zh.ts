@@ -13,7 +13,7 @@ export const zh: Record<string, string> = {
   'tab.finance': '财务',
   'tab.my': '我的',
 
-  'login.title': '足球队管理',
+  'login.title': '一脚定江山，全场听我喊',
   'login.btn': '微信一键登录',
   'login.fail': '登录失败，请重试',
   'login.tap_avatar': '点击设置头像',
@@ -59,7 +59,7 @@ export const zh: Record<string, string> = {
   'act.lose': '负',
   'act.join': '我要参加',
   'act.cancel_join': '取消报名',
-  'act.close': '关闭报名',
+  'act.close': '取消活动',
   'act.edit': '编辑活动',
   'act.record': '录入比分',
   'act.share': '分享给好友',

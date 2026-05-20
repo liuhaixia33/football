@@ -8,16 +8,16 @@ import type { ActivityRes, ActivityDetailRes, RegStatus } from '../../types/api'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.07)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
-  win: '#00e472',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
+  win: '#22c55e',
   draw: '#ffb700',
   lose: '#ff4d5a',
 }
@@ -46,7 +46,7 @@ function FeaturedCard({
   const visibleAv = joined.slice(0, MAX_AV)
 
   const rsvpBtns: { status: RegStatus; label: string; color: string; dimBg: string }[] = [
-    { status: 'JOINED',    label: '参加', color: C.win,  dimBg: 'rgba(0,228,114,0.14)' },
+    { status: 'JOINED',    label: '参加', color: C.win,  dimBg: 'rgba(34,197,94,0.14)' },
     { status: 'TENTATIVE', label: '观望', color: C.draw, dimBg: 'rgba(255,183,0,0.14)' },
     { status: 'ABSENT',    label: '不去', color: C.lose, dimBg: 'rgba(255,77,90,0.12)' },
   ]
@@ -55,10 +55,10 @@ function FeaturedCard({
     <View
       onClick={onPress}
       style={{
-        background: 'linear-gradient(150deg, #0c2b1b 0%, #0e1e30 55%, #0b0f18 100%)',
+        background: 'linear-gradient(150deg, #0b2a10 0%, #0c2212 55%, #0f1010 100%)',
         borderRadius: px(22),
         marginBottom: px(14),
-        border: `1px solid rgba(0,228,114,0.22)`,
+        border: `1px solid rgba(34,197,94,0.22)`,
         overflow: 'hidden',
       }}
     >
@@ -82,7 +82,7 @@ function FeaturedCard({
           <Text style={{
             fontSize: px(24), color: C.primary, fontWeight: '700',
             background: C.primaryDim, borderRadius: '9999px', padding: '3px 12px',
-            border: '1px solid rgba(0,228,114,0.25)',
+            border: '1px solid rgba(34,197,94,0.25)',
           }}>
             报名中
           </Text>
@@ -125,13 +125,13 @@ function FeaturedCard({
                 {r.avatarUrl ? (
                   <Image src={r.avatarUrl} style={{
                     width: px(40), height: px(40), borderRadius: '50%',
-                    border: '2px solid #0b0f18', display: 'block',
+                    border: '2px solid #0f1010', display: 'block',
                   }} />
                 ) : (
                   <View style={{
                     width: px(40), height: px(40), borderRadius: '50%',
                     background: `hsl(${(r.userId * 137) % 360}, 40%, 22%)`,
-                    border: '2px solid #0b0f18',
+                    border: '2px solid #0f1010',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     <Text style={{ fontSize: px(26), color: C.text2, fontWeight: '700' }}>
@@ -145,7 +145,7 @@ function FeaturedCard({
               <View style={{
                 marginLeft: px(-12),
                 width: px(40), height: px(40), borderRadius: '50%',
-                background: C.surface2, border: '2px solid #0b0f18',
+                background: C.surface2, border: '2px solid #0f1010',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Text style={{ fontSize: px(22), color: C.text2, fontWeight: '700' }}>+{extra}</Text>
@@ -326,7 +326,7 @@ export default function HomePage() {
               padding: `${px(7)} ${px(16)}`,
             }}
           >
-            <Text style={{ fontSize: px(26), color: '#0b0f18', fontWeight: '700' }}>
+            <Text style={{ fontSize: px(26), color: '#0f1010', fontWeight: '700' }}>
               + {t('home.create')}
             </Text>
           </View>

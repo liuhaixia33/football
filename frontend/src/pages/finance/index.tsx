@@ -8,16 +8,16 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.07)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
-  win: '#00e472',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
+  win: '#22c55e',
   draw: '#ffb700',
   lose: '#ff4d5a',
 }
@@ -85,7 +85,7 @@ export default function FinancePage() {
         {/* 余额卡片 */}
         {summary && (
           <View style={{
-            background: `linear-gradient(135deg, #0d2b1a 0%, #0b1f2f 100%)`,
+            background: `linear-gradient(135deg, #0b2a10 0%, #091a0a 100%)`,
             padding: `${px(24)} ${px(20)}`,
             marginBottom: px(14),
             borderRadius: px(20),
@@ -97,7 +97,7 @@ export default function FinancePage() {
             <View style={{
               position: 'absolute', top: px(-40), right: px(-40),
               width: px(140), height: px(140), borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(0,228,114,0.08) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(34,197,94,0.08) 0%, transparent 70%)',
             }} />
 
             <Text style={{ fontSize: px(24), color: 'rgba(0,228,114,0.6)', display: 'block',
@@ -152,7 +152,7 @@ export default function FinancePage() {
             >
               <View style={{
                 width: px(36), height: px(36), borderRadius: px(10),
-                background: r.type === 'INCOME' ? 'rgba(0,228,114,0.12)' : 'rgba(255,77,90,0.12)',
+                background: r.type === 'INCOME' ? 'rgba(34,197,94,0.12)' : 'rgba(255,77,90,0.12)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: px(12),
                 flexShrink: 0,
               }}>

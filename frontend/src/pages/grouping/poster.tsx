@@ -19,7 +19,7 @@ function drawHeader(ctx: any, title: string, startTime: string, location: string
   ctx.fillRect(0, 0, W, HEADER_H)
 
   // Thin green accent line at bottom of header
-  ctx.setFillStyle('#00e472')
+  ctx.setFillStyle('#22c55e')
   ctx.fillRect(0, HEADER_H - 2, W, 2)
 
   ctx.setFillStyle('#ffffff')
@@ -234,8 +234,8 @@ export default function GroupingPosterPage() {
   }
 
   return (
-    <View style={{ padding: '16px', background: '#0b0f18', minHeight: '100vh' }}>
-      <Text style={{ fontSize: '14px', color: '#7a8ca3', display: 'block', marginBottom: '12px' }}>
+    <View style={{ padding: '16px', background: '#0f1010', minHeight: '100vh' }}>
+      <Text style={{ fontSize: '14px', color: '#8a9e8a', display: 'block', marginBottom: '12px' }}>
         {drawing ? '海报生成中...' : '海报已生成，可保存或分享到微信群。'}
       </Text>
       <Canvas
@@ -255,7 +255,7 @@ export default function GroupingPosterPage() {
         </View>
       )}
       <Button
-        style={{ marginTop: '10px', background: 'rgba(255,255,255,0.07)', color: '#7a8ca3',
+        style={{ marginTop: '10px', background: 'rgba(255,255,255,0.07)', color: '#8a9e8a',
                  border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '14px' }}
         onClick={() => grouping && drawPoster(grouping)}
       >重新生成</Button>

@@ -7,16 +7,16 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.09)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
-  win: '#00e472',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
+  win: '#22c55e',
   lose: '#ff4d5a',
 }
 
@@ -100,10 +100,10 @@ export default function FinanceRecordPage() {
               style={{
                 flex: 1, textAlign: 'center', padding: px(12), borderRadius: px(12),
                 background: type === typeVal
-                  ? (typeVal === 'INCOME' ? 'rgba(0,228,114,0.15)' : 'rgba(255,77,90,0.15)')
+                  ? (typeVal === 'INCOME' ? 'rgba(34,197,94,0.15)' : 'rgba(255,77,90,0.15)')
                   : C.surface2,
                 border: type === typeVal
-                  ? `1.5px solid ${typeVal === 'INCOME' ? 'rgba(0,228,114,0.4)' : 'rgba(255,77,90,0.4)'}`
+                  ? `1.5px solid ${typeVal === 'INCOME' ? 'rgba(34,197,94,0.4)' : 'rgba(255,77,90,0.4)'}`
                   : `1px solid ${C.border}`,
               }}
             >
@@ -144,7 +144,7 @@ export default function FinanceRecordPage() {
               onClick={() => setCategory(c)}
               style={{
                 padding: `${px(7)} ${px(14)}`, borderRadius: '9999px', fontSize: px(26),
-                border: `1.5px solid ${category === c ? 'rgba(0,228,114,0.4)' : C.border}`,
+                border: `1.5px solid ${category === c ? 'rgba(34,197,94,0.4)' : C.border}`,
                 color: category === c ? C.primary : C.text2,
                 background: category === c ? C.primaryDim : C.surface2,
                 fontWeight: category === c ? '700' : '400',
@@ -175,7 +175,7 @@ export default function FinanceRecordPage() {
 
         <Button
           style={{
-            background: C.primary, color: '#0b0f18', borderRadius: px(14),
+            background: C.primary, color: '#0f1010', borderRadius: px(14),
             border: 'none', fontSize: px(32), fontWeight: '700',
             padding: `${px(14)} 0`,
           }}

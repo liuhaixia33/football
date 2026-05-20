@@ -6,15 +6,15 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.09)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
 }
 
 export default function JoinTeamPage() {
@@ -84,7 +84,7 @@ export default function JoinTeamPage() {
           placeholder='请输入 8 位邀请码'
           maxlength={8}
           style={{
-            border: `1.5px solid ${code ? 'rgba(0,228,114,0.4)' : C.border}`,
+            border: `1.5px solid ${code ? 'rgba(34,197,94,0.4)' : C.border}`,
             borderRadius: px(14), padding: `${px(18)} ${px(14)}`,
             marginBottom: px(32), fontSize: px(52), letterSpacing: px(8),
             textAlign: 'center', background: C.surface2, color: C.primary,
@@ -94,7 +94,7 @@ export default function JoinTeamPage() {
         <Button
           style={{
             background: code.trim().length > 0 ? C.primary : 'rgba(255,255,255,0.07)',
-            color: code.trim().length > 0 ? '#0b0f18' : C.text3,
+            color: code.trim().length > 0 ? '#0f1010' : C.text3,
             borderRadius: px(14), border: 'none',
             fontSize: px(32), fontWeight: '700', padding: `${px(14)} 0`,
           }}

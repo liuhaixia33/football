@@ -3,28 +3,26 @@ import { View, Text, Button, ScrollView, Image } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { useAuthStore } from '../../store/auth'
-import type { ActivityDetailRes, RegStatus } from '../../types/api'
+import type { ActivityDetailRes } from '../../types/api'
 import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.07)',
   borderMed: 'rgba(255,255,255,0.12)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
-  win: '#00e472',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
+  win: '#22c55e',
   draw: '#ffb700',
   lose: '#ff4d5a',
 }
 
-// RSVP_BAR_HEIGHT — reserve this space at the bottom of the scroll area
-const RSVP_H = 80
 
 export default function ActivityDetailPage() {
   const [detail, setDetail] = useState<ActivityDetailRes | null>(null)
@@ -59,26 +57,13 @@ export default function ActivityDetailPage() {
   }
 
   const a = detail.activity
-  const isOpen = a.status === 'OPEN' && !(a.deadline && new Date(a.deadline) < new Date())
-
-  const handleRegister = async (status: RegStatus) => {
-    try {
-      if (a.myStatus === status) {
-        await activityApi.cancelRegister(activityId)
-      } else {
-        await activityApi.register(activityId, status)
-      }
-      const updated = await activityApi.detail(activityId)
-      setDetail(updated)
-    } catch (e: unknown) {
-      Taro.showToast({ title: e instanceof Error ? e.message : t('common.error'), icon: 'none' })
-    }
-  }
+  const deadlinePassed = !!(a.deadline && new Date(a.deadline) < new Date())
+  const isOpen = a.status === 'OPEN' && !deadlinePassed
 
   const handleClose = async () => {
     try {
       await activityApi.close(activityId)
-      Taro.showToast({ title: '已关闭报名', icon: 'success' })
+      Taro.showToast({ title: '活动已取消', icon: 'success' })
       setDetail(await activityApi.detail(activityId))
     } catch (e: unknown) {
       Taro.showToast({ title: e instanceof Error ? e.message : t('common.error'), icon: 'none' })
@@ -141,7 +126,7 @@ export default function ActivityDetailPage() {
 
         {/* ── Hero title section — no card, part of the page itself ── */}
         <View style={{
-          background: `linear-gradient(160deg, ${isOpen ? '#0e2d1e' : '#131a27'} 0%, #0b0f18 100%)`,
+          background: `linear-gradient(160deg, ${isOpen ? '#162016' : '#181c18'} 0%, #0f1010 100%)`,
           padding: `${px(20)} ${px(18)} ${px(22)}`,
           borderBottom: `1px solid ${C.border}`,
         }}>
@@ -156,7 +141,7 @@ export default function ActivityDetailPage() {
                 borderRadius: '9999px', padding: '3px 10px',
                 letterSpacing: '0.05em',
               }}>
-                {isOpen ? '报名中' : a.status === 'FINISHED' ? '已结束' : '已关闭'}
+                {isOpen ? '报名中' : a.status === 'FINISHED' ? '已结束' : deadlinePassed ? '已截止' : '已关闭'}
               </Text>
             </View>
             <Text style={{
@@ -169,7 +154,7 @@ export default function ActivityDetailPage() {
               <Text style={{
                 fontSize: px(22), fontWeight: '700',
                 color: a.myStatus === 'JOINED' ? C.win : a.myStatus === 'TENTATIVE' ? C.draw : C.text3,
-                background: a.myStatus === 'JOINED' ? 'rgba(0,228,114,0.12)'
+                background: a.myStatus === 'JOINED' ? 'rgba(34,197,94,0.12)'
                   : a.myStatus === 'TENTATIVE' ? 'rgba(255,183,0,0.12)' : 'rgba(255,255,255,0.05)',
                 borderRadius: '9999px', padding: '3px 10px',
               }}>
@@ -281,123 +266,128 @@ export default function ActivityDetailPage() {
           )}
         </View>
 
-        {/* ── Admin actions ── */}
-        {isCaptainOrAdmin() && (
-          <View style={{ padding: `${px(16)} ${px(18)} ${isOpen ? px(16 + RSVP_H) : px(40)}`, display: 'flex', flexDirection: 'column', gap: px(10) }}>
+        {/* scroll 底部留白，给固定栏腾位置 */}
+        <View style={{ height: px(isCaptainOrAdmin() ? 80 : deadlinePassed ? 72 : 0) }} />
+      </ScrollView>
 
-            {/* 管理类：关闭 + 编辑 并排（OPEN 状态） */}
+      {/* ══════════════════════════════════════════
+          固定底栏：统一处理所有场景
+          ══════════════════════════════════════════ */}
+
+      {/* ── 场景 A：管理员 ── */}
+      {isCaptainOrAdmin() && (
+        <View style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0,
+          background: C.surface,
+          borderTop: `1px solid ${C.borderMed}`,
+          paddingBottom: px(16),
+        }}>
+
+          {/* 管理操作行：所有按钮等宽 flex:1 */}
+          <View style={{ display: 'flex', gap: px(8), padding: `${px(12)} ${px(14)} 0`, alignItems: 'center' }}>
+
+            {/* 关闭报名（OPEN） */}
             {a.status === 'OPEN' && (
-              <View style={{ display: 'flex', gap: px(10) }}>
-                <Button
-                  style={{
-                    flex: 1, background: 'rgba(255,255,255,0.05)', color: C.text2,
-                    border: `1px solid ${C.border}`, borderRadius: px(12),
-                    fontSize: px(27), padding: `${px(12)} 0`,
-                  }}
-                  onClick={handleClose}
-                >
-                  {t('act.close')}
-                </Button>
-                <Button
-                  style={{
-                    flex: 1, background: 'rgba(77,166,255,0.1)', color: '#4da6ff',
-                    border: '1px solid rgba(77,166,255,0.22)', borderRadius: px(12),
-                    fontSize: px(27), padding: `${px(12)} 0`,
-                  }}
-                  onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?editId=${activityId}` })}
-                >
-                  {t('act.edit')}
-                </Button>
-              </View>
-            )}
-
-            {/* 主操作：记录比赛（MATCH + CLOSED） */}
-            {a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
-              <Button
-                style={{
-                  background: 'rgba(255,183,0,0.12)', color: C.draw,
-                  border: '1px solid rgba(255,183,0,0.25)', borderRadius: px(12),
-                  fontSize: px(28), padding: `${px(13)} 0`,
-                }}
-                onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?resultFor=${activityId}` })}
-              >
-                {t('act.record')}
+              <Button onClick={handleClose} style={{
+                flex: 1,
+                background: 'rgba(255,255,255,0.04)', color: C.text2,
+                border: `1px solid ${C.border}`, borderRadius: px(10),
+                fontSize: px(26), padding: `${px(11)} 0`,
+              }}>
+                {t('act.close')}
               </Button>
             )}
 
-            {/* 主操作：分组管理（TRAINING） */}
+            {/* 编辑（OPEN） */}
+            {a.status === 'OPEN' && (
+              <Button
+                onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?editId=${activityId}` })}
+                style={{
+                  flex: 1,
+                  background: 'rgba(77,166,255,0.12)', color: '#4da6ff',
+                  border: '1px solid rgba(77,166,255,0.25)', borderRadius: px(10),
+                  fontSize: px(26), fontWeight: '600', padding: `${px(11)} 0`,
+                }}
+              >
+                {t('act.edit')}
+              </Button>
+            )}
+
+            {/* 分组管理（TRAINING） */}
             {a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
               <Button
+                onClick={() => Taro.navigateTo({
+                  url: `/pages/grouping/index?activityId=${activityId}&title=${encodeURIComponent(a.title)}&startTime=${encodeURIComponent(a.startTime)}&location=${encodeURIComponent(a.location ?? '')}&status=${a.status}`,
+                })}
                 style={{
-                  background: 'rgba(0,228,114,0.12)', color: C.primary,
-                  border: '1px solid rgba(0,228,114,0.25)', borderRadius: px(12),
-                  fontSize: px(28), padding: `${px(13)} 0`,
+                  flex: 1,
+                  background: 'rgba(34,197,94,0.10)', color: C.primary,
+                  border: '1px solid rgba(34,197,94,0.22)', borderRadius: px(10),
+                  fontSize: px(26), fontWeight: '600', padding: `${px(11)} 0`,
                 }}
-                onClick={() =>
-                  Taro.navigateTo({
-                    url: `/pages/grouping/index?activityId=${activityId}&title=${encodeURIComponent(a.title)}&startTime=${encodeURIComponent(a.startTime)}&location=${encodeURIComponent(a.location ?? '')}&status=${a.status}`,
-                  })
-                }
               >
                 分组管理
               </Button>
             )}
 
-            {/* 次要：分享 */}
-            <Button
-              openType='share'
-              style={{
-                background: 'transparent', color: C.text3,
-                border: `1px solid ${C.border}`, borderRadius: px(12),
-                fontSize: px(26), padding: `${px(10)} 0`,
-              }}
-            >
+            {/* 记录比赛（MATCH + 已关闭 + 无结果） */}
+            {a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
+              <Button
+                onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?resultFor=${activityId}` })}
+                style={{
+                  flex: 1,
+                  background: 'rgba(255,183,0,0.12)', color: C.draw,
+                  border: '1px solid rgba(255,183,0,0.25)', borderRadius: px(10),
+                  fontSize: px(26), fontWeight: '600', padding: `${px(11)} 0`,
+                }}
+              >
+                {t('act.record')}
+              </Button>
+            )}
+
+            {/* 分享 — 等宽 */}
+            <Button openType='share' style={{
+              flex: 1,
+              background: 'rgba(255,255,255,0.04)', color: C.text3,
+              border: `1px solid ${C.border}`, borderRadius: px(10),
+              fontSize: px(26), padding: `${px(11)} 0`,
+            }}>
               {t('act.share')}
             </Button>
           </View>
-        )}
+        </View>
+      )}
 
-        {/* Bottom padding when RSVP bar is showing and there are no admin actions */}
-        {isOpen && !isCaptainOrAdmin() && (
-          <View style={{ height: px(RSVP_H + 16) }} />
-        )}
-      </ScrollView>
-
-      {/* ── Sticky RSVP bar — only when activity is open ── */}
-      {isOpen && (
+      {/* ── 场景 C：截止时间已过（活动仍 OPEN）── */}
+      {!isCaptainOrAdmin() && !isOpen && deadlinePassed && a.status === 'OPEN' && (
         <View style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
-          background: C.surface,
-          borderTop: `1px solid ${C.borderMed}`,
-          padding: `${px(12)} ${px(14)} ${px(20)}`,
-          display: 'flex',
-          gap: px(8),
+          background: 'rgba(19,26,39,0.97)',
+          borderTop: `1px solid rgba(255,183,0,0.20)`,
+          padding: `${px(12)} ${px(18)} ${px(18)}`,
+          display: 'flex', alignItems: 'center', gap: px(10),
         }}>
-          {([
-            { status: 'JOINED'    as RegStatus, label: t('act.status_joined'),    active: C.win,  activeBg: 'rgba(0,228,114,0.12)' },
-            { status: 'TENTATIVE' as RegStatus, label: t('act.status_tentative'), active: C.draw, activeBg: 'rgba(255,183,0,0.12)' },
-            { status: 'ABSENT'    as RegStatus, label: t('act.status_absent'),    active: C.lose, activeBg: 'rgba(255,77,90,0.12)' },
-          ]).map(btn => {
-            const isActive = a.myStatus === btn.status
-            return (
-              <Button
-                key={btn.status}
-                style={{
-                  flex: 1,
-                  background: isActive ? btn.activeBg : 'rgba(255,255,255,0.05)',
-                  color: isActive ? btn.active : C.text2,
-                  border: `1px solid ${isActive ? btn.active + '44' : C.border}`,
-                  borderRadius: px(10),
-                  fontSize: px(26),
-                  fontWeight: isActive ? '700' : '400',
-                  padding: `${px(10)} 0`,
-                }}
-                onClick={() => handleRegister(btn.status)}
-              >
-                {btn.label}
-              </Button>
-            )
-          })}
+          <Text style={{ fontSize: px(26) }}>⏰</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: px(26), fontWeight: '700', color: C.draw, display: 'block' }}>
+              报名已截止
+            </Text>
+            {a.deadline && (
+              <Text style={{ fontSize: px(21), color: C.text3, marginTop: px(2) }}>
+                {fmtDate(a.deadline)} 截止
+              </Text>
+            )}
+          </View>
+          {a.myStatus && (
+            <Text style={{
+              fontSize: px(22), fontWeight: '700', borderRadius: '9999px', padding: '3px 10px',
+              color: a.myStatus === 'JOINED' ? C.win : a.myStatus === 'TENTATIVE' ? C.draw : C.text3,
+              background: a.myStatus === 'JOINED' ? 'rgba(34,197,94,0.12)'
+                : a.myStatus === 'TENTATIVE' ? 'rgba(255,183,0,0.12)' : 'rgba(255,255,255,0.05)',
+            }}>
+              {a.myStatus === 'JOINED' ? '已报名' : a.myStatus === 'TENTATIVE' ? '待定' : '未参加'}
+            </Text>
+          )}
         </View>
       )}
     </View>

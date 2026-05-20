@@ -16,4 +16,8 @@ export const teamApi = {
     api.delete<void>(`/api/v1/teams/${teamId}/members/${userId}`),
   leave: (teamId: number) =>
     api.delete<void>(`/api/v1/teams/${teamId}/leave`),
+  getTeam: (teamId: number) =>
+    api.get<Team>(`/api/v1/teams/${teamId}`),
+  updateTeam: (teamId: number, body: { name?: string; description?: string; logoUrl?: string }) =>
+    api.put<Team>(`/api/v1/teams/${teamId}`, body as Record<string, unknown>),
 }

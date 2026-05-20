@@ -6,15 +6,15 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.07)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
 }
 
 export default function TeamSelectPage() {
@@ -97,7 +97,7 @@ export default function TeamSelectPage() {
         style={{
           textAlign: 'center', padding: px(16), color: C.primary, fontSize: px(28),
           fontWeight: '600', background: C.primaryDim, borderRadius: px(16),
-          marginTop: px(8), border: `1px solid rgba(0,228,114,0.15)`,
+          marginTop: px(8), border: `1px solid rgba(34,197,94,0.15)`,
         }}
       >
         + {i18n('my.join_create')}

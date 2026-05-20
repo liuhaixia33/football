@@ -8,15 +8,15 @@ import type { MemberRes } from '../../types/api'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.07)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
   lose: '#ff4d5a',
 }
 
@@ -120,7 +120,7 @@ export default function MembersPage() {
                 display: 'flex', alignItems: 'center', gap: px(6),
                 padding: `${px(7)} ${px(14)}`, borderRadius: '9999px',
                 background: tab === item.key ? C.primaryDim : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${tab === item.key ? 'rgba(0,228,114,0.3)' : C.border}`,
+                border: `1px solid ${tab === item.key ? 'rgba(34,197,94,0.3)' : C.border}`,
               }}
             >
               <Text style={{
@@ -137,7 +137,7 @@ export default function MembersPage() {
                   padding: '0 4px',
                 }}>
                   <Text style={{ fontSize: px(22), fontWeight: '700',
-                                 color: tab === item.key ? '#0b0f18' : C.text2 }}>
+                                 color: tab === item.key ? '#0f1010' : C.text2 }}>
                     {item.count}
                   </Text>
                 </View>
@@ -220,7 +220,7 @@ export default function MembersPage() {
                           size='mini'
                           style={{
                             background: C.primaryDim, color: C.primary,
-                            border: `1px solid rgba(0,228,114,0.3)`,
+                            border: `1px solid rgba(34,197,94,0.3)`,
                             borderRadius: px(8), fontSize: px(24), fontWeight: '700',
                             padding: `${px(5)} ${px(12)}`,
                           }}

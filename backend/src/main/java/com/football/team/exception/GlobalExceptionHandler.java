@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -13,8 +14,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handle(BusinessException e) {
+        log.warn("业务异常 [{}]: {}", e.getCode(), e.getMessage());
         return ResponseEntity.status(e.getCode())
             .body(ApiResponse.error(e.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handle(NoResourceFoundException e) {
+        return ResponseEntity.status(404)
+            .body(ApiResponse.error(404, "Not Found"));
     }
 
     @ExceptionHandler(Exception.class)

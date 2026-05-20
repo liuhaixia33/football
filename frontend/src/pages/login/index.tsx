@@ -8,15 +8,15 @@ import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
 const C = {
-  primary: '#00e472',
-  primaryDim: 'rgba(0,228,114,0.12)',
-  bg: '#0b0f18',
-  surface: '#131a27',
-  surface2: '#1a2235',
+  primary: '#22c55e',
+  primaryDim: 'rgba(34,197,94,0.12)',
+  bg: '#0f1010',
+  surface: '#181c18',
+  surface2: '#1e2420',
   border: 'rgba(255,255,255,0.09)',
-  text: '#e8f0fb',
-  text2: '#7a8ca3',
-  text3: '#364a60',
+  text: '#e8ede8',
+  text2: '#8a9e8a',
+  text3: '#4a5a4a',
 }
 
 export default function LoginPage() {
@@ -59,7 +59,7 @@ export default function LoginPage() {
   }
 
   return (
-    <View style={{ height: '100%', background: 'linear-gradient(180deg, #0e2d1e 0%, #0b0f18 40%)', display: 'flex', flexDirection: 'column' }}>
+    <View style={{ height: '100%', background: 'linear-gradient(180deg, #162016 0%, #0f1010 40%)', display: 'flex', flexDirection: 'column' }}>
 
       {/* ── Brand ── */}
       <View style={{
@@ -70,7 +70,7 @@ export default function LoginPage() {
         <View style={{
           width: px(88), height: px(88), borderRadius: '50%',
           background: C.primaryDim,
-          border: `2px solid rgba(0,228,114,0.25)`,
+          border: `2px solid rgba(34,197,94,0.25)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           marginBottom: px(16),
         }}>
@@ -89,7 +89,7 @@ export default function LoginPage() {
 
       {/* ── Avatar + Nickname + Login ── */}
       <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-                     justifyContent: 'center', padding: `0 ${px(40)} ${px(40)}`, gap: px(24) }}>
+                     justifyContent: 'flex-start', padding: `${px(36)} ${px(40)} ${px(40)}`, gap: px(20) }}>
         <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Button
             openType="chooseAvatar"
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 }} />
               : <View style={{
                   width: px(140), height: px(140), borderRadius: '50%',
-                  background: C.surface2, border: `2px dashed rgba(0,228,114,0.35)`,
+                  background: C.surface2, border: `2px dashed rgba(34,197,94,0.35)`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Text style={{ fontSize: px(80) }}>📷</Text>
@@ -135,10 +135,10 @@ export default function LoginPage() {
         />
         <Button
           style={{
-            width: '100%',
-            marginTop: px(16),
+            width: px(520),
+            marginTop: px(52),
             background: canLogin ? C.primary : 'rgba(255,255,255,0.07)',
-            color: canLogin ? '#0b0f18' : C.text3,
+            color: canLogin ? '#0f1010' : C.text3,
             borderRadius: px(16),
             height: px(56),
             lineHeight: px(56),

@@ -59,7 +59,7 @@ export const en: Record<string, string> = {
   'act.lose': 'Defeat',
   'act.join': 'Join',
   'act.cancel_join': 'Cancel',
-  'act.close': 'Close Registration',
+  'act.close': 'Cancel Activity',
   'act.edit': 'Edit Activity',
   'act.record': 'Record Score',
   'act.share': 'Share',

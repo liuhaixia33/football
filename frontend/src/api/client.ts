@@ -29,11 +29,12 @@ export async function request<T>(
     header,
   })
 
+  const body = res.data as ApiResponse<T>
+
   if (res.statusCode >= 400) {
-    throw new Error(`服务器错误 (${res.statusCode})`)
+    throw new Error(body?.message || `服务器错误 (${res.statusCode})`)
   }
 
-  const body = res.data as ApiResponse<T>
   if (body.code === 401) {
     useAuthStore.getState().clear()
     Taro.reLaunch({ url: '/pages/login/index' })

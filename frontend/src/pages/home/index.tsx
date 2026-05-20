@@ -24,12 +24,70 @@ const C = {
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
-// Hero card for the next upcoming activity — shows roster + RSVP buttons
+const RSVP_BTNS: { status: RegStatus; label: string; color: string; dimBg: string }[] = [
+  { status: 'JOINED',    label: '参加', color: C.win,  dimBg: 'rgba(34,197,94,0.14)' },
+  { status: 'TENTATIVE', label: '观望', color: C.draw, dimBg: 'rgba(255,183,0,0.14)' },
+  { status: 'ABSENT',    label: '不去', color: C.lose, dimBg: 'rgba(255,77,90,0.12)' },
+]
+
+function RsvpRow({ myStatus, onRsvp }: { myStatus: RegStatus | null; onRsvp: (s: RegStatus) => void }) {
+  return (
+    <View
+      onClick={e => e.stopPropagation()}
+      style={{ display: 'flex', padding: `${px(10)} ${px(14)} ${px(14)}`, gap: px(8) }}
+    >
+      {RSVP_BTNS.map(btn => {
+        const active = myStatus === btn.status
+        return (
+          <View
+            key={btn.status}
+            onClick={e => { e.stopPropagation(); onRsvp(btn.status) }}
+            style={{
+              flex: 1, textAlign: 'center', padding: `${px(11)} 0`,
+              borderRadius: px(12),
+              background: active ? btn.dimBg : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${active ? btn.color + '50' : C.border}`,
+            }}
+          >
+            <Text style={{ fontSize: px(28), fontWeight: active ? '800' : '500',
+                           color: active ? btn.color : C.text3 }}>
+              {btn.label}
+            </Text>
+          </View>
+        )
+      })}
+    </View>
+  )
+}
+
+function RegPill({ r }: { r: { userId: number; nickname: string; avatarUrl: string } }) {
+  return (
+    <View style={{
+      display: 'flex', alignItems: 'center', gap: px(5),
+      background: C.surface2, borderRadius: '9999px',
+      padding: `${px(4)} ${px(10)} ${px(4)} ${px(5)}`,
+      border: `1px solid rgba(255,255,255,0.06)`,
+    }}>
+      {r.avatarUrl
+        ? <Image src={r.avatarUrl} style={{ width: px(28), height: px(28), borderRadius: '50%' }} />
+        : <View style={{
+            width: px(28), height: px(28), borderRadius: '50%',
+            background: `hsl(${(r.userId * 137) % 360}, 35%, 22%)`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Text style={{ fontSize: px(20), color: C.text2, fontWeight: '700' }}>
+              {r.nickname.charAt(0)}
+            </Text>
+          </View>
+      }
+      <Text style={{ fontSize: px(24), color: C.text }}>{r.nickname}</Text>
+    </View>
+  )
+}
+
+// Hero card — first open activity, shows full roster
 function FeaturedCard({
-  a,
-  detail,
-  onPress,
-  onRsvp,
+  a, detail, onPress, onRsvp,
 }: {
   a: ActivityRes
   detail: ActivityDetailRes | null
@@ -40,41 +98,39 @@ function FeaturedCard({
   const dateStr = `${d.getMonth() + 1}月${d.getDate()}日 周${WEEK[d.getDay()]}`
   const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 
-  const joined = detail?.registrations.filter(r => r.status === 'JOINED') ?? []
-  const MAX_AV = 6
-  const extra = Math.max(0, joined.length - MAX_AV)
-  const visibleAv = joined.slice(0, MAX_AV)
+  const joined    = detail?.registrations.filter(r => r.status === 'JOINED')    ?? []
+  const tentative = detail?.registrations.filter(r => r.status === 'TENTATIVE') ?? []
+  const absent    = detail?.registrations.filter(r => r.status === 'ABSENT')    ?? []
+  const hasAny = joined.length + tentative.length + absent.length > 0
 
-  const rsvpBtns: { status: RegStatus; label: string; color: string; dimBg: string }[] = [
-    { status: 'JOINED',    label: '参加', color: C.win,  dimBg: 'rgba(34,197,94,0.14)' },
-    { status: 'TENTATIVE', label: '观望', color: C.draw, dimBg: 'rgba(255,183,0,0.14)' },
-    { status: 'ABSENT',    label: '不去', color: C.lose, dimBg: 'rgba(255,77,90,0.12)' },
-  ]
+  const RosterGroup = ({ list, label, color }: { list: typeof joined; label: string; color: string }) => {
+    if (list.length === 0) return null
+    return (
+      <View style={{ marginBottom: px(12) }}>
+        <View style={{ display: 'flex', alignItems: 'center', gap: px(5), marginBottom: px(7) }}>
+          <View style={{ width: px(5), height: px(5), borderRadius: '50%', background: color }} />
+          <Text style={{ fontSize: px(22), fontWeight: '700', color }}>
+            {label} · {list.length}人
+          </Text>
+        </View>
+        <View style={{ display: 'flex', flexWrap: 'wrap', gap: px(6) }}>
+          {list.map(r => <RegPill key={r.userId} r={r} />)}
+        </View>
+      </View>
+    )
+  }
 
   return (
-    <View
-      onClick={onPress}
-      style={{
-        background: 'linear-gradient(150deg, #0b2a10 0%, #0c2212 55%, #0f1010 100%)',
-        borderRadius: px(22),
-        marginBottom: px(14),
-        border: `1px solid rgba(34,197,94,0.22)`,
-        overflow: 'hidden',
-      }}
-    >
-      {/* ── Top info section ── */}
+    <View onClick={onPress} style={{
+      background: 'linear-gradient(150deg, #0b2a10 0%, #0c2212 55%, #0f1010 100%)',
+      borderRadius: px(22), marginBottom: px(14),
+      border: `1px solid rgba(34,197,94,0.22)`, overflow: 'hidden',
+    }}>
+      {/* Top info */}
       <View style={{ padding: `${px(18)} ${px(18)} ${px(14)}` }}>
-        {/* Meta row */}
-        <View style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          marginBottom: px(14),
-        }}>
+        <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: px(14) }}>
           <View style={{ display: 'flex', alignItems: 'center', gap: px(8) }}>
-            <View style={{
-              width: px(7), height: px(7), borderRadius: '50%',
-              background: C.primary,
-              boxShadow: `0 0 6px ${C.primary}`,
-            }} />
+            <View style={{ width: px(7), height: px(7), borderRadius: '50%', background: C.primary, boxShadow: `0 0 6px ${C.primary}` }} />
             <Text style={{ fontSize: px(26), color: C.text2, fontWeight: '500' }}>
               {dateStr} · {timeStr}
             </Text>
@@ -83,21 +139,16 @@ function FeaturedCard({
             fontSize: px(24), color: C.primary, fontWeight: '700',
             background: C.primaryDim, borderRadius: '9999px', padding: '3px 12px',
             border: '1px solid rgba(34,197,94,0.25)',
-          }}>
-            报名中
-          </Text>
+          }}>报名中</Text>
         </View>
 
-        {/* Title */}
         <Text style={{
           fontSize: px(48), fontWeight: '900', color: C.text,
-          display: 'block', letterSpacing: '-0.02em', lineHeight: '1.25',
-          marginBottom: px(10),
+          display: 'block', letterSpacing: '-0.02em', lineHeight: '1.25', marginBottom: px(10),
         }}>
           {a.title}
         </Text>
 
-        {/* Location + capacity */}
         <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <Text style={{ fontSize: px(28), color: C.text2, flex: 1 }} numberOfLines={1}>
             📍 {a.location}
@@ -108,83 +159,63 @@ function FeaturedCard({
         </View>
       </View>
 
-      {/* ── Roster strip ── */}
-      <View style={{
-        borderTop: `1px solid rgba(255,255,255,0.06)`,
-        borderBottom: `1px solid rgba(255,255,255,0.06)`,
-        padding: `${px(12)} ${px(18)}`,
-        display: 'flex', alignItems: 'center', gap: px(10),
-      }}>
-        <Text style={{ fontSize: px(24), color: C.text3, flexShrink: 0 }}>已报名</Text>
-
-        {/* Avatar stack */}
-        {visibleAv.length > 0 ? (
-          <View style={{ display: 'flex', flexDirection: 'row', flexShrink: 0 }}>
-            {visibleAv.map((r, i) => (
-              <View key={r.userId} style={{ marginLeft: i > 0 ? px(-12) : 0, zIndex: MAX_AV - i }}>
-                {r.avatarUrl ? (
-                  <Image src={r.avatarUrl} style={{
-                    width: px(40), height: px(40), borderRadius: '50%',
-                    border: '2px solid #0f1010', display: 'block',
-                  }} />
-                ) : (
-                  <View style={{
-                    width: px(40), height: px(40), borderRadius: '50%',
-                    background: `hsl(${(r.userId * 137) % 360}, 40%, 22%)`,
-                    border: '2px solid #0f1010',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Text style={{ fontSize: px(26), color: C.text2, fontWeight: '700' }}>
-                      {r.nickname.charAt(0)}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            ))}
-            {extra > 0 && (
-              <View style={{
-                marginLeft: px(-12),
-                width: px(40), height: px(40), borderRadius: '50%',
-                background: C.surface2, border: '2px solid #0f1010',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Text style={{ fontSize: px(22), color: C.text2, fontWeight: '700' }}>+{extra}</Text>
-              </View>
-            )}
-          </View>
+      {/* Full roster */}
+      <View style={{ borderTop: `1px solid rgba(255,255,255,0.06)`, padding: `${px(14)} ${px(18)} ${px(6)}` }}>
+        {hasAny ? (
+          <>
+            <RosterGroup list={joined}    label="报名" color={C.win}  />
+            <RosterGroup list={tentative} label="待定" color={C.draw} />
+            <RosterGroup list={absent}    label="不去" color={C.lose} />
+          </>
         ) : (
-          <Text style={{ fontSize: px(26), color: C.text3 }}>还没有人报名</Text>
+          <Text style={{ fontSize: px(26), color: C.text3, paddingBottom: px(8) }}>
+            还没有人报名
+          </Text>
         )}
       </View>
 
-      {/* ── RSVP buttons ── */}
-      <View
-        onClick={e => e.stopPropagation()}
-        style={{ display: 'flex', padding: `${px(12)} ${px(14)}`, gap: px(8) }}
-      >
-        {rsvpBtns.map(btn => {
-          const active = a.myStatus === btn.status
-          return (
-            <View
-              key={btn.status}
-              onClick={(e) => { e.stopPropagation(); onRsvp(btn.status) }}
-              style={{
-                flex: 1, textAlign: 'center',
-                padding: `${px(12)} 0`,
-                borderRadius: px(14),
-                background: active ? btn.dimBg : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${active ? btn.color + '50' : C.border}`,
-              }}
-            >
-              <Text style={{
-                fontSize: px(30), fontWeight: active ? '800' : '500',
-                color: active ? btn.color : C.text3,
-              }}>
-                {btn.label}
-              </Text>
-            </View>
-          )
-        })}
+      {/* RSVP */}
+      <View style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
+        <RsvpRow myStatus={a.myStatus} onRsvp={onRsvp} />
+      </View>
+    </View>
+  )
+}
+
+// Medium card for other open activities
+function OpenCard({ a, onPress, onRsvp }: { a: ActivityRes; onPress: () => void; onRsvp: (s: RegStatus) => void }) {
+  const d = new Date(a.startTime)
+  const dateStr = `${d.getMonth() + 1}月${d.getDate()}日 周${WEEK[d.getDay()]}`
+  const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+
+  return (
+    <View onClick={onPress} style={{
+      background: C.surface, borderRadius: px(18), marginBottom: px(10),
+      border: `1px solid rgba(34,197,94,0.14)`, overflow: 'hidden',
+    }}>
+      <View style={{ padding: `${px(14)} ${px(16)} ${px(12)}` }}>
+        <View style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: px(8) }}>
+          <Text style={{ fontSize: px(24), color: C.text2 }}>{dateStr} · {timeStr}</Text>
+          <Text style={{
+            fontSize: px(22), color: C.primary, fontWeight: '600',
+            background: C.primaryDim, borderRadius: '9999px', padding: '2px 10px',
+          }}>报名中</Text>
+        </View>
+        <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text, display: 'block',
+                       letterSpacing: '-0.01em', marginBottom: px(6) }}>
+          {a.title}
+        </Text>
+        <View style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Text style={{ fontSize: px(26), color: C.text2, flex: 1 }} numberOfLines={1}>
+            📍 {a.location}
+          </Text>
+          <Text style={{ fontSize: px(24), color: C.text3, flexShrink: 0, marginLeft: px(8) }}>
+            {a.registeredCount}{a.maxPlayers ? `/${a.maxPlayers}` : ''} 人
+          </Text>
+        </View>
+      </View>
+      <View style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
+        <RsvpRow myStatus={a.myStatus} onRsvp={onRsvp} />
       </View>
     </View>
   )
@@ -368,10 +399,11 @@ export default function HomePage() {
                     />
                   )}
                   {restUpcoming.map(a => (
-                    <CompactCard
+                    <OpenCard
                       key={a.id}
                       a={a}
                       onPress={() => Taro.navigateTo({ url: `/pages/activity-detail/index?id=${a.id}` })}
+                      onRsvp={(status) => handleRsvp(a.id, status)}
                     />
                   ))}
                 </View>

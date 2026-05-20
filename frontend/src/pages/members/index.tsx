@@ -106,7 +106,8 @@ export default function MembersPage() {
           </Text>
         </View>
 
-        {/* Tabs */}
+        {/* Tabs — pending tab only visible to captain/admin */}
+        {isCaptainOrAdmin() && (
         <View style={{ display: 'flex', padding: `0 ${px(14)} ${px(12)}`, gap: px(8) }}>
           {[
             { key: 'active' as const, label: t('members.active'), count: active.length },
@@ -144,6 +145,7 @@ export default function MembersPage() {
             </View>
           ))}
         </View>
+        )}
       </View>
 
       <ScrollView scrollY style={{ flex: 1, padding: `${px(12)} ${px(14)}` }}>

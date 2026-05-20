@@ -27,6 +27,24 @@ jobs:
           name: backend-jar
           path: backend/target/team-backend-1.0.0.jar
 
+      - name: Check secrets
+        run: |
+          echo "ECS_HOST='${{ secrets.ECS_HOST }}'"
+          echo "ECS_USER='${{ secrets.ECS_USER }}'"
+          if [ -z "${{ secrets.ECS_HOST }}" ]; then
+            echo "❌ ERROR: secrets.ECS_HOST is empty!"
+            exit 1
+          fi
+          if [ -z "${{ secrets.ECS_USER }}" ]; then
+            echo "❌ ERROR: secrets.ECS_USER is empty!"
+            exit 1
+          fi
+          if [ -z "${{ secrets.ECS_PASS }}" ]; then
+            echo "❌ ERROR: secrets.ECS_PASS is empty!"
+            exit 1
+          fi
+          echo "✅ All secrets are set"
+
       - name: Deploy to ECS
         if: github.ref == 'refs/heads/main'
         env:
@@ -35,11 +53,12 @@ jobs:
           ECS_PASS: ${{ secrets.ECS_PASS }}
         run: |
           sudo apt-get install -y sshpass
+          echo "Deploying to $ECS_USER@$ECS_HOST ..."
           sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no \
             backend/target/team-backend-1.0.0.jar \
             "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar"
           sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no "$ECS_USER@$ECS_HOST" \
-            "systemctl restart football-team"
+            "systemctl restart football-team && sleep 2 && systemctl is-active football-team"
 
   frontend:
     runs-on: ubuntu-latest

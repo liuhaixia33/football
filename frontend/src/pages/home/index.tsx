@@ -408,6 +408,7 @@ export default function HomePage() {
             </>
           )}
         </View>
+        <View style={{ height: px(160) }} />
       </ScrollView>
     </View>
   )

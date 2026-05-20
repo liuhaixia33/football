@@ -1,30 +1,34 @@
 .tab-bar {
   display: flex;
-  height: 80px;
+  align-items: flex-start;
+  height: calc(80px + env(safe-area-inset-bottom));
   background: #131a27;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 4px;
   padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
 }
 
 .tab-item {
   flex: 1;
+  height: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 8px;
   position: relative;
   cursor: pointer;
+  overflow: hidden;
 
   .tab-icon {
-    font-size: 54rpx;
-    line-height: 1.2;
+    font-size: 44rpx;
+    line-height: 1;
   }
 
   .tab-text {
-    font-size: 24rpx;
+    font-size: 22rpx;
     color: #3d526a;
-    margin-top: 5px;
+    margin-top: 4px;
     font-weight: 500;
     letter-spacing: 0.03em;
   }

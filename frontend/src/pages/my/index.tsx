@@ -347,6 +347,7 @@ export default function MyPage() {
           </View>
         </View>
 
+        <View style={{ height: px(160) }} />
       </ScrollView>
 
       {/* ── Edit Profile Sheet ── */}

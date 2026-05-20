@@ -5,7 +5,6 @@ import { userApi } from '../../api/user'
 import { uploadApi } from '../../api/upload'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
-import { useLangStore } from '../../store/lang'
 import type { MyStatsRes, MemberRole } from '../../types/api'
 import { px } from '../../utils/style'
 
@@ -42,7 +41,6 @@ export default function MyPage() {
   const { nickname, avatarUrl, token, userId, currentTeamId, currentRole,
           teams, setCurrentTeam, setTeams, setAuth, clear } = useAuthStore()
   const t = useT()
-  const { language, setLanguage } = useLangStore()
 
   const [editing, setEditing] = useState(false)
   const [draftAvatarTmp, setDraftAvatarTmp] = useState('')
@@ -132,16 +130,6 @@ export default function MyPage() {
     })
   }
 
-  const switchLanguage = () => {
-    Taro.showActionSheet({
-      itemList: [t('my.lang_zh'), t('my.lang_en')],
-      success: ({ tapIndex }) => {
-        const lang: 'zh' | 'en' = tapIndex === 0 ? 'zh' : 'en'
-        setLanguage(lang)
-        Taro.setNavigationBarTitle({ title: lang === 'zh' ? '我的' : 'My' })
-      },
-    })
-  }
 
   const draftAvatarDisplay = draftAvatarTmp || avatarUrl || ''
 
@@ -334,21 +322,8 @@ export default function MyPage() {
 
         {/* ── Settings ── */}
         <View style={{ padding: `${px(20)} ${px(16)} ${px(40)}` }}>
-          <SectionTitle label={language === 'zh' ? '设置' : 'Settings'} />
+          <SectionTitle label='设置' />
           <View style={{ background: C.surface, borderRadius: px(16), border: `1px solid ${C.border}`, overflow: 'hidden' }}>
-
-            {/* Language */}
-            <View onClick={switchLanguage}
-              style={{ display: 'flex', alignItems: 'center', gap: px(14), padding: `${px(16)} ${px(16)}` }}>
-              <Text style={{ fontSize: px(36), width: px(24), textAlign: 'center' }}>🌐</Text>
-              <Text style={{ flex: 1, fontSize: px(30), color: C.text, fontWeight: '500' }}>{t('my.language')}</Text>
-              <Text style={{ fontSize: px(26), color: C.text2 }}>
-                {language === 'zh' ? t('my.lang_zh') : t('my.lang_en')}
-              </Text>
-              <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
-            </View>
-
-            <View style={{ height: '1px', background: C.border, marginLeft: px(54) }} />
 
             {/* Leave team */}
             {currentRole !== 'CAPTAIN' && (

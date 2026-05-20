@@ -87,35 +87,34 @@ export default function LoginPage() {
         </Text>
       </View>
 
-      {/* ── Avatar ── */}
-      <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <Button
-          openType="chooseAvatar"
-          onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
-          style={{ background: 'transparent', border: 'none', padding: 0 }}
-        >
-          {avatarDisplay
-            ? <Image src={avatarDisplay} style={{
-                width: px(140), height: px(140), borderRadius: '50%',
-                border: `3px solid ${C.primary}`,
-                display: 'block',
-              }} />
-            : <View style={{
-                width: px(140), height: px(140), borderRadius: '50%',
-                background: C.surface2, border: `2px dashed rgba(0,228,114,0.35)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Text style={{ fontSize: px(80) }}>📷</Text>
-              </View>
-          }
-        </Button>
-        <Text style={{ fontSize: px(24), color: C.text3, marginTop: px(12) }}>
-          {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
-        </Text>
-      </View>
-
-      {/* ── Nickname + Login button ── */}
-      <View style={{ padding: `0 ${px(40)} ${px(64)}`, display: 'flex', flexDirection: 'column', gap: px(20) }}>
+      {/* ── Avatar + Nickname + Login ── */}
+      <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                     justifyContent: 'center', padding: `0 ${px(40)} ${px(40)}`, gap: px(24) }}>
+        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Button
+            openType="chooseAvatar"
+            onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
+            style={{ background: 'transparent', border: 'none', padding: 0 }}
+          >
+            {avatarDisplay
+              ? <Image src={avatarDisplay} style={{
+                  width: px(140), height: px(140), borderRadius: '50%',
+                  border: `3px solid ${C.primary}`,
+                  display: 'block',
+                }} />
+              : <View style={{
+                  width: px(140), height: px(140), borderRadius: '50%',
+                  background: C.surface2, border: `2px dashed rgba(0,228,114,0.35)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <Text style={{ fontSize: px(80) }}>📷</Text>
+                </View>
+            }
+          </Button>
+          <Text style={{ fontSize: px(24), color: C.text3, marginTop: px(12) }}>
+            {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
+          </Text>
+        </View>
         <Input
           type="nickname"
           value={nickname}
@@ -123,6 +122,7 @@ export default function LoginPage() {
           onBlur={(e) => setNickname(e.detail.value)}
           placeholder={t('login.nickname_placeholder')}
           style={{
+            width: '100%',
             height: px(56),
             background: C.surface,
             borderRadius: px(14),
@@ -135,6 +135,7 @@ export default function LoginPage() {
         />
         <Button
           style={{
+            width: '100%',
             background: canLogin ? C.primary : 'rgba(255,255,255,0.07)',
             color: canLogin ? '#0b0f18' : C.text3,
             borderRadius: px(16),

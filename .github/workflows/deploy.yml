@@ -54,9 +54,11 @@ jobs:
           echo "当前: $ACTIVE_SLOT → 部署到: $INACTIVE (port $INACTIVE_PORT)"
 
           # 2. 上传新 JAR（运行中的 JVM 不受影响）
-          sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
+          ls -la backend/target/team-backend-1.0.0.jar || { echo "❌ JAR 文件不存在"; exit 1; }
+          sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no \
             backend/target/team-backend-1.0.0.jar \
-            "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar"
+            "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar" \
+            || { echo "❌ SCP 失败，退出码 $?"; exit 1; }
 
           # 3. 重启 inactive slot（确保加载新 JAR）
           $SSH "systemctl restart football-team-$INACTIVE"

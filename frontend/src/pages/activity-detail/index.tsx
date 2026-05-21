@@ -379,13 +379,18 @@ export default function ActivityDetailPage() {
               </Button>
             )}
 
-            {/* 分享 — 等宽 */}
-            <Button openType='share' style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.04)', color: C.text3,
-              border: `1px solid ${C.border}`, borderRadius: px(10),
-              fontSize: px(26), padding: `${px(11)} 0`,
-            }}>
+            {/* 分享海报 */}
+            <Button
+              onClick={() => Taro.navigateTo({
+                url: `/pages/activity-poster/index?activityId=${activityId}`,
+              })}
+              style={{
+                flex: 1,
+                background: 'rgba(255,255,255,0.04)', color: C.text3,
+                border: `1px solid ${C.border}`, borderRadius: px(10),
+                fontSize: px(26), padding: `${px(11)} 0`,
+              }}
+            >
               {t('act.share')}
             </Button>
           </View>

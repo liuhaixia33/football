@@ -201,7 +201,7 @@ export default function LoginPage() {
           style={{
             width: px(520),
             marginTop: px(20),
-            background: canLogin ? '#22c55e' : 'rgba(255,255,255,0.07)',
+            background: canLogin ? C.primary : 'rgba(255,255,255,0.07)',
             color: canLogin ? '#0f1010' : C.text3,
             borderRadius: px(16),
             height: px(56),

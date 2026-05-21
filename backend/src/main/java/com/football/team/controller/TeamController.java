@@ -6,6 +6,7 @@ import com.football.team.dto.res.MemberRes;
 import com.football.team.entity.Team;
 import com.football.team.entity.User;
 import com.football.team.enums.MemberRole;
+import com.football.team.exception.BusinessException;
 import com.football.team.security.RequireRole;
 import com.football.team.service.TeamService;
 import jakarta.servlet.http.HttpServletRequest;

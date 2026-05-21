@@ -34,7 +34,7 @@ log_ok()    { echo -e "${GREEN}[OK]${NC}   $1"; }
 log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-ssh_run() { sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no "$ECS_USER@$ECS_HOST" "$1"; }
+ssh_run() { sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 "$ECS_USER@$ECS_HOST" "$1"; }
 
 # 检查依赖
 check_deps() {
@@ -70,10 +70,9 @@ wait_healthy() {
   local max=30
   for i in $(seq 1 $max); do
     local code
-    code=$(ssh_run "curl -s -o /dev/null -w '%{http_code}' \
-      http://127.0.0.1:$port/api/v1/auth/login \
-      -X POST -H 'Content-Type: application/json' -d '{}'")
-    if [ "$code" != "000" ]; then
+    code=$(ssh_run "curl -s --max-time 10 --connect-timeout 5 -o /dev/null -w '%{http_code}' \
+      http://127.0.0.1:$port/api/v1/activities/team/1")
+    if [ "$code" != "000" ] && [ -n "$code" ]; then
       return 0
     fi
     log_info "等待服务就绪... ($i/$max)"
@@ -103,13 +102,13 @@ deploy_backend() {
 
   # 2. 上传新 JAR（运行中的 JVM 不受影响）
   log_info "上传 JAR..."
-  sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no \
+  sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 \
     "$local_jar" "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar"
   log_ok "上传完成"
 
-  # 3. 启动 inactive slot
-  log_info "启动 football-team-$inactive..."
-  ssh_run "systemctl start football-team-$inactive"
+  # 3. 重启 inactive slot（确保加载新 JAR）
+  log_info "重启 football-team-$inactive..."
+  ssh_run "systemctl restart football-team-$inactive"
 
   # 4. 健康检查
   log_info "健康检查 (port $inactive_port)..."
@@ -120,11 +119,11 @@ deploy_backend() {
   fi
   log_ok "新实例健康"
 
-  # 5. 切换 Nginx upstream（sed 改端口 + restart，sed -i 会产生新 inode 导致 reload 读旧缓存）
+  # 5. 切换 Nginx upstream（零停机 reload）
   log_info "切换 Nginx 流量 → port $inactive_port..."
   ssh_run "sed -i 's|server 172.17.0.1:[0-9]*;|server 172.17.0.1:$inactive_port;|' \
     /root/upball-project/upball/docker/nginx/nginx.conf && \
-    docker restart upball-nginx"
+    docker exec upball-nginx nginx -s reload"
   log_ok "Nginx 已切流到 $inactive"
 
   # 6. 停止旧 slot（等 2s 让 Nginx 完成在途请求转发）

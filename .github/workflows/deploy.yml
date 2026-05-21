@@ -42,7 +42,7 @@ jobs:
           ECS_PASS: ${{ secrets.ECS_PASS }}
         run: |
           sudo apt-get install -y sshpass
-          SSH="sshpass -p $ECS_PASS ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 $ECS_USER@$ECS_HOST"
+          SSH="sshpass -p $ECS_PASS ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
 
           # 1. 检测活跃 slot
           ACTIVE=$($SSH "systemctl is-active football-team-blue 2>/dev/null" || true)
@@ -58,15 +58,14 @@ jobs:
             backend/target/team-backend-1.0.0.jar \
             "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar"
 
-          # 3. 启动 inactive slot
-          $SSH "systemctl start football-team-$INACTIVE"
+          # 3. 重启 inactive slot（确保加载新 JAR）
+          $SSH "systemctl restart football-team-$INACTIVE"
 
           # 4. 健康检查（最多等 60s）
           for i in $(seq 1 30); do
-            CODE=$($SSH "curl -s -o /dev/null -w '%{http_code}' \
-              http://127.0.0.1:$INACTIVE_PORT/api/v1/auth/login \
-              -X POST -H 'Content-Type: application/json' -d '{}'")
-            if [ "$CODE" != "000" ]; then
+            CODE=$($SSH "curl -s --max-time 10 --connect-timeout 5 -o /dev/null -w '%{http_code}' \
+              http://127.0.0.1:$INACTIVE_PORT/api/v1/activities/team/1")
+            if [ "$CODE" != "000" ] && [ -n "$CODE" ]; then
               echo "✅ 新实例健康 (HTTP $CODE)"
               break
             fi
@@ -79,10 +78,10 @@ jobs:
             fi
           done
 
-          # 5. 切换 Nginx upstream（sed 改端口 + restart，sed -i 产生新 inode 导致 reload 读旧缓存）
+          # 5. 切换 Nginx upstream（零停机 reload）
           $SSH "sed -i 's|server 172.17.0.1:[0-9]*;|server 172.17.0.1:$INACTIVE_PORT;|' \
             /root/upball-project/upball/docker/nginx/nginx.conf && \
-            docker restart upball-nginx"
+            docker exec upball-nginx nginx -s reload"
           echo "✅ Nginx 已切流到 $INACTIVE"
 
           # 6. 排水 2s 后停止旧 slot

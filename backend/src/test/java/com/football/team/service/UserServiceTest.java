@@ -25,6 +25,7 @@ class UserServiceTest {
     @Mock ActivityRegistrationRepository regRepository;
     @Mock ActivityRepository activityRepository;
     @Mock MatchResultRepository matchResultRepository;
+    @Mock ContentSafetyService contentSafetyService;
     @InjectMocks UserService userService;
 
     @Test

@@ -1,6 +1,7 @@
 package com.football.team.service;
 
 import com.football.team.dto.req.*;
+import com.football.team.service.ContentSafetyService;
 import com.football.team.dto.res.MemberRes;
 import com.football.team.dto.res.TeamPublicRes;
 import com.football.team.entity.*;
@@ -24,8 +25,16 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final TeamMemberRepository teamMemberRepository;
     private final UserRepository userRepository;
+    private final ContentSafetyService contentSafetyService;
 
     public Team createTeam(Long userId, CreateTeamReq req) {
+        User creator = userRepository.findById(userId)
+            .orElseThrow(() -> BusinessException.notFound("用户不存在"));
+        contentSafetyService.checkText(creator.getOpenid(), req.getName());
+        if (req.getDescription() != null && !req.getDescription().isBlank()) {
+            contentSafetyService.checkText(creator.getOpenid(), req.getDescription());
+        }
+
         Team team = new Team();
         team.setName(req.getName());
         team.setDescription(req.getDescription() != null ? req.getDescription() : "");

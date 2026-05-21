@@ -1,6 +1,7 @@
 package com.football.team.service;
 
 import com.football.team.dto.req.CreateActivityReq;
+import com.football.team.service.ContentSafetyService;
 import com.football.team.dto.req.RecordResultReq;
 import com.football.team.dto.req.RegisterReq;
 import com.football.team.dto.res.RegistrationRes;
@@ -25,8 +26,14 @@ public class ActivityService {
     private final ActivityRegistrationRepository regRepository;
     private final MatchResultRepository matchResultRepository;
     private final UserRepository userRepository;
+    private final ContentSafetyService contentSafetyService;
 
     public Activity createActivity(Long teamId, Long creatorId, CreateActivityReq req) {
+        User creator = userRepository.findById(creatorId)
+            .orElseThrow(() -> BusinessException.notFound("用户不存在"));
+        contentSafetyService.checkText(creator.getOpenid(), req.getTitle());
+        contentSafetyService.checkText(creator.getOpenid(), req.getLocation());
+
         Activity a = new Activity();
         a.setTeamId(teamId);
         a.setCreatedBy(creatorId);
@@ -124,6 +131,10 @@ public class ActivityService {
             throw BusinessException.notFound("活动不存在");
         if (a.getStatus() != ActivityStatus.OPEN)
             throw BusinessException.badRequest("已封闭的活动不可修改");
+        User creator = userRepository.findById(a.getCreatedBy())
+            .orElseThrow(() -> BusinessException.notFound("用户不存在"));
+        contentSafetyService.checkText(creator.getOpenid(), req.getTitle());
+        contentSafetyService.checkText(creator.getOpenid(), req.getLocation());
         a.setType(req.getType());
         a.setTitle(req.getTitle());
         a.setOpponent(req.getOpponent());

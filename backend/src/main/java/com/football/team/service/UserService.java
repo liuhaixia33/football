@@ -1,6 +1,7 @@
 package com.football.team.service;
 
 import com.football.team.dto.req.UpdateProfileReq;
+import com.football.team.service.ContentSafetyService;
 import com.football.team.dto.res.MyStatsRes;
 import com.football.team.dto.res.TeamBriefRes;
 import com.football.team.dto.res.UserProfileRes;
@@ -23,6 +24,7 @@ public class UserService {
     private final ActivityRegistrationRepository regRepository;
     private final ActivityRepository activityRepository;
     private final MatchResultRepository matchResultRepository;
+    private final ContentSafetyService contentSafetyService;
 
     public UserProfileRes getProfile(Long userId) {
         User user = userRepository.findById(userId)
@@ -65,7 +67,10 @@ public class UserService {
     public void updateProfile(Long userId, UpdateProfileReq req) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> BusinessException.notFound("用户不存在"));
-        if (req.getNickname() != null) user.setNickname(req.getNickname());
+        if (req.getNickname() != null) {
+            contentSafetyService.checkText(user.getOpenid(), req.getNickname());
+            user.setNickname(req.getNickname());
+        }
         if (req.getAvatarUrl() != null) user.setAvatarUrl(req.getAvatarUrl());
         userRepository.save(user);
     }

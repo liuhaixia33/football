@@ -6,6 +6,7 @@ import com.football.team.dto.req.RecordResultReq;
 import com.football.team.entity.Activity;
 import com.football.team.entity.ActivityRegistration;
 import com.football.team.entity.MatchResult;
+import com.football.team.entity.User;
 import com.football.team.enums.ActivityStatus;
 import com.football.team.enums.ActivityType;
 import com.football.team.enums.MatchOutcome;
@@ -32,6 +33,7 @@ class ActivityServiceTest {
     @Mock ActivityRegistrationRepository regRepository;
     @Mock MatchResultRepository matchResultRepository;
     @Mock UserRepository userRepository;
+    @Mock ContentSafetyService contentSafetyService;
     @InjectMocks ActivityService activityService;
 
     // ---- register() 测试 ----
@@ -140,7 +142,10 @@ class ActivityServiceTest {
     @Test
     void updateActivity_success_updatesAllFields() {
         Activity a = new Activity(); a.setId(1L); a.setTeamId(1L); a.setStatus(ActivityStatus.OPEN);
+        a.setCreatedBy(10L);
         when(activityRepository.findById(1L)).thenReturn(Optional.of(a));
+        User creator = new User(); creator.setId(10L); creator.setOpenid("openid-10");
+        when(userRepository.findById(10L)).thenReturn(Optional.of(creator));
         when(activityRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         CreateActivityReq req = new CreateActivityReq();
         req.setType(ActivityType.TRAINING);

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View, Text, Button, Image, Input, ScrollView } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { userApi } from '../../api/user'
 import { uploadApi } from '../../api/upload'
 import { teamApi } from '../../api/team'
@@ -40,7 +40,14 @@ function SectionTitle({ label }: { label: string }) {
 export default function MyPage() {
   const [stats, setStats] = useState<MyStatsRes | null>(null)
   const { nickname, avatarUrl, token, userId, currentTeamId, currentRole,
-          teams, setCurrentTeam, setTeams, setAuth, clear } = useAuthStore()
+          teams, setCurrentTeam, setTeams, setAuth, clear, currentTeamInviteCode } = useAuthStore()
+  const currentTeamName = teams.find(t => t.teamId === currentTeamId)?.teamName ?? '球队'
+
+  useShareAppMessage(() => ({
+    title: `「${currentTeamName}」邀请您加入，一起驰骋绿茵！`,
+    path: `/pages/home/index?inviteCode=${currentTeamInviteCode()}&teamId=${currentTeamId}`,
+    imageUrl: '/assets/images/share-cover.png',
+  }))
   const t = useT()
 
   const [editing, setEditing] = useState(false)
@@ -406,9 +413,25 @@ export default function MyPage() {
           <SectionTitle label='设置' />
           <View style={{ background: C.surface, borderRadius: px(16), border: `1px solid ${C.border}`, overflow: 'hidden' }}>
 
-            {/* Transfer captain — captain only */}
+            {/* Invite teammates — all members */}
+            <Button
+              openType='share'
+              style={{
+                display: 'flex', flexDirection: 'row', alignItems: 'center', gap: px(14),
+                padding: `${px(13)} ${px(16)}`,
+                background: 'transparent', border: 'none', margin: 0,
+                width: '100%', textAlign: 'left', lineHeight: 'normal', borderRadius: 0,
+              }}
+            >
+              <Text style={{ fontSize: px(32), width: px(40), textAlign: 'center' }}>👥</Text>
+              <Text style={{ flex: 1, fontSize: px(30), color: C.text, fontWeight: '500' }}>邀请队友</Text>
+              <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
+            </Button>
+
+            {/* Captain-only settings */}
             {currentRole === 'CAPTAIN' && (
               <>
+                <View style={{ height: '1px', background: C.border, marginLeft: px(54) }} />
                 <View onClick={transferCaptain}
                   style={{ display: 'flex', alignItems: 'center', gap: px(14), padding: `${px(13)} ${px(16)}` }}>
                   <Text style={{ fontSize: px(32), width: px(40), textAlign: 'center' }}>👑</Text>
@@ -416,17 +439,13 @@ export default function MyPage() {
                   <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
                 </View>
                 <View style={{ height: '1px', background: C.border, marginLeft: px(54) }} />
+                <View onClick={openTeamEdit}
+                  style={{ display: 'flex', alignItems: 'center', gap: px(14), padding: `${px(13)} ${px(16)}` }}>
+                  <Text style={{ fontSize: px(32), width: px(40), textAlign: 'center' }}>🛡️</Text>
+                  <Text style={{ flex: 1, fontSize: px(30), color: C.text, fontWeight: '500' }}>编辑球队信息</Text>
+                  <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
+                </View>
               </>
-            )}
-
-            {/* Edit team info — captain only */}
-            {currentRole === 'CAPTAIN' && (
-              <View onClick={openTeamEdit}
-                style={{ display: 'flex', alignItems: 'center', gap: px(14), padding: `${px(13)} ${px(16)}` }}>
-                <Text style={{ fontSize: px(32), width: px(40), textAlign: 'center' }}>🛡️</Text>
-                <Text style={{ flex: 1, fontSize: px(30), color: C.text, fontWeight: '500' }}>编辑球队信息</Text>
-                <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
-              </View>
             )}
           </View>
         </View>

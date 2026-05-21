@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { View, Text, ScrollView, Image } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
+import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
 import type { ActivityRes, ActivityDetailRes, RegStatus } from '../../types/api'
@@ -296,7 +297,40 @@ export default function HomePage() {
   const [featuredDetail, setFeaturedDetail] = useState<ActivityDetailRes | null>(null)
   const [loading, setLoading] = useState(false)
   const t = useT()
-  const { currentTeamId, isCaptainOrAdmin } = useAuthStore()
+  const { currentTeamId, isCaptainOrAdmin, teams } = useAuthStore()
+  const routerParams = Taro.getCurrentInstance().router?.params ?? {}
+  const sharedInviteCode = routerParams.inviteCode as string | undefined
+  const sharedTeamId = routerParams.teamId ? Number(routerParams.teamId) : null
+  const joinModalShown = useRef(false)
+
+  // 已登录用户通过分享链接进入时弹框询问是否加入
+  useEffect(() => {
+    if (!sharedInviteCode || joinModalShown.current) return
+    if (sharedTeamId && teams.some(t => t.teamId === sharedTeamId)) return
+    joinModalShown.current = true
+    Taro.removeStorageSync('pending_invite_code')
+
+    teamApi.getByInviteCode(sharedInviteCode)
+      .then(teamInfo => {
+        Taro.showModal({
+          title: '加入球队',
+          content: `检测到邀请，是否申请加入「${teamInfo.name}」？`,
+          success: async ({ confirm }) => {
+            if (!confirm) return
+            try {
+              await teamApi.join(sharedInviteCode)
+              Taro.showToast({ title: '申请已发送，等待管理员审核', icon: 'success' })
+            } catch (e: unknown) {
+              const msg = e instanceof Error ? e.message : ''
+              if (!msg.includes('已是') && !msg.includes('审核中')) {
+                Taro.showToast({ title: msg || '申请失败', icon: 'none' })
+              }
+            }
+          },
+        })
+      })
+      .catch(() => {})
+  }, [sharedInviteCode, teams])
 
   const load = async () => {
     if (!currentTeamId) return

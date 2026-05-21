@@ -23,6 +23,11 @@ public class OssService {
         return ossProperties.getBaseUrl() + "/" + key;
     }
 
+    public String uploadBytes(byte[] data, String key) {
+        ossClient.putObject(ossProperties.getBucketName(), key, new java.io.ByteArrayInputStream(data));
+        return ossProperties.getBaseUrl() + "/" + key;
+    }
+
     private String getExtension(String filename) {
         if (filename == null || !filename.contains(".")) return ".jpg";
         return filename.substring(filename.lastIndexOf("."));

@@ -238,36 +238,40 @@ export default function ActivityPosterPage() {
   }
 
   return (
-    <View style={{ padding: '16px', background: '#0f1010', minHeight: '100vh' }}>
-      <Text style={{ fontSize: '14px', color: '#8a9e8a', display: 'block', marginBottom: '12px' }}>
-        {drawing ? '海报生成中...' : '海报已生成，可保存或分享到群。'}
-      </Text>
+    <View style={{ background: '#0f1010', minHeight: '100vh' }}>
+      <View style={{ padding: '16px 16px 0' }}>
+        <Text style={{ fontSize: '14px', color: '#8a9e8a', display: 'block', marginBottom: '12px' }}>
+          {drawing ? '海报生成中...' : '海报已生成，可保存或分享到群。'}
+        </Text>
+      </View>
 
       <Canvas
         canvasId={CANVAS_ID}
         style={{ width: `${W}px`, height: `${H}px`, borderRadius: '10px', display: 'block' }}
       />
 
-      {!drawing && tempFilePath && (
-        <View style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-          <Button
-            style={{ flex: '1', background: '#1a2e1a', color: '#4ade80',
-                     border: '1px solid rgba(74,222,128,0.25)', borderRadius: '8px', fontSize: '14px' }}
-            onClick={handleSave}
-          >保存到相册</Button>
-          <Button
-            style={{ flex: '1', background: '#07c160', color: '#fff',
-                     border: 'none', borderRadius: '8px', fontSize: '14px' }}
-            onClick={handleShare}
-          >分享到群</Button>
-        </View>
-      )}
+      <View style={{ padding: '0 16px 16px' }}>
+        {!drawing && tempFilePath && (
+          <View style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+            <Button
+              style={{ flex: '1', background: '#1a2e1a', color: '#4ade80',
+                       border: '1px solid rgba(74,222,128,0.25)', borderRadius: '8px', fontSize: '14px' }}
+              onClick={handleSave}
+            >保存到相册</Button>
+            <Button
+              style={{ flex: '1', background: '#07c160', color: '#fff',
+                       border: 'none', borderRadius: '8px', fontSize: '14px' }}
+              onClick={handleShare}
+            >分享到群</Button>
+          </View>
+        )}
 
-      <Button
-        style={{ marginTop: '10px', background: 'rgba(255,255,255,0.06)', color: '#8a9e8a',
-                 border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '14px' }}
-        onClick={() => detail && renderPoster(detail)}
-      >重新生成</Button>
+        <Button
+          style={{ marginTop: '10px', background: 'rgba(255,255,255,0.06)', color: '#8a9e8a',
+                   border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '14px' }}
+          onClick={() => detail && renderPoster(detail)}
+        >重新生成</Button>
+      </View>
     </View>
   )
 }

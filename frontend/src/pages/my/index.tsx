@@ -447,6 +447,17 @@ export default function MyPage() {
                 </View>
               </>
             )}
+            {(currentRole === 'CAPTAIN' || currentRole === 'ADMIN') && (
+              <>
+                <View style={{ height: '1px', background: C.border, marginLeft: px(54) }} />
+                <View onClick={() => Taro.navigateTo({ url: '/pages/team-poster/index' })}
+                  style={{ display: 'flex', alignItems: 'center', gap: px(14), padding: `${px(13)} ${px(16)}` }}>
+                  <Text style={{ fontSize: px(32), width: px(40), textAlign: 'center' }}>🪪</Text>
+                  <Text style={{ flex: 1, fontSize: px(30), color: C.primary, fontWeight: '500' }}>生成球队名片</Text>
+                  <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
+                </View>
+              </>
+            )}
           </View>
         </View>
 

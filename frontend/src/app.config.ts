@@ -16,6 +16,7 @@ export default defineAppConfig({
     'pages/grouping/index',
     'pages/grouping/poster',
     'pages/activity-poster/index',
+    'pages/team-poster/index',
   ],
   tabBar: {
     custom: true,

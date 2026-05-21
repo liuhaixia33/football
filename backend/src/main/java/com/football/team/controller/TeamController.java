@@ -3,11 +3,14 @@ package com.football.team.controller;
 import com.football.team.dto.req.*;
 import com.football.team.dto.res.ApiResponse;
 import com.football.team.dto.res.MemberRes;
+import com.football.team.dto.res.PosterRes;
+import com.football.team.dto.res.TeamPublicRes;
 import com.football.team.entity.Team;
 import com.football.team.entity.User;
 import com.football.team.enums.MemberRole;
 import com.football.team.exception.BusinessException;
 import com.football.team.security.RequireRole;
+import com.football.team.service.PosterService;
 import com.football.team.service.TeamService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -22,6 +25,7 @@ import java.util.List;
 public class TeamController {
 
     private final TeamService teamService;
+    private final PosterService posterService;
 
     @PostMapping
     public ApiResponse<Team> create(HttpServletRequest req,
@@ -80,5 +84,29 @@ public class TeamController {
         User user = (User) req.getAttribute("currentUser");
         teamService.leaveTeam(teamId, user.getId());
         return ApiResponse.ok(null);
+    }
+
+    /** 公开接口：无需登录，用于扫码后展示球队信息 */
+    @GetMapping("/{teamId}/public")
+    public ApiResponse<TeamPublicRes> getPublicInfo(@PathVariable Long teamId) {
+        return ApiResponse.ok(teamService.getPublicInfo(teamId));
+    }
+
+    /** 扫码申请加入（需登录，不需要已是成员） */
+    @PostMapping("/{teamId}/apply")
+    public ApiResponse<Void> applyByTeamId(HttpServletRequest req,
+                                            @PathVariable Long teamId) {
+        User user = (User) req.getAttribute("currentUser");
+        if (user == null) throw BusinessException.unauthorized("请先登录");
+        teamService.applyJoinByTeamId(user.getId(), teamId);
+        return ApiResponse.ok(null);
+    }
+
+    /** 生成球队名片（仅 ADMIN 及以上） */
+    @GetMapping("/{teamId}/poster")
+    @RequireRole(MemberRole.ADMIN)
+    public ApiResponse<PosterRes> getPoster(@PathVariable Long teamId) {
+        String url = posterService.generatePoster(teamId);
+        return ApiResponse.ok(new PosterRes(url));
     }
 }

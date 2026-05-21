@@ -3,6 +3,7 @@ package com.football.team.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.football.team.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ContentSafetyService {
 
     private final WechatService wechatService;
@@ -65,7 +67,8 @@ public class ContentSafetyService {
             }
         } catch (BusinessException e) {
             throw e;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("Content safety response parse failed, skipping check: {}", raw, e);
         }
     }
 }

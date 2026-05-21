@@ -41,7 +41,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function PrivacyPage() {
   return (
-    <ScrollView scrollY style={{ background: C.bg, minHeight: '100%' }}>
+    <ScrollView scrollY style={{ backgroundColor: C.bg, minHeight: '100%' }}>
       <View style={{ padding: px(32), paddingBottom: px(60) }}>
         <Text
           style={{

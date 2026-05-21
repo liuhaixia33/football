@@ -21,7 +21,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function TermsPage() {
   return (
-    <ScrollView scrollY style={{ background: C.bg, minHeight: '100%' }}>
+    <ScrollView scrollY style={{ backgroundColor: C.bg, minHeight: '100%' }}>
       <View style={{ padding: px(32), paddingBottom: px(60) }}>
         <Text style={{ fontSize: px(40), fontWeight: '900', color: C.text, display: 'block', marginBottom: px(8) }}>
           用户协议

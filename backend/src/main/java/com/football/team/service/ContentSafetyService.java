@@ -19,8 +19,15 @@ import java.util.Map;
 public class ContentSafetyService {
 
     private final WechatService wechatService;
-    private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate = buildRestTemplate();
+
+    private static RestTemplate buildRestTemplate() {
+        var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5_000);
+        factory.setReadTimeout(10_000);
+        return new RestTemplate(factory);
+    }
 
     public void checkText(String openid, String text) {
         if (wechatService.isDevMock() || text == null || text.isBlank()) return;

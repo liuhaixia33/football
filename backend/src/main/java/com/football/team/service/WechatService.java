@@ -19,8 +19,15 @@ public class WechatService {
     @Value("${wechat.app-secret}") private String appSecret;
 
     private final StringRedisTemplate redis;
-    private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate = buildRestTemplate();
+
+    private static RestTemplate buildRestTemplate() {
+        var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5_000);
+        factory.setReadTimeout(10_000);
+        return new RestTemplate(factory);
+    }
 
     private static final String ACCESS_TOKEN_KEY = "wechat:access_token";
 

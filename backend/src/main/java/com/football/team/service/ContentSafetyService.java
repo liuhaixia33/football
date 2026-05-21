@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.core.io.ByteArrayResource;
 
 import java.util.Map;
 
@@ -42,9 +45,13 @@ public class ContentSafetyService {
         String token = wechatService.getAccessToken();
         String url = "https://api.weixin.qq.com/wxa/img_sec_check?access_token=" + token;
 
+        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
+        form.add("media", new ByteArrayResource(imageBytes) {
+            @Override public String getFilename() { return "image.jpg"; }
+        });
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        HttpEntity<byte[]> entity = new HttpEntity<>(imageBytes, headers);
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(form, headers);
 
         String raw = restTemplate.postForEntity(url, entity, String.class).getBody();
         parseAndThrow(raw);
@@ -61,7 +68,7 @@ public class ContentSafetyService {
             Object detail = result.get("result");
             if (detail instanceof Map<?, ?> detailMap) {
                 Object suggest = detailMap.get("suggest");
-                if ("risky".equals(suggest)) {
+                if ("block".equals(suggest)) {
                     throw BusinessException.badRequest("内容包含违规信息，请修改后重试");
                 }
             }

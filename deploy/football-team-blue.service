@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=/opt/football-team
-ExecStart=/usr/bin/java -Xms128m -Xmx512m -Dspring.profiles.active=dev -jar /opt/football-team/football-team.jar --server.port=8080
+ExecStart=/usr/bin/java -Xms256m -Xmx1024m -Dspring.profiles.active=dev -jar /opt/football-team/football-team.jar --server.port=8080
 EnvironmentFile=/opt/football-team/env
 Restart=on-failure
 RestartSec=5

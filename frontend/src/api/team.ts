@@ -22,4 +22,13 @@ export const teamApi = {
     api.put<Team>(`/api/v1/teams/${teamId}`, body as Record<string, unknown>),
   getByInviteCode: (inviteCode: string) =>
     api.get<Team>(`/api/v1/teams/by-invite/${inviteCode}`),
+  getPublicInfo: (teamId: number) =>
+    api.get<{ teamId: number; name: string; logoUrl: string; description: string; memberCount: number }>(
+      `/api/v1/teams/${teamId}/public`,
+      false
+    ),
+  applyByTeamId: (teamId: number) =>
+    api.post<void>(`/api/v1/teams/${teamId}/apply`, {}, false),
+  getPoster: (teamId: number) =>
+    api.get<{ posterUrl: string }>(`/api/v1/teams/${teamId}/poster`),
 }

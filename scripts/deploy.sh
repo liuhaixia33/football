@@ -2,24 +2,22 @@
 set -e
 
 # ============================================================
-# Football Team 小程序 — 构建/部署脚本
+# Football Team 小程序 — 构建/部署脚本（蓝绿部署）
 # ============================================================
 # 用法:
-#   ./scripts/deploy.sh backend   构建并部署后端
+#   ./scripts/deploy.sh backend   构建并蓝绿部署后端（零停机）
 #   ./scripts/deploy.sh frontend  构建前端(微信小程序)
 #   ./scripts/deploy.sh all       构建前后端并部署后端
 #
 # 环境变量:
-#   ECS_HOST       服务器地址 (默认: 8.152.193.56)
-#   ECS_USER       服务器用户 (默认: root)
-#   ECS_PASS       服务器密码 (默认: 930304@ecs)
-#   ECS_JAR_PATH   服务器JAR路径 (默认: /opt/football-team/football-team.jar)
+#   ECS_HOST    服务器地址 (默认: 8.152.193.56)
+#   ECS_USER    服务器用户 (默认: root)
+#   ECS_PASS    服务器密码
 # ============================================================
 
 ECS_HOST="${ECS_HOST:-8.152.193.56}"
 ECS_USER="${ECS_USER:-root}"
 ECS_PASS="${ECS_PASS:-930304@ecs}"
-ECS_JAR_PATH="${ECS_JAR_PATH:-/opt/football-team/football-team.jar}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -35,6 +33,8 @@ log_info()  { echo -e "${BLUE}[INFO]${NC}  $1"; }
 log_ok()    { echo -e "${GREEN}[OK]${NC}   $1"; }
 log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+ssh_run() { sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no "$ECS_USER@$ECS_HOST" "$1"; }
 
 # 检查依赖
 check_deps() {
@@ -53,32 +53,85 @@ build_backend() {
   ls -lh target/team-backend-1.0.0.jar
 }
 
-# 部署后端
+# 检测当前活跃 slot（blue 或 green）
+detect_active_slot() {
+  local status
+  status=$(ssh_run "systemctl is-active football-team-blue 2>/dev/null" || true)
+  if [ "$status" = "active" ]; then
+    echo "blue"
+  else
+    echo "green"
+  fi
+}
+
+# 等待新实例健康（任意 HTTP 响应即视为就绪）
+wait_healthy() {
+  local port=$1
+  local max=30
+  for i in $(seq 1 $max); do
+    local code
+    code=$(ssh_run "curl -s -o /dev/null -w '%{http_code}' \
+      http://127.0.0.1:$port/api/v1/auth/login \
+      -X POST -H 'Content-Type: application/json' -d '{}'")
+    if [ "$code" != "000" ]; then
+      return 0
+    fi
+    log_info "等待服务就绪... ($i/$max)"
+    sleep 2
+  done
+  return 1
+}
+
+# 部署后端（蓝绿切换，零停机）
 deploy_backend() {
   local local_jar="$PROJECT_ROOT/backend/target/team-backend-1.0.0.jar"
   if [ ! -f "$local_jar" ]; then
-    log_error "JAR 文件不存在: $local_jar"
-    log_info "先执行: ./scripts/deploy.sh backend"
+    log_error "JAR 文件不存在: $local_jar，请先执行: ./scripts/deploy.sh backend"
     exit 1
   fi
 
-  log_info "上传 JAR 到服务器 ($ECS_USER@$ECS_HOST)..."
+  # 1. 检测当前活跃 slot
+  log_info "检测活跃 slot..."
+  local active inactive inactive_port
+  active=$(detect_active_slot)
+  if [ "$active" = "blue" ]; then
+    inactive="green"; inactive_port=8081
+  else
+    inactive="blue";  inactive_port=8080
+  fi
+  log_info "当前: $active → 部署到: $inactive (port $inactive_port)"
+
+  # 2. 上传新 JAR（运行中的 JVM 不受影响）
+  log_info "上传 JAR..."
   sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no \
-    "$local_jar" "$ECS_USER@$ECS_HOST:$ECS_JAR_PATH"
+    "$local_jar" "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar"
   log_ok "上传完成"
 
-  log_info "重启 systemd 服务 (football-team)..."
-  sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no "$ECS_USER@$ECS_HOST" \
-    "systemctl restart football-team && sleep 2 && systemctl is-active football-team"
-  log_ok "服务已重启并运行正常"
+  # 3. 启动 inactive slot
+  log_info "启动 football-team-$inactive..."
+  ssh_run "systemctl start football-team-$inactive"
 
-  log_info "验证接口..."
-  sleep 2
-  if curl -s -o /dev/null -w "%{http_code}" "https://ball.xiyanziran.top/api/v1/upload/avatar" -X POST -F "file=@/etc/hosts" | grep -q "200"; then
-    log_ok "接口验证通过 (200)"
-  else
-    log_warn "接口验证未通过，请手动检查"
+  # 4. 健康检查
+  log_info "健康检查 (port $inactive_port)..."
+  if ! wait_healthy "$inactive_port"; then
+    log_error "健康检查超时，回滚：停止 football-team-$inactive"
+    ssh_run "systemctl stop football-team-$inactive"
+    exit 1
   fi
+  log_ok "新实例健康"
+
+  # 5. 切换 Nginx upstream（sed 改端口 + restart，sed -i 会产生新 inode 导致 reload 读旧缓存）
+  log_info "切换 Nginx 流量 → port $inactive_port..."
+  ssh_run "sed -i 's|server 172.17.0.1:[0-9]*;|server 172.17.0.1:$inactive_port;|' \
+    /root/upball-project/upball/docker/nginx/nginx.conf && \
+    docker restart upball-nginx"
+  log_ok "Nginx 已切流到 $inactive"
+
+  # 6. 停止旧 slot（等 2s 让 Nginx 完成在途请求转发）
+  sleep 2
+  log_info "停止旧 slot: football-team-$active..."
+  ssh_run "systemctl stop football-team-$active"
+  log_ok "部署完成 ✓  活跃 slot: $inactive (port $inactive_port)"
 }
 
 # 构建前端
@@ -111,15 +164,16 @@ main() {
       echo "用法: $0 {backend|frontend|all}"
       echo ""
       echo "命令:"
-      echo "  backend   构建并部署后端到 ECS"
+      echo "  backend   构建并蓝绿部署后端（零停机）"
       echo "  frontend  构建前端(微信小程序 dist)"
       echo "  all       构建前后端并部署后端"
       echo ""
+      echo "首次使用请先运行: ./scripts/setup-bluegreen.sh"
+      echo ""
       echo "环境变量:"
-      echo "  ECS_HOST       服务器地址 (默认: $ECS_HOST)"
-      echo "  ECS_USER       服务器用户 (默认: $ECS_USER)"
-      echo "  ECS_PASS       服务器密码"
-      echo "  ECS_JAR_PATH   服务器JAR路径 (默认: $ECS_JAR_PATH)"
+      echo "  ECS_HOST    服务器地址 (默认: $ECS_HOST)"
+      echo "  ECS_USER    服务器用户 (默认: $ECS_USER)"
+      echo "  ECS_PASS    服务器密码"
       exit 1
       ;;
   esac

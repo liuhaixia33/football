@@ -36,6 +36,10 @@ public class WechatService {
         return (String) result.get("openid");
     }
 
+    public boolean isDevMock() {
+        return "dev_mock".equals(appId);
+    }
+
     /** 获取 access_token，Redis 缓存 7100s（有效期 7200s） */
     public String getAccessToken() {
         String cached = redis.opsForValue().get(ACCESS_TOKEN_KEY);

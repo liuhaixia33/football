@@ -57,11 +57,9 @@ jobs:
           fi
           echo "当前: $ACTIVE_SLOT → 部署到: $INACTIVE (port $INACTIVE_PORT)"
 
-          # 2. 上传新 JAR（运行中的 JVM 不受影响）
+          # 2. 上传新 JAR（运行中的 JVM 不受影响；弃用 scp，改用 cat|ssh 管道）
           ls -la backend/target/team-backend-1.0.0.jar || { echo "❌ JAR 文件不存在"; exit 1; }
-          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            backend/target/team-backend-1.0.0.jar \
-            "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar" \
+          cat backend/target/team-backend-1.0.0.jar | $SSH "cat > /opt/football-team/football-team.jar.tmp && mv /opt/football-team/football-team.jar.tmp /opt/football-team/football-team.jar" \
             || { echo "❌ JAR 上传失败，退出码 $?"; exit 1; }
 
           # 3. 重启 inactive slot（确保加载新 JAR）

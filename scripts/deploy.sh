@@ -34,7 +34,7 @@ log_ok()    { echo -e "${GREEN}[OK]${NC}   $1"; }
 log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-ssh_run() { sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 "$ECS_USER@$ECS_HOST" "$1"; }
+ssh_run() { sshpass -p "$ECS_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 "$ECS_USER@$ECS_HOST" "$1"; }
 
 # 检查依赖
 check_deps() {
@@ -102,7 +102,7 @@ deploy_backend() {
 
   # 2. 上传新 JAR（运行中的 JVM 不受影响）
   log_info "上传 JAR..."
-  sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no \
+  sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     "$local_jar" "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar" \
     || { log_error "SCP 失败，退出码 $?"; exit 1; }
   log_ok "上传完成"

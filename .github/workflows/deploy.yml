@@ -42,7 +42,7 @@ jobs:
           ECS_PASS: ${{ secrets.ECS_PASS }}
         run: |
           sudo apt-get install -y sshpass
-          SSH="sshpass -p $ECS_PASS ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
+          SSH="sshpass -p $ECS_PASS ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
 
           # 1. 检测活跃 slot
           ACTIVE=$($SSH "systemctl is-active football-team-blue 2>/dev/null" || true)
@@ -55,7 +55,7 @@ jobs:
 
           # 2. 上传新 JAR（运行中的 JVM 不受影响）
           ls -la backend/target/team-backend-1.0.0.jar || { echo "❌ JAR 文件不存在"; exit 1; }
-          sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no \
+          sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
             backend/target/team-backend-1.0.0.jar \
             "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar" \
             || { echo "❌ SCP 失败，退出码 $?"; exit 1; }

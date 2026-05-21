@@ -108,7 +108,8 @@ public class PosterService {
             g.drawString(teamName, 50, 285);
 
             // 简介
-            String desc = description.length() > 18 ? description.substring(0, 18) + "…" : description;
+            String safeDesc = description == null ? "" : description;
+            String desc = safeDesc.length() > 18 ? safeDesc.substring(0, 18) + "…" : safeDesc;
             g.setFont(new Font("SansSerif", Font.PLAIN, 28));
             g.setColor(TEXT_MUTED);
             g.drawString(desc, 50, 330);

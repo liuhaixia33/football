@@ -503,78 +503,88 @@ export default function MyPage() {
         }}>
           <View style={{
             background: C.surface2, borderRadius: `${px(24)} ${px(24)} 0 0`,
-            padding: `${px(20)} ${px(24)} ${px(40)}`,
             border: `1px solid ${C.border}`, borderBottom: 'none',
+            maxHeight: '85vh', display: 'flex', flexDirection: 'column',
           }}>
-            <View style={{ width: px(36), height: px(4), borderRadius: px(2),
-                           background: C.border, margin: '0 auto', marginBottom: px(24) }} />
-            <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text,
-                           textAlign: 'center', display: 'block', marginBottom: px(24) }}>
-              编辑球队信息
-            </Text>
-
-            {/* Logo picker */}
-            <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
-              <View onClick={pickTeamLogo} style={{ position: 'relative' }}>
-                {(draftTeamLogoTmp || currentTeamLogoUrl)
-                  ? <Image src={draftTeamLogoTmp || currentTeamLogoUrl} style={{
-                      width: px(88), height: px(88), borderRadius: px(20),
-                      border: `3px solid ${C.primary}`,
-                    }} />
-                  : <View style={{
-                      width: px(88), height: px(88), borderRadius: px(20),
-                      background: C.surface3, border: `2px dashed rgba(34,197,94,0.3)`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <Text style={{ fontSize: px(56) }}>🛡️</Text>
-                    </View>
-                }
-                <View style={{
-                  position: 'absolute', bottom: px(0), right: px(0),
-                  width: px(24), height: px(24), borderRadius: '50%',
-                  background: C.primary, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: `2px solid #1e2420`,
-                }}>
-                  <Text style={{ color: '#0f1010', fontSize: px(20), fontWeight: '700' }}>✎</Text>
-                </View>
-              </View>
+            {/* Handle + title */}
+            <View style={{ padding: `${px(20)} ${px(24)} 0`, flexShrink: 0 }}>
+              <View style={{ width: px(36), height: px(4), borderRadius: px(2),
+                             background: C.border, margin: '0 auto', marginBottom: px(24) }} />
+              <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text,
+                             textAlign: 'center', display: 'block', marginBottom: px(24) }}>
+                编辑球队信息
+              </Text>
             </View>
 
-            {/* Team name */}
-            <Text style={{ fontSize: px(24), fontWeight: '600', color: C.text3,
-                           marginBottom: px(8), display: 'block',
-                           letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              球队名称
-            </Text>
-            <Input
-              value={draftTeamName}
-              onInput={(e) => setDraftTeamName(e.detail.value)}
-              placeholder='请输入球队名称'
-              style={{
-                height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
-                padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
-                marginBottom: px(16),
-              }}
-            />
+            {/* Scrollable content */}
+            <ScrollView scrollY style={{ padding: `0 ${px(24)}` }}>
+              {/* Logo picker */}
+              <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
+                <View onClick={pickTeamLogo} style={{ position: 'relative' }}>
+                  {(draftTeamLogoTmp || currentTeamLogoUrl)
+                    ? <Image src={draftTeamLogoTmp || currentTeamLogoUrl} style={{
+                        width: px(88), height: px(88), borderRadius: px(20),
+                        border: `3px solid ${C.primary}`,
+                      }} />
+                    : <View style={{
+                        width: px(88), height: px(88), borderRadius: px(20),
+                        background: C.surface3, border: `2px dashed rgba(34,197,94,0.3)`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <Text style={{ fontSize: px(56) }}>🛡️</Text>
+                      </View>
+                  }
+                  <View style={{
+                    position: 'absolute', bottom: px(0), right: px(0),
+                    width: px(24), height: px(24), borderRadius: '50%',
+                    background: C.primary, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: `2px solid #1e2420`,
+                  }}>
+                    <Text style={{ color: '#0f1010', fontSize: px(20), fontWeight: '700' }}>✎</Text>
+                  </View>
+                </View>
+              </View>
 
-            {/* Description */}
-            <Text style={{ fontSize: px(24), fontWeight: '600', color: C.text3,
-                           marginBottom: px(8), display: 'block',
-                           letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              一句话介绍
-            </Text>
-            <Input
-              value={draftTeamDesc}
-              onInput={(e) => setDraftTeamDesc(e.detail.value)}
-              placeholder='球队的一句话简介（选填）'
-              style={{
-                height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
-                padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
-                marginBottom: px(24),
-              }}
-            />
+              {/* Team name */}
+              <Text style={{ fontSize: px(24), fontWeight: '600', color: C.text3,
+                             marginBottom: px(8), display: 'block',
+                             letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                球队名称
+              </Text>
+              <Input
+                value={draftTeamName}
+                onInput={(e) => setDraftTeamName(e.detail.value)}
+                placeholder='请输入球队名称'
+                style={{
+                  height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
+                  padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
+                  marginBottom: px(16),
+                }}
+              />
 
-            <View style={{ display: 'flex', gap: px(12) }}>
+              {/* Description */}
+              <Text style={{ fontSize: px(24), fontWeight: '600', color: C.text3,
+                             marginBottom: px(8), display: 'block',
+                             letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                一句话介绍
+              </Text>
+              <Input
+                value={draftTeamDesc}
+                onInput={(e) => setDraftTeamDesc(e.detail.value)}
+                placeholder='球队的一句话简介（选填）'
+                style={{
+                  height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
+                  padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
+                  marginBottom: px(16),
+                }}
+              />
+            </ScrollView>
+
+            {/* Buttons — always visible above safe area */}
+            <View style={{
+              padding: `${px(16)} ${px(24)} calc(env(safe-area-inset-bottom) + ${px(24)})`,
+              flexShrink: 0, display: 'flex', gap: px(12),
+            }}>
               <Button
                 style={{ flex: 1, height: px(50), lineHeight: px(50), background: 'rgba(255,255,255,0.06)',
                          color: C.text2, border: 'none', borderRadius: px(12), fontSize: px(30), fontWeight: '500' }}
@@ -604,57 +614,67 @@ export default function MyPage() {
         }}>
           <View style={{
             background: C.surface2, borderRadius: `${px(24)} ${px(24)} 0 0`,
-            padding: `${px(20)} ${px(24)} ${px(40)}`,
             border: `1px solid ${C.border}`, borderBottom: 'none',
+            maxHeight: '85vh', display: 'flex', flexDirection: 'column',
           }}>
-            <View style={{ width: px(36), height: px(4), borderRadius: px(2),
-                           background: C.border, margin: '0 auto', marginBottom: px(24) }} />
-            <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text,
-                           textAlign: 'center', display: 'block', marginBottom: px(24) }}>
-              {t('my.edit_profile')}
-            </Text>
-
-            {/* Avatar picker */}
-            <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
-              <Button
-                openType="chooseAvatar"
-                onChooseAvatar={(e) => setDraftAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
-                style={{ background: 'transparent', border: 'none', padding: 0,
-                         width: px(88), height: px(88), borderRadius: '50%' }}
-              >
-                {draftAvatarDisplay
-                  ? <Image src={draftAvatarDisplay} style={{
-                      width: px(88), height: px(88), borderRadius: '50%',
-                      border: `3px solid ${C.primary}`,
-                    }} />
-                  : <View style={{ width: px(88), height: px(88), borderRadius: '50%',
-                                   background: C.surface3, display: 'flex', alignItems: 'center',
-                                   justifyContent: 'center', border: `2px dashed rgba(34,197,94,0.3)` }}>
-                      <Text style={{ fontSize: px(60) }}>👤</Text>
-                    </View>
-                }
-              </Button>
+            {/* Handle + title */}
+            <View style={{ padding: `${px(20)} ${px(24)} 0`, flexShrink: 0 }}>
+              <View style={{ width: px(36), height: px(4), borderRadius: px(2),
+                             background: C.border, margin: '0 auto', marginBottom: px(24) }} />
+              <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text,
+                             textAlign: 'center', display: 'block', marginBottom: px(24) }}>
+                {t('my.edit_profile')}
+              </Text>
             </View>
 
-            {/* Nickname */}
-            <Text style={{ fontSize: px(24), fontWeight: '600', color: C.text3,
-                           marginBottom: px(8), display: 'block',
-                           letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              昵称
-            </Text>
-            <Input
-              type="nickname"
-              value={draftNickname}
-              onInput={(e) => setDraftNickname(e.detail.value)}
-              placeholder={t('login.nickname_placeholder')}
-              style={{
-                height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
-                padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
-                marginBottom: px(24),
-              }}
-            />
+            {/* Scrollable content */}
+            <ScrollView scrollY style={{ padding: `0 ${px(24)}` }}>
+              {/* Avatar picker */}
+              <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
+                <Button
+                  openType="chooseAvatar"
+                  onChooseAvatar={(e) => setDraftAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
+                  style={{ background: 'transparent', border: 'none', padding: 0,
+                           width: px(88), height: px(88), borderRadius: '50%' }}
+                >
+                  {draftAvatarDisplay
+                    ? <Image src={draftAvatarDisplay} style={{
+                        width: px(88), height: px(88), borderRadius: '50%',
+                        border: `3px solid ${C.primary}`,
+                      }} />
+                    : <View style={{ width: px(88), height: px(88), borderRadius: '50%',
+                                     background: C.surface3, display: 'flex', alignItems: 'center',
+                                     justifyContent: 'center', border: `2px dashed rgba(34,197,94,0.3)` }}>
+                        <Text style={{ fontSize: px(60) }}>👤</Text>
+                      </View>
+                  }
+                </Button>
+              </View>
 
-            <View style={{ display: 'flex', gap: px(12) }}>
+              {/* Nickname */}
+              <Text style={{ fontSize: px(24), fontWeight: '600', color: C.text3,
+                             marginBottom: px(8), display: 'block',
+                             letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                昵称
+              </Text>
+              <Input
+                type="nickname"
+                value={draftNickname}
+                onInput={(e) => setDraftNickname(e.detail.value)}
+                placeholder={t('login.nickname_placeholder')}
+                style={{
+                  height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
+                  padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
+                  marginBottom: px(16),
+                }}
+              />
+            </ScrollView>
+
+            {/* Buttons — always visible above safe area */}
+            <View style={{
+              padding: `${px(16)} ${px(24)} calc(env(safe-area-inset-bottom) + ${px(24)})`,
+              flexShrink: 0, display: 'flex', gap: px(12),
+            }}>
               <Button
                 style={{ flex: 1, height: px(50), lineHeight: px(50), background: 'rgba(255,255,255,0.06)',
                          color: C.text2, border: 'none', borderRadius: px(12), fontSize: px(30), fontWeight: '500' }}

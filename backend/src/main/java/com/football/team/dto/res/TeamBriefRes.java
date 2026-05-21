@@ -9,4 +9,5 @@ public class TeamBriefRes {
     private String teamName;
     private String logoUrl;
     private String role;
+    private String inviteCode;
 }

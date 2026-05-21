@@ -66,6 +66,14 @@ public class TeamController {
         return ApiResponse.ok(null);
     }
 
+    @GetMapping("/by-invite/{inviteCode}")
+    public ApiResponse<Team> getByInviteCode(HttpServletRequest req,
+                                              @PathVariable String inviteCode) {
+        User user = (User) req.getAttribute("currentUser");
+        if (user == null) throw BusinessException.unauthorized("请先登录");
+        return ApiResponse.ok(teamService.getTeamByInviteCode(inviteCode));
+    }
+
     @DeleteMapping("/{teamId}/leave")
     public ApiResponse<Void> leave(HttpServletRequest req, @PathVariable Long teamId) {
         User user = (User) req.getAttribute("currentUser");

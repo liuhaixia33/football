@@ -3,6 +3,7 @@ import { View, Text, Button, Image, Input } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { authApi } from '../../api/auth'
 import { uploadApi } from '../../api/upload'
+import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
@@ -42,6 +43,38 @@ export default function LoginPage() {
       const res = await authApi.login(code, nickname.trim(), ossUrl)
       setAuth(res.token, res.userId, res.nickname, res.avatarUrl || ossUrl)
       setTeams(res.teams)
+
+      // 检查是否有待处理的球队邀请
+      const pendingCode = Taro.getStorageSync('pending_invite_code') as string | undefined
+      if (pendingCode) {
+        Taro.removeStorageSync('pending_invite_code')
+        const alreadyMember = res.teams.some(t => t.inviteCode === pendingCode)
+        if (!alreadyMember) {
+          try {
+            const teamInfo = await teamApi.getByInviteCode(pendingCode)
+            await new Promise<void>(resolve => {
+              Taro.showModal({
+                title: '加入球队',
+                content: `检测到邀请，是否申请加入「${teamInfo.name}」？`,
+                success: async ({ confirm }) => {
+                  if (confirm) {
+                    try {
+                      await teamApi.join(pendingCode)
+                      Taro.showToast({ title: '申请已发送，等待管理员审核', icon: 'success' })
+                    } catch (e: unknown) {
+                      const msg = e instanceof Error ? e.message : ''
+                      if (!msg.includes('已是') && !msg.includes('审核中')) {
+                        Taro.showToast({ title: msg || '申请失败', icon: 'none' })
+                      }
+                    }
+                  }
+                  resolve()
+                },
+              })
+            })
+          } catch {} // 无效邀请码静默忽略
+        }
+      }
 
       if (res.teams.length === 0) {
         Taro.reLaunch({ url: '/pages/onboard/index' })

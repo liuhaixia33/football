@@ -11,6 +11,7 @@ export interface TeamBrief {
   teamName: string
   logoUrl: string
   role: MemberRole
+  inviteCode: string
 }
 
 export interface LoginRes {

@@ -136,6 +136,12 @@ public class TeamService {
         }).toList();
     }
 
+    @Transactional(readOnly = true)
+    public Team getTeamByInviteCode(String inviteCode) {
+        return teamRepository.findByInviteCode(inviteCode)
+            .orElseThrow(() -> BusinessException.notFound("邀请码无效"));
+    }
+
     private String generateCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
     }

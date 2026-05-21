@@ -9,6 +9,14 @@ function App({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!token) {
+      // Save inviteCode from shared link before redirecting to login
+      try {
+        const opts = Taro.getLaunchOptionsSync()
+        const inviteCode = (opts.query as Record<string, string>)?.inviteCode
+        if (inviteCode) {
+          Taro.setStorageSync('pending_invite_code', inviteCode)
+        }
+      } catch {}
       Taro.reLaunch({ url: '/pages/login/index' })
     }
   }, [token])

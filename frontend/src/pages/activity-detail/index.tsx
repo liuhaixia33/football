@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { View, Text, Button, ScrollView, Image } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
+import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
 import type { ActivityDetailRes } from '../../types/api'
 import { useT } from '../../i18n/useT'
@@ -27,12 +28,16 @@ const C = {
 export default function ActivityDetailPage() {
   const [detail, setDetail] = useState<ActivityDetailRes | null>(null)
   const t = useT()
-  const { isCaptainOrAdmin, currentTeamId } = useAuthStore()
-  const activityId = Number(Taro.getCurrentInstance().router?.params?.id)
+  const { isCaptainOrAdmin, currentTeamId, currentTeamInviteCode, teams } = useAuthStore()
+  const routerParams = Taro.getCurrentInstance().router?.params ?? {}
+  const activityId = Number(routerParams.id)
+  const sharedTeamId = routerParams.teamId ? Number(routerParams.teamId) : null
+  const sharedInviteCode = routerParams.inviteCode as string | undefined
+  const joinModalShown = useRef(false)
 
   useShareAppMessage(() => ({
     title: detail?.activity.title ?? '球队活动',
-    path: `/pages/activity-detail/index?id=${activityId}&teamId=${currentTeamId}`,
+    path: `/pages/activity-detail/index?id=${activityId}&teamId=${currentTeamId}&inviteCode=${currentTeamInviteCode()}`,
     imageUrl: '/assets/images/share-cover.png',
   }))
 
@@ -46,6 +51,35 @@ export default function ActivityDetailPage() {
       .then(setDetail)
       .catch(() => Taro.showToast({ title: t('act.load_fail'), icon: 'none' }))
   }, [activityId])
+
+  // 检测邀请码并弹框询问是否加入
+  useEffect(() => {
+    if (!sharedInviteCode || joinModalShown.current) return
+    if (sharedTeamId && teams.some(t => t.teamId === sharedTeamId)) return // 已是成员
+    joinModalShown.current = true
+    Taro.removeStorageSync('pending_invite_code')
+
+    teamApi.getByInviteCode(sharedInviteCode)
+      .then(teamInfo => {
+        Taro.showModal({
+          title: '加入球队',
+          content: `检测到邀请，是否申请加入「${teamInfo.name}」？`,
+          success: async ({ confirm }) => {
+            if (!confirm) return
+            try {
+              await teamApi.join(sharedInviteCode)
+              Taro.showToast({ title: '申请已发送，等待管理员审核', icon: 'success' })
+            } catch (e: unknown) {
+              const msg = e instanceof Error ? e.message : ''
+              if (!msg.includes('已是') && !msg.includes('审核中')) {
+                Taro.showToast({ title: msg || '申请失败', icon: 'none' })
+              }
+            }
+          },
+        })
+      })
+      .catch(() => {}) // 无效邀请码静默忽略
+  }, [sharedInviteCode, teams])
 
   if (!detail) {
     return (

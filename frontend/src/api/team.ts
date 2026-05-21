@@ -20,4 +20,6 @@ export const teamApi = {
     api.get<Team>(`/api/v1/teams/${teamId}`),
   updateTeam: (teamId: number, body: { name?: string; description?: string; logoUrl?: string }) =>
     api.put<Team>(`/api/v1/teams/${teamId}`, body as Record<string, unknown>),
+  getByInviteCode: (inviteCode: string) =>
+    api.get<Team>(`/api/v1/teams/by-invite/${inviteCode}`),
 }

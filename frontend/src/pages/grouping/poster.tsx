@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Button, Canvas } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { groupingApi } from '../../api/grouping'
+import { useAuthStore } from '../../store/auth'
 import type { GroupingRes, GroupDto } from '../../types/api'
 
 const CANVAS_ID = 'grouping-poster'
 const W = 375
 const HEADER_H = 68   // outside-pitch title area
 const PITCH_H = 520
-const CANVAS_H = HEADER_H + PITCH_H
+const FOOTER_H = 44   // invite code footer
+const CANVAS_H = HEADER_H + PITCH_H + FOOTER_H
 const LINE_C = 'rgba(255,255,255,0.68)'
 const GRASS_A = '#1d6030'
 const GRASS_B = '#226835'
@@ -164,12 +166,40 @@ function drawGroupLabel(ctx: any, group: GroupDto, yo: number, halfH: number, is
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function drawFooter(ctx: any, inviteCode: string) {
+  const y = HEADER_H + PITCH_H
+  ctx.setFillStyle('#0d1117')
+  ctx.fillRect(0, y, W, FOOTER_H)
+  ctx.setFillStyle('rgba(255,255,255,0.06)')
+  ctx.fillRect(0, y, W, 1)
+  if (!inviteCode) return
+  ctx.setFillStyle('#22c55e')
+  ctx.setFontSize(10)
+  ctx.setTextAlign('center')
+  ctx.fillText('球队邀请码', W / 2, y + 16)
+  ctx.setFillStyle('rgba(255,255,255,0.65)')
+  ctx.setFontSize(13)
+  ctx.fillText(inviteCode, W / 2, y + 34)
+}
+
 export default function GroupingPosterPage() {
   const params = Taro.getCurrentInstance().router?.params ?? {}
   const activityId = Number(params.activityId)
   const title = decodeURIComponent(params.title ?? '')
   const startTime = decodeURIComponent(params.startTime ?? '')
   const location = decodeURIComponent(params.location ?? '')
+  const { currentTeamId, currentTeamInviteCode } = useAuthStore()
+  const inviteCode = currentTeamInviteCode()
+
+  useShareAppMessage(() => ({
+    title: `${title || '训练分组'} | 扫码加入球队`,
+    path: `/pages/activity-detail/index?id=${activityId}&teamId=${currentTeamId}&inviteCode=${inviteCode}`,
+  }))
+
+  useDidShow(() => {
+    Taro.showShareMenu({ withShareTicket: false, showShareItems: ['shareAppMessage'] })
+  })
 
   const [grouping, setGrouping] = useState<GroupingRes | null>(null)
   const [tempFilePath, setTempFilePath] = useState<string | null>(null)
@@ -207,6 +237,9 @@ export default function GroupingPosterPage() {
         drawGroupPlayers(ctx, g, yo, halfH, isTopTeam, color)
         drawGroupLabel(ctx, g, yo, halfH, isTopTeam, color)
       })
+
+      // 4. Footer with invite code
+      drawFooter(ctx, inviteCode)
 
       ctx.draw(false, () => {
         Taro.canvasToTempFilePath({

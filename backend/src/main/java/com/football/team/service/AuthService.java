@@ -56,6 +56,7 @@ public class AuthService {
                 return TeamBriefRes.builder()
                     .teamId(t.getId()).teamName(t.getName())
                     .logoUrl(t.getLogoUrl()).role(m.getRole().name())
+                    .inviteCode(t.getInviteCode())
                     .build();
             }).toList();
 

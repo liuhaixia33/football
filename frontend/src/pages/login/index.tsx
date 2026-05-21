@@ -175,21 +175,22 @@ export default function LoginPage() {
           <Checkbox
             value="agreed"
             checked={agreed}
-            color="#22c55e"
+            color={C.primary}
+            onChange={() => setAgreed(v => !v)}
             style={{ transform: 'scale(0.8)' }}
           />
           <Text style={{ fontSize: px(24), color: C.text2 }}>
             我已阅读并同意
           </Text>
           <Text
-            style={{ fontSize: px(24), color: '#22c55e', textDecoration: 'underline' }}
+            style={{ fontSize: px(24), color: C.primary, textDecoration: 'underline' }}
             onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/terms/index' }) }}
           >
             《用户协议》
           </Text>
           <Text style={{ fontSize: px(24), color: C.text2 }}>和</Text>
           <Text
-            style={{ fontSize: px(24), color: '#22c55e', textDecoration: 'underline' }}
+            style={{ fontSize: px(24), color: C.primary, textDecoration: 'underline' }}
             onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/privacy/index' }) }}
           >
             《隐私政策》

@@ -283,7 +283,7 @@ export default function MembersPage() {
             })}
           </View>
         )}
-        <View style={{ height: px(160) }} />
+        <View style={{ height: px(192) }} />
       </ScrollView>
     </View>
   )

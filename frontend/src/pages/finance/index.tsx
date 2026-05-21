@@ -187,7 +187,7 @@ export default function FinancePage() {
             </View>
           )}
         </View>
-        <View style={{ height: px(160) }} />
+        <View style={{ height: px(192) }} />
       </ScrollView>
     </View>
   )

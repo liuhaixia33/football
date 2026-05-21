@@ -11,10 +11,14 @@ import { px } from '../../utils/style'
 const C = {
   primary: '#22c55e',
   primaryDim: 'rgba(34,197,94,0.12)',
+  primaryBorder: 'rgba(34,197,94,0.25)',
+  primaryDash: 'rgba(34,197,94,0.35)',
   bg: '#0f1010',
   surface: '#181c18',
   surface2: '#1e2420',
   border: 'rgba(255,255,255,0.09)',
+  disabledBg: 'rgba(255,255,255,0.07)',
+  disabledText: '#0f1010',
   text: '#e8ede8',
   text2: '#8a9e8a',
   text3: '#4a5a4a',
@@ -104,7 +108,7 @@ export default function LoginPage() {
         <View style={{
           width: px(88), height: px(88), borderRadius: '50%',
           background: C.primaryDim,
-          border: `2px solid rgba(34,197,94,0.25)`,
+          border: `2px solid ${C.primaryBorder}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           marginBottom: px(16),
         }}>
@@ -138,7 +142,7 @@ export default function LoginPage() {
                 }} />
               : <View style={{
                   width: px(140), height: px(140), borderRadius: '50%',
-                  background: C.surface2, border: `2px dashed rgba(34,197,94,0.35)`,
+                  background: C.surface2, border: `2px dashed ${C.primaryDash}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <Text style={{ fontSize: px(80) }}>📷</Text>
@@ -201,8 +205,8 @@ export default function LoginPage() {
           style={{
             width: px(520),
             marginTop: px(20),
-            background: canLogin ? C.primary : 'rgba(255,255,255,0.07)',
-            color: canLogin ? '#0f1010' : C.text3,
+            background: canLogin ? C.primary : C.disabledBg,
+            color: canLogin ? C.disabledText : C.text3,
             borderRadius: px(16),
             height: px(56),
             lineHeight: px(56),

@@ -1,6 +1,7 @@
 package com.football.team.controller;
 
 import com.football.team.dto.req.*;
+import com.football.team.dto.req.UpdateTeamReq;
 import com.football.team.dto.res.ApiResponse;
 import com.football.team.dto.res.MemberRes;
 import com.football.team.dto.res.PosterRes;
@@ -84,6 +85,19 @@ public class TeamController {
         User user = (User) req.getAttribute("currentUser");
         teamService.leaveTeam(teamId, user.getId());
         return ApiResponse.ok(null);
+    }
+
+    @GetMapping("/{teamId}")
+    @RequireRole(MemberRole.PLAYER)
+    public ApiResponse<Team> getTeam(@PathVariable Long teamId) {
+        return ApiResponse.ok(teamService.getById(teamId));
+    }
+
+    @PutMapping("/{teamId}")
+    @RequireRole(MemberRole.ADMIN)
+    public ApiResponse<Team> updateTeam(@PathVariable Long teamId,
+                                        @RequestBody UpdateTeamReq body) {
+        return ApiResponse.ok(teamService.updateTeam(teamId, body));
     }
 
     /** 公开接口：无需登录，用于扫码后展示球队信息 */

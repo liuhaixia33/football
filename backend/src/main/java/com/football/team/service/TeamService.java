@@ -1,6 +1,7 @@
 package com.football.team.service;
 
 import com.football.team.dto.req.*;
+import com.football.team.dto.req.UpdateTeamReq;
 import com.football.team.service.ContentSafetyService;
 import com.football.team.dto.res.MemberRes;
 import com.football.team.dto.res.TeamPublicRes;
@@ -186,6 +187,24 @@ public class TeamService {
         member.setTeamId(team.getId());
         member.setUserId(userId);
         teamMemberRepository.save(member);
+    }
+
+    @Transactional(readOnly = true)
+    public Team getById(Long teamId) {
+        return teamRepository.findById(teamId)
+            .orElseThrow(() -> BusinessException.notFound("球队不存在"));
+    }
+
+    public Team updateTeam(Long teamId, UpdateTeamReq req) {
+        Team team = teamRepository.findById(teamId)
+            .orElseThrow(() -> BusinessException.notFound("球队不存在"));
+        if (req.getName() != null && !req.getName().isBlank())
+            team.setName(req.getName().trim());
+        if (req.getDescription() != null)
+            team.setDescription(req.getDescription().trim());
+        if (req.getLogoUrl() != null && !req.getLogoUrl().isBlank())
+            team.setLogoUrl(req.getLogoUrl());
+        return teamRepository.save(team);
     }
 
     private String generateCode() {

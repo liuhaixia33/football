@@ -37,9 +37,14 @@ public class PosterService {
         String cached = redis.opsForValue().get(cacheKey);
         if (cached != null) return cached;
 
-        TeamPublicRes info  = teamService.getPublicInfo(teamId);
-        byte[] miniCode     = wechatService.generateMiniCode("teamId=" + teamId, "pages/join-team/index");
-        byte[] logoBytes    = fetchLogo(info.getLogoUrl());
+        TeamPublicRes info = teamService.getPublicInfo(teamId);
+        byte[] miniCode;
+        try {
+            miniCode = wechatService.generateMiniCode("teamId=" + teamId, "pages/join-team/index");
+        } catch (Exception e) {
+            miniCode = null;
+        }
+        byte[] logoBytes = fetchLogo(info.getLogoUrl());
 
         byte[] poster = renderPoster(info.getName(), info.getDescription(),
             info.getMemberCount(), logoBytes, miniCode);

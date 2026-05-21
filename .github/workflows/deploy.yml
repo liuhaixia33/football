@@ -45,8 +45,10 @@ jobs:
         env:
           ECS_HOST: ${{ secrets.ECS_HOST }}
           ECS_USER: ${{ secrets.ECS_USER }}
+        shell: bash
         run: |
-          SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
+          set +e
+          SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
 
           # 1. 检测活跃 slot
           ACTIVE=$($SSH "systemctl is-active football-team-blue 2>/dev/null" || true)

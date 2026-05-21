@@ -2,6 +2,7 @@ package com.football.team.service;
 
 import com.football.team.dto.req.*;
 import com.football.team.dto.res.MemberRes;
+import com.football.team.dto.res.TeamPublicRes;
 import com.football.team.entity.*;
 import com.football.team.enums.*;
 import com.football.team.exception.BusinessException;
@@ -140,6 +141,42 @@ public class TeamService {
     public Team getTeamByInviteCode(String inviteCode) {
         return teamRepository.findByInviteCode(inviteCode)
             .orElseThrow(() -> BusinessException.notFound("邀请码无效"));
+    }
+
+    @Transactional(readOnly = true)
+    public TeamPublicRes getPublicInfo(Long teamId) {
+        Team team = teamRepository.findById(teamId)
+            .orElseThrow(() -> BusinessException.notFound("球队不存在"));
+        int memberCount = teamMemberRepository.findByTeamIdAndStatus(teamId, MemberStatus.ACTIVE).size();
+        return TeamPublicRes.builder()
+            .teamId(team.getId())
+            .name(team.getName())
+            .logoUrl(team.getLogoUrl())
+            .description(team.getDescription())
+            .memberCount(memberCount)
+            .build();
+    }
+
+    public void applyJoinByTeamId(Long userId, Long teamId) {
+        Team team = teamRepository.findById(teamId)
+            .orElseThrow(() -> BusinessException.notFound("球队不存在"));
+
+        Optional<TeamMember> existing = teamMemberRepository.findByTeamIdAndUserId(team.getId(), userId);
+        if (existing.isPresent()) {
+            TeamMember m = existing.get();
+            if (m.getStatus() == MemberStatus.ACTIVE)
+                throw BusinessException.badRequest("您已是该球队成员");
+            if (m.getStatus() == MemberStatus.PENDING)
+                throw BusinessException.badRequest("您的申请正在审核中");
+            m.setStatus(MemberStatus.PENDING);
+            m.setJoinedAt(null);
+            teamMemberRepository.save(m);
+            return;
+        }
+        TeamMember member = new TeamMember();
+        member.setTeamId(team.getId());
+        member.setUserId(userId);
+        teamMemberRepository.save(member);
     }
 
     private String generateCode() {

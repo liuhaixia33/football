@@ -17,6 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.football.team.dto.res.TeamPublicRes;
+
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,5 +93,46 @@ class TeamServiceTest {
         captain.setRole(MemberRole.CAPTAIN);
         when(teamMemberRepository.findByTeamIdAndUserId(1L, 99L)).thenReturn(Optional.of(captain));
         assertThrows(BusinessException.class, () -> teamService.removeMember(1L, 99L));
+    }
+
+    @Test
+    void getPublicInfo_teamNotFound_throwsNotFound() {
+        when(teamRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> teamService.getPublicInfo(99L));
+    }
+
+    @Test
+    void getPublicInfo_success_returnsMemberCount() {
+        Team team = new Team();
+        team.setId(1L);
+        team.setName("城南联队");
+        team.setLogoUrl("http://logo.url");
+        team.setDescription("每周末踢球");
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(team));
+
+        TeamMember m1 = new TeamMember(); m1.setStatus(MemberStatus.ACTIVE);
+        TeamMember m2 = new TeamMember(); m2.setStatus(MemberStatus.ACTIVE);
+        when(teamMemberRepository.findByTeamIdAndStatus(1L, MemberStatus.ACTIVE))
+            .thenReturn(List.of(m1, m2));
+
+        TeamPublicRes res = teamService.getPublicInfo(1L);
+        assertEquals("城南联队", res.getName());
+        assertEquals(2, res.getMemberCount());
+    }
+
+    @Test
+    void applyJoinByTeamId_teamNotFound_throwsNotFound() {
+        when(teamRepository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(BusinessException.class, () -> teamService.applyJoinByTeamId(1L, 99L));
+    }
+
+    @Test
+    void applyJoinByTeamId_alreadyActive_throwsBadRequest() {
+        Team team = new Team(); team.setId(5L);
+        when(teamRepository.findById(5L)).thenReturn(Optional.of(team));
+        TeamMember active = new TeamMember(); active.setStatus(MemberStatus.ACTIVE);
+        when(teamMemberRepository.findByTeamIdAndUserId(5L, 1L)).thenReturn(Optional.of(active));
+
+        assertThrows(BusinessException.class, () -> teamService.applyJoinByTeamId(1L, 5L));
     }
 }

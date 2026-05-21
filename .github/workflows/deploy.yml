@@ -42,8 +42,11 @@ jobs:
           ECS_PASS: ${{ secrets.ECS_PASS }}
         run: |
           sudo apt-get install -y sshpass
-          export SSHPASS="$ECS_PASS"
-          SSH="sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
+          PASSFILE=$(mktemp)
+          trap 'rm -f "$PASSFILE"' EXIT
+          echo "$ECS_PASS" > "$PASSFILE"
+          chmod 600 "$PASSFILE"
+          SSH="sshpass -f $PASSFILE ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
 
           # 1. 检测活跃 slot
           ACTIVE=$($SSH "systemctl is-active football-team-blue 2>/dev/null" || true)

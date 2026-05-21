@@ -40,60 +40,40 @@ jobs:
           ssh-private-key: ${{ secrets.ECS_SSH_KEY }}
           log-public-key: false
 
-      - name: Deploy to ECS (blue-green)
+      - name: Deploy to ECS
         if: github.ref == 'refs/heads/main'
         env:
           ECS_HOST: ${{ secrets.ECS_HOST }}
           ECS_USER: ${{ secrets.ECS_USER }}
         shell: bash
         run: |
-          set +e
           SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
 
-          # 1. 检测活跃 slot
-          ACTIVE=$($SSH "systemctl is-active football-team-blue 2>/dev/null" || true)
-          if [ "$ACTIVE" = "active" ]; then
-            INACTIVE=green; INACTIVE_PORT=8081; ACTIVE_SLOT=blue
-          else
-            INACTIVE=blue;  INACTIVE_PORT=8080; ACTIVE_SLOT=green
-          fi
-          echo "当前: $ACTIVE_SLOT → 部署到: $INACTIVE (port $INACTIVE_PORT)"
-
-          # 2. 上传新 JAR（运行中的 JVM 不受影响；弃用 scp，改用 cat|ssh 管道）
+          # 1. 上传 JAR
           ls -la backend/target/team-backend-1.0.0.jar || { echo "❌ JAR 文件不存在"; exit 1; }
           cat backend/target/team-backend-1.0.0.jar | $SSH "cat > /opt/football-team/football-team.jar.tmp && mv /opt/football-team/football-team.jar.tmp /opt/football-team/football-team.jar" \
-            || { echo "❌ JAR 上传失败，退出码 $?"; exit 1; }
+            || { echo "❌ JAR 上传失败"; exit 1; }
+          echo "✅ JAR 上传成功"
 
-          # 3. 重启 inactive slot（确保加载新 JAR）
-          $SSH "systemctl restart football-team-$INACTIVE"
+          # 2. 重启服务
+          $SSH "systemctl restart football-team"
+          echo "✅ 服务重启中..."
 
-          # 4. 健康检查（最多等 60s）
+          # 3. 健康检查（最多等 60s）
           for i in $(seq 1 30); do
-            CODE=$($SSH "curl -s --max-time 10 --connect-timeout 5 -o /dev/null -w '%{http_code}' \
-              http://127.0.0.1:$INACTIVE_PORT/api/v1/activities/team/1")
+            CODE=$($SSH "curl -s --max-time 10 --connect-timeout 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/v1/activities/team/1")
             if [ "$CODE" != "000" ] && [ -n "$CODE" ]; then
-              echo "✅ 新实例健康 (HTTP $CODE)"
+              echo "✅ 服务健康 (HTTP $CODE)"
               break
             fi
             echo "等待服务就绪... ($i/30)"
             sleep 2
             if [ "$i" = "30" ]; then
-              echo "❌ 健康检查超时，回滚"
-              $SSH "systemctl stop football-team-$INACTIVE"
+              echo "❌ 健康检查超时"
               exit 1
             fi
           done
-
-          # 5. 切换 Nginx upstream（零停机 reload）
-          $SSH "sed -i 's|server 172.17.0.1:[0-9]*;|server 172.17.0.1:$INACTIVE_PORT;|' \
-            /root/upball-project/upball/docker/nginx/nginx.conf && \
-            docker exec upball-nginx nginx -s reload"
-          echo "✅ Nginx 已切流到 $INACTIVE"
-
-          # 6. 排水 2s 后停止旧 slot
-          sleep 2
-          $SSH "systemctl stop football-team-$ACTIVE_SLOT"
-          echo "✅ 部署完成，活跃 slot: $INACTIVE (port $INACTIVE_PORT)"
+          echo "✅ 部署完成"
 
   frontend:
     runs-on: ubuntu-latest

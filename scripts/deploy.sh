@@ -100,11 +100,10 @@ deploy_backend() {
   fi
   log_info "当前: $active → 部署到: $inactive (port $inactive_port)"
 
-  # 2. 上传新 JAR（运行中的 JVM 不受影响）
+  # 2. 上传新 JAR（运行中的 JVM 不受影响；弃用 scp，改用 cat|ssh 管道）
   log_info "上传 JAR..."
-  sshpass -p "$ECS_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-    "$local_jar" "$ECS_USER@$ECS_HOST:/opt/football-team/football-team.jar" \
-    || { log_error "SCP 失败，退出码 $?"; exit 1; }
+  cat "$local_jar" | ssh_run "cat > /opt/football-team/football-team.jar.tmp && mv /opt/football-team/football-team.jar.tmp /opt/football-team/football-team.jar" \
+    || { log_error "JAR 上传失败，退出码 $?"; exit 1; }
   log_ok "上传完成"
 
   # 3. 重启 inactive slot（确保加载新 JAR）

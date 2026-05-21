@@ -5,7 +5,7 @@ spring:
     password: Q*p-FD_G2CqGLkn
   data:
     redis:
-      host: r-2ze7mjt9yrjml1gbwypd.redis.rds.aliyuncs.com
+      host: r-2ze7mjt9yrjml1gbwy.redis.rds.aliyuncs.com
       port: 6379
 
 wechat:

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, Button, Image, Input } from '@tarojs/components'
+import { View, Text, Button, Image, Input, Checkbox } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { authApi } from '../../api/auth'
 import { uploadApi } from '../../api/upload'
@@ -25,10 +25,11 @@ export default function LoginPage() {
   const [avatarTmp, setAvatarTmp] = useState('')
   const { setAuth, setTeams, avatarUrl: storedAvatarUrl, nickname: storedNickname } = useAuthStore()
   const [nickname, setNickname] = useState(storedNickname || '')
+  const [agreed, setAgreed] = useState(false)
   const t = useT()
 
   const avatarDisplay = avatarTmp || storedAvatarUrl || ''
-  const canLogin = !!(avatarTmp || storedAvatarUrl) && !!nickname.trim() && !loading
+  const canLogin = !!(avatarTmp || storedAvatarUrl) && !!nickname.trim() && !loading && agreed
 
   const handleLogin = async () => {
     if (!canLogin) return
@@ -166,11 +167,40 @@ export default function LoginPage() {
             textAlign: 'center',
           }}
         />
+        {/* 协议同意行 */}
+        <View
+          style={{ display: 'flex', alignItems: 'center', gap: px(8), marginTop: px(16) }}
+          onClick={() => setAgreed(v => !v)}
+        >
+          <Checkbox
+            value="agreed"
+            checked={agreed}
+            color="#22c55e"
+            style={{ transform: 'scale(0.8)' }}
+          />
+          <Text style={{ fontSize: px(24), color: C.text2 }}>
+            我已阅读并同意
+          </Text>
+          <Text
+            style={{ fontSize: px(24), color: '#22c55e', textDecoration: 'underline' }}
+            onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/terms/index' }) }}
+          >
+            《用户协议》
+          </Text>
+          <Text style={{ fontSize: px(24), color: C.text2 }}>和</Text>
+          <Text
+            style={{ fontSize: px(24), color: '#22c55e', textDecoration: 'underline' }}
+            onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/privacy/index' }) }}
+          >
+            《隐私政策》
+          </Text>
+        </View>
+
         <Button
           style={{
             width: px(520),
-            marginTop: px(52),
-            background: canLogin ? C.primary : 'rgba(255,255,255,0.07)',
+            marginTop: px(20),
+            background: canLogin ? '#22c55e' : 'rgba(255,255,255,0.07)',
             color: canLogin ? '#0f1010' : C.text3,
             borderRadius: px(16),
             height: px(56),

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { View, Text, ScrollView, Image } from '@tarojs/components'
+import { View, Text, ScrollView, Image, Button } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { teamApi } from '../../api/team'
@@ -297,7 +297,7 @@ export default function HomePage() {
   const [featuredDetail, setFeaturedDetail] = useState<ActivityDetailRes | null>(null)
   const [loading, setLoading] = useState(false)
   const t = useT()
-  const { currentTeamId, isCaptainOrAdmin, teams } = useAuthStore()
+  const { currentTeamId, isCaptainOrAdmin, teams, token } = useAuthStore()
   const routerParams = Taro.getCurrentInstance().router?.params ?? {}
   const sharedInviteCode = routerParams.inviteCode as string | undefined
   const sharedTeamId = routerParams.teamId ? Number(routerParams.teamId) : null
@@ -354,6 +354,16 @@ export default function HomePage() {
 
   useDidShow(load)
 
+  useEffect(() => {
+    try {
+      const opts = Taro.getLaunchOptionsSync()
+      const inviteCode = (opts.query as Record<string, string>)?.inviteCode
+      if (inviteCode) {
+        Taro.setStorageSync('pending_invite_code', inviteCode)
+      }
+    } catch {}
+  }, [])
+
   const handleRsvp = async (activityId: number, status: RegStatus) => {
     const currentStatus = activities.find(a => a.id === activityId)?.myStatus
     try {
@@ -371,6 +381,33 @@ export default function HomePage() {
   const upcoming = activities.filter(a => a.status === 'OPEN')
   const past = activities.filter(a => a.status !== 'OPEN')
   const [featured, ...restUpcoming] = upcoming
+
+  if (!token) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0f1010', display: 'flex', flexDirection: 'column',
+                     alignItems: 'center', justifyContent: 'center', padding: px(40) }}>
+        <Text style={{ fontSize: px(120), display: 'block', textAlign: 'center', marginBottom: px(24) }}>⚽</Text>
+        <Text style={{ fontSize: px(48), fontWeight: '900', color: '#e8ede8', textAlign: 'center',
+                       display: 'block', marginBottom: px(12) }}>
+          足球队
+        </Text>
+        <Text style={{ fontSize: px(28), color: '#8a9e8a', textAlign: 'center', display: 'block',
+                       marginBottom: px(48) }}>
+          管理你的球队，记录每一场比赛
+        </Text>
+        <Button
+          style={{
+            backgroundColor: '#22c55e', color: '#0f1010', borderRadius: px(16),
+            fontSize: px(34), fontWeight: '800', border: 'none',
+            padding: `${px(18)} ${px(60)}`,
+          }}
+          onClick={() => Taro.navigateTo({ url: '/pages/login/index' })}
+        >
+          登录 / 注册
+        </Button>
+      </View>
+    )
+  }
 
   return (
     <View style={{ height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>

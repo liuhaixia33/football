@@ -8,6 +8,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -83,7 +86,9 @@ public class WechatService {
             "line_color", Map.of("r", 39, "g", 174, "b", 96)
         );
 
-        byte[] response = restTemplate.postForObject(url, body, byte[].class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        byte[] response = restTemplate.postForObject(url, new HttpEntity<>(body, headers), byte[].class);
         if (response == null || response.length == 0)
             throw BusinessException.badRequest("生成小程序码失败：空响应");
 

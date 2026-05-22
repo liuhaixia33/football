@@ -2,6 +2,8 @@ package com.football.team.service;
 
 import com.football.team.dto.res.TeamPublicRes;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ public class PosterService {
     private final OssService ossService;
     private final StringRedisTemplate redis;
 
+    private static final Logger log = LoggerFactory.getLogger(PosterService.class);
     private static final int W = 750, H = 1080;
     private static final Color GREEN       = new Color(0x2e, 0xcc, 0x71);
     private static final Color GREEN_DARK  = new Color(0x27, 0xae, 0x60);
@@ -42,6 +45,7 @@ public class PosterService {
         try {
             miniCode = wechatService.generateMiniCode("teamId=" + teamId, "pages/join-team/index");
         } catch (Exception e) {
+            log.warn("小程序码生成失败，将渲染占位符 teamId={}: {}", teamId, e.getMessage());
             miniCode = null;
         }
         byte[] logoBytes = fetchLogo(info.getLogoUrl());
@@ -52,7 +56,10 @@ public class PosterService {
         String key = "poster/" + teamId + "_" + System.currentTimeMillis() + ".png";
         String url = ossService.uploadBytes(poster, key);
 
-        redis.opsForValue().set(cacheKey, url, 24, TimeUnit.HOURS);
+        // 只在小程序码成功生成时才缓存，失败时不缓存以便下次重试
+        if (miniCode != null) {
+            redis.opsForValue().set(cacheKey, url, 24, TimeUnit.HOURS);
+        }
         return url;
     }
 

@@ -14,8 +14,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor @Transactional(readOnly = true)
 public class UserService {
@@ -51,11 +54,17 @@ public class UserService {
         List<Activity> teamFinished = activityRepository
             .findByTeamIdAndStatusOrderByStartTimeDesc(teamId, ActivityStatus.FINISHED);
 
-        // user's JOINED activity IDs
+        // only consider activity IDs that belong to this team
+        Set<Long> teamFinishedIds = teamFinished.stream()
+            .map(Activity::getId)
+            .collect(Collectors.toSet());
+
+        // user's JOINED activity IDs, filtered to this team
         Set<Long> joinedIds = regRepository
             .findByUserIdAndStatus(userId, RegStatus.JOINED)
             .stream().map(ActivityRegistration::getActivityId)
-            .collect(java.util.stream.Collectors.toSet());
+            .filter(teamFinishedIds::contains)
+            .collect(Collectors.toSet());
 
         // attendance rate
         int total = teamFinished.size();
@@ -81,19 +90,20 @@ public class UserService {
             Set<Long> mJoined = regRepository
                 .findByUserIdAndStatus(m.getUserId(), RegStatus.JOINED)
                 .stream().map(ActivityRegistration::getActivityId)
-                .collect(java.util.stream.Collectors.toSet());
+                .filter(teamFinishedIds::contains)
+                .collect(Collectors.toSet());
             double mRate = total == 0 ? 0.0
                 : (double) teamFinished.stream().filter(a -> mJoined.contains(a.getId())).count() / total;
             if (mRate > attendanceRate) teamAttendanceRank++;
         }
 
         // monthly stats (last 6 calendar months)
-        java.time.YearMonth now = java.time.YearMonth.now();
-        List<MonthStatRes> monthlyStats = new java.util.ArrayList<>();
+        YearMonth now = YearMonth.now();
+        List<MonthStatRes> monthlyStats = new ArrayList<>();
         for (int i = 5; i >= 0; i--) {
-            java.time.YearMonth ym = now.minusMonths(i);
+            YearMonth ym = now.minusMonths(i);
             int count = (int) teamFinished.stream()
-                .filter(a -> java.time.YearMonth.from(a.getStartTime()).equals(ym)
+                .filter(a -> YearMonth.from(a.getStartTime()).equals(ym)
                           && joinedIds.contains(a.getId()))
                 .count();
             monthlyStats.add(new MonthStatRes(ym.toString(), count));

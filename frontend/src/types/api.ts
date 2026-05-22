@@ -98,11 +98,21 @@ export interface UserProfileRes {
   teams: TeamBrief[]
 }
 
+export interface MonthStat {
+  month: string  // "2026-05"
+  count: number
+}
+
 export interface MyStatsRes {
   totalMatches: number
   wins: number
   draws: number
   losses: number
+  attendanceRate: number       // 0.0 ~ 1.0
+  currentStreak: number
+  teamAttendanceRank: number
+  teamMemberCount: number
+  monthlyStats: MonthStat[]
 }
 
 export interface GroupMemberDto {

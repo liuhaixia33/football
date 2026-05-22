@@ -1,0 +1,60 @@
+<h2>球队名片 — 三种实现方案</h2>
+<p class="subtitle">核心链路：分享名片 → 外人扫码/点击 → 直接申请加入</p>
+
+<div class="options" style="flex-direction: column; gap: 16px;">
+
+  <div class="option" data-choice="poster-code" onclick="toggleSelect(this)" style="align-items: flex-start; padding: 20px; gap: 20px;">
+    <div class="letter">A</div>
+    <div class="content" style="flex: 1;">
+      <h3>海报图片 + 小程序码 ⭐ 推荐</h3>
+      <p>后端调用微信 API 生成小程序码，嵌入精美海报图片。用户保存海报分享到朋友圈/群，外人扫小程序码直接跳申请页。</p>
+      <div style="display: flex; gap: 24px; margin-top: 12px;">
+        <div>
+          <div class="label">流程</div>
+          <div style="font-size: 13px;">队长生成 → 保存图片 → 发朋友圈/群 → 扫码 → 申请</div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>优势</h4><ul><li>可发朋友圈，传播范围最广</li><li>扫码直达，体验流畅</li><li>海报有设计感，代表球队形象</li></ul></div>
+        <div class="cons"><h4>代价</h4><ul><li>需调用微信 wxacode API</li><li>后端需生成图片（Canvas 或模板）</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="card-share" onclick="toggleSelect(this)" style="align-items: flex-start; padding: 20px; gap: 20px;">
+    <div class="letter">B</div>
+    <div class="content" style="flex: 1;">
+      <h3>小程序卡片分享</h3>
+      <p>通过 wx.shareAppMessage 分享为微信消息卡片（带封面图和标题）。点击卡片直接跳申请页，实现最简单。</p>
+      <div style="display: flex; gap: 24px; margin-top: 12px;">
+        <div>
+          <div class="label">流程</div>
+          <div style="font-size: 13px;">点击分享 → 选联系人/群 → 对方点卡片 → 申请</div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>优势</h4><ul><li>开发最简单，改动最少</li><li>无需生成图片</li></ul></div>
+        <div class="cons"><h4>代价</h4><ul><li>只能发到聊天，<strong>不能发朋友圈</strong></li><li>传播范围受限，不能截图再传</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="invite-code" onclick="toggleSelect(this)" style="align-items: flex-start; padding: 20px; gap: 20px;">
+    <div class="letter">C</div>
+    <div class="content" style="flex: 1;">
+      <h3>海报图片 + 邀请码文字</h3>
+      <p>复用现有邀请码机制，在海报上印上邀请码。外人看到后手动到小程序输入邀请码加入。</p>
+      <div style="display: flex; gap: 24px; margin-top: 12px;">
+        <div>
+          <div class="label">流程</div>
+          <div style="font-size: 13px;">生成海报 → 分享 → 对方打开小程序 → 手动输入邀请码 → 申请</div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros"><h4>优势</h4><ul><li>后端几乎零改动</li><li>邀请码已有现成逻辑</li></ul></div>
+        <div class="cons"><h4>代价</h4><ul><li>需手动输入邀请码，<strong>转化率最低</strong></li><li>用户体验差</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

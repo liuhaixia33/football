@@ -1,0 +1,136 @@
+<h2>球队名片 — 完整功能流程</h2>
+<p class="subtitle">两条链路：生成 & 分享 / 扫码 & 申请</p>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px;">
+
+  <!-- 左：生成分享链路 -->
+  <div class="mockup">
+    <div class="mockup-header">🟢 队长端：生成 & 分享</div>
+    <div class="mockup-body" style="padding: 16px;">
+
+      <div style="display: flex; flex-direction: column; gap: 0;">
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #2ecc71; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">1</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">点击「生成球队名片」</div>
+            <div style="font-size: 11px; color: #888;">「我的」页面 / 球队管理入口</div>
+          </div>
+        </div>
+
+        <div style="width: 2px; height: 16px; background: #d0ead8; margin-left: 15px;"></div>
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #2ecc71; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">2</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">后端生成海报</div>
+            <div style="font-size: 11px; color: #888;">调微信 API 生成小程序码 → 合成海报图片 → 上传 OSS → 返回 URL</div>
+          </div>
+        </div>
+
+        <div style="width: 2px; height: 16px; background: #d0ead8; margin-left: 15px;"></div>
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #2ecc71; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">3</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">展示海报 + 保存按钮</div>
+            <div style="font-size: 11px; color: #888;">前端展示绿色海报，点击保存到相册</div>
+          </div>
+        </div>
+
+        <div style="width: 2px; height: 16px; background: #d0ead8; margin-left: 15px;"></div>
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #27ae60; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">4</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">分享到朋友圈 / 群</div>
+            <div style="font-size: 11px; color: #888;">从相册转发图片</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 右：扫码申请链路 -->
+  <div class="mockup">
+    <div class="mockup-header">🔵 外部用户：扫码 & 申请</div>
+    <div class="mockup-body" style="padding: 16px;">
+
+      <div style="display: flex; flex-direction: column; gap: 0;">
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #3498db; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">1</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">扫描海报上的小程序码</div>
+            <div style="font-size: 11px; color: #888;">微信相机扫码</div>
+          </div>
+        </div>
+
+        <div style="width: 2px; height: 16px; background: #d0e8f8; margin-left: 15px;"></div>
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #3498db; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">2</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">跳转申请加入页</div>
+            <div style="font-size: 11px; color: #888;">pages/join-team（已有），自动带入 teamId，展示球队名称</div>
+          </div>
+        </div>
+
+        <div style="width: 2px; height: 16px; background: #d0e8f8; margin-left: 15px;"></div>
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #3498db; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">3</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">填写申请信息 & 提交</div>
+            <div style="font-size: 11px; color: #888;">微信昵称 / 位置 / 简单自我介绍（可选）</div>
+          </div>
+        </div>
+
+        <div style="width: 2px; height: 16px; background: #d0e8f8; margin-left: 15px;"></div>
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+          <div style="width: 32px; height: 32px; background: #2980b9; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; font-weight: bold;">4</div>
+          <div>
+            <div style="font-size: 13px; font-weight: bold;">队长审核</div>
+            <div style="font-size: 11px; color: #888;">现有审核流程，通过即加入</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 技术边界 -->
+<div style="margin-top: 24px; background: #f8fffe; border: 1px solid #d0ead8; border-radius: 10px; padding: 16px;">
+  <div class="label">新增 & 改动边界</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 12px; font-size: 12px;">
+    <div>
+      <div style="font-weight: bold; color: #27ae60; margin-bottom: 6px;">🆕 新增</div>
+      <ul style="margin: 0; padding-left: 16px; color: #555; line-height: 1.8;">
+        <li>后端：海报生成接口</li>
+        <li>后端：微信小程序码生成</li>
+        <li>前端：名片预览 & 保存页</li>
+      </ul>
+    </div>
+    <div>
+      <div style="font-weight: bold; color: #e67e22; margin-bottom: 6px;">✏️ 改动</div>
+      <ul style="margin: 0; padding-left: 16px; color: #555; line-height: 1.8;">
+        <li>join-team 页：支持 scene 参数进入</li>
+        <li>WechatService：新增小程序码方法</li>
+        <li>「我的」页：加入口入口</li>
+      </ul>
+    </div>
+    <div>
+      <div style="font-weight: bold; color: #888; margin-bottom: 6px;">✅ 复用</div>
+      <ul style="margin: 0; padding-left: 16px; color: #555; line-height: 1.8;">
+        <li>申请加入审核流程</li>
+        <li>OSS 图片上传</li>
+        <li>邀请码 / teamId 机制</li>
+      </ul>
+    </div>
+  </div>
+</div>

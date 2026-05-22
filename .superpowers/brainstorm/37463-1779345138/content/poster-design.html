@@ -1,0 +1,96 @@
+<h2>球队名片海报 — 布局方案</h2>
+<p class="subtitle">选一个你喜欢的风格方向，我们再细化内容</p>
+
+<div class="split" style="gap: 24px; align-items: flex-start;">
+
+  <!-- 方案 1：深色运动风 -->
+  <div class="option" data-choice="dark" onclick="toggleSelect(this)" style="flex-direction: column; padding: 0; overflow: hidden; border-radius: 12px;">
+    <div style="background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 28px 24px; color: white; width: 200px; box-sizing: border-box;">
+      <div style="font-size: 10px; letter-spacing: 2px; color: #e94560; text-transform: uppercase; margin-bottom: 12px;">⚽ FOOTBALL TEAM</div>
+      <div style="width: 52px; height: 52px; background: #e94560; border-radius: 50%; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px;">⚽</div>
+      <div style="font-size: 18px; font-weight: bold; margin-bottom: 4px;">城南联队</div>
+      <div style="font-size: 10px; color: #aaa; margin-bottom: 16px;">每周末，只踢好球</div>
+      <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: bold; color: #e94560;">28</div>
+          <div style="font-size: 9px; color: #888;">队员</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: bold; color: #e94560;">12</div>
+          <div style="font-size: 9px; color: #888;">场比赛</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: bold; color: #e94560;">8胜</div>
+          <div style="font-size: 9px; color: #888;">胜场</div>
+        </div>
+      </div>
+      <div style="background: white; border-radius: 8px; padding: 8px; text-align: center; margin-bottom: 10px;">
+        <div style="width: 60px; height: 60px; background: #eee; margin: 0 auto 6px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">小程序码</div>
+        <div style="font-size: 9px; color: #333; font-weight: bold;">扫码申请加入</div>
+      </div>
+    </div>
+    <div style="background: #111; color: #666; font-size: 11px; text-align: center; padding: 8px;">深色运动风</div>
+  </div>
+
+  <!-- 方案 2：清爽绿色 -->
+  <div class="option" data-choice="green" onclick="toggleSelect(this)" style="flex-direction: column; padding: 0; overflow: hidden; border-radius: 12px;">
+    <div style="background: linear-gradient(160deg, #f8fffe 0%, #e8f8f0 100%); padding: 28px 24px; color: #1a1a1a; width: 200px; box-sizing: border-box; border: 1px solid #d0ead8;">
+      <div style="font-size: 10px; letter-spacing: 2px; color: #2ecc71; text-transform: uppercase; margin-bottom: 12px;">⚽ FOOTBALL TEAM</div>
+      <div style="width: 52px; height: 52px; background: #2ecc71; border-radius: 50%; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px;">⚽</div>
+      <div style="font-size: 18px; font-weight: bold; margin-bottom: 4px; color: #1a1a1a;">城南联队</div>
+      <div style="font-size: 10px; color: #888; margin-bottom: 16px;">每周末，只踢好球</div>
+      <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: bold; color: #27ae60;">28</div>
+          <div style="font-size: 9px; color: #888;">队员</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: bold; color: #27ae60;">12</div>
+          <div style="font-size: 9px; color: #888;">场比赛</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: bold; color: #27ae60;">8胜</div>
+          <div style="font-size: 9px; color: #888;">胜场</div>
+        </div>
+      </div>
+      <div style="background: white; border-radius: 8px; padding: 8px; text-align: center; margin-bottom: 10px; border: 1px solid #d0ead8;">
+        <div style="width: 60px; height: 60px; background: #f0f0f0; margin: 0 auto 6px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">小程序码</div>
+        <div style="font-size: 9px; color: #333; font-weight: bold;">扫码申请加入</div>
+      </div>
+    </div>
+    <div style="background: #f0f8f4; color: #888; font-size: 11px; text-align: center; padding: 8px; border-top: 1px solid #d0ead8;">清爽绿色</div>
+  </div>
+
+  <!-- 方案 3：极简黑白 -->
+  <div class="option" data-choice="minimal" onclick="toggleSelect(this)" style="flex-direction: column; padding: 0; overflow: hidden; border-radius: 12px;">
+    <div style="background: white; padding: 28px 24px; color: #1a1a1a; width: 200px; box-sizing: border-box; border: 1px solid #eee;">
+      <div style="width: 4px; height: 36px; background: #1a1a1a; display: inline-block; margin-right: 10px; vertical-align: middle;"></div>
+      <span style="font-size: 10px; letter-spacing: 3px; text-transform: uppercase; vertical-align: middle;">Football</span>
+      <div style="width: 52px; height: 52px; border: 2px solid #1a1a1a; border-radius: 50%; margin: 14px 0 10px; display: flex; align-items: center; justify-content: center; font-size: 22px;">⚽</div>
+      <div style="font-size: 20px; font-weight: 900; margin-bottom: 2px;">城南联队</div>
+      <div style="font-size: 10px; color: #888; margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 16px;">每周末，只踢好球</div>
+      <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: 900;">28</div>
+          <div style="font-size: 9px; color: #888;">队员</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: 900;">12</div>
+          <div style="font-size: 9px; color: #888;">场比赛</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: 900;">8胜</div>
+          <div style="font-size: 9px; color: #888;">胜场</div>
+        </div>
+      </div>
+      <div style="border: 1px solid #1a1a1a; border-radius: 8px; padding: 8px; text-align: center;">
+        <div style="width: 60px; height: 60px; background: #f5f5f5; margin: 0 auto 6px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #999;">小程序码</div>
+        <div style="font-size: 9px; color: #333; font-weight: bold;">扫码申请加入</div>
+      </div>
+    </div>
+    <div style="background: #fafafa; color: #888; font-size: 11px; text-align: center; padding: 8px; border-top: 1px solid #eee;">极简黑白</div>
+  </div>
+
+</div>
+
+<p style="margin-top: 20px; font-size: 12px; color: #aaa;">海报内容：球队名 / Logo / 简介 / 队员数 / 比赛场数 / 胜场数 / 小程序码</p>

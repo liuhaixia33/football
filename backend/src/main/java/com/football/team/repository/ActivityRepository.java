@@ -10,6 +10,8 @@ import java.util.List;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByTeamIdOrderByStartTimeDesc(Long teamId);
 
+    List<Activity> findByTeamIdAndStatusOrderByStartTimeDesc(Long teamId, ActivityStatus status);
+
     @Modifying
     @Query("UPDATE Activity a SET a.status = :newStatus WHERE a.status IN :statuses AND a.startTime <= :now")
     int bulkUpdateStatusByStartTimeBefore(ActivityStatus newStatus, List<ActivityStatus> statuses, LocalDateTime now);

@@ -576,7 +576,7 @@ export default function MyPage() {
             </View>
 
             {/* Scrollable content */}
-            <ScrollView scrollY style={{ padding: `0 ${px(24)}` }}>
+            <ScrollView scrollY style={{ flex: 1, minHeight: 0, padding: `0 ${px(24)}` }}>
               {/* Logo picker */}
               <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
                 <View onClick={pickTeamLogo} style={{ position: 'relative' }}>
@@ -687,7 +687,7 @@ export default function MyPage() {
             </View>
 
             {/* Scrollable content */}
-            <ScrollView scrollY style={{ padding: `0 ${px(24)}` }}>
+            <ScrollView scrollY style={{ flex: 1, minHeight: 0, padding: `0 ${px(24)}` }}>
               {/* Avatar picker */}
               <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
                 <Button

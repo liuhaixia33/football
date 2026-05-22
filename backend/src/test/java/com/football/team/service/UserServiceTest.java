@@ -169,4 +169,35 @@ class UserServiceTest {
         m.setStatus(MemberStatus.ACTIVE);
         return m;
     }
+
+    @Test
+    void getStats_teamRank_ranksCorrectly() {
+        // 3 activities; user(1) participated in 2 (rate=2/3≈0.67)
+        // member2 participated in 3 (rate=1.0) → ranks above user
+        // member3 participated in 1 (rate=1/3≈0.33) → ranks below user
+        Activity a1 = act(1L, 1L); Activity a2 = act(2L, 1L); Activity a3 = act(3L, 1L);
+        when(activityRepository.findByTeamIdAndStatusOrderByStartTimeDesc(1L, ActivityStatus.FINISHED))
+            .thenReturn(List.of(a3, a2, a1));
+
+        // userId=1: joined a1, a2
+        when(regRepository.findByUserIdAndStatus(1L, RegStatus.JOINED))
+            .thenReturn(List.of(reg(1L, 1L), reg(2L, 1L)));
+        // userId=2: joined a1, a2, a3
+        when(regRepository.findByUserIdAndStatus(2L, RegStatus.JOINED))
+            .thenReturn(List.of(reg(1L, 2L), reg(2L, 2L), reg(3L, 2L)));
+        // userId=3: joined a1 only
+        when(regRepository.findByUserIdAndStatus(3L, RegStatus.JOINED))
+            .thenReturn(List.of(reg(1L, 3L)));
+
+        when(matchResultRepository.findByActivityIdIn(any())).thenReturn(List.of());
+
+        TeamMember m1 = member(1L); TeamMember m2 = member(2L); TeamMember m3 = member(3L);
+        when(teamMemberRepository.findByTeamIdAndStatus(1L, MemberStatus.ACTIVE))
+            .thenReturn(List.of(m1, m2, m3));
+
+        MyStatsRes res = userService.getStats(1L, 1L);
+
+        assertThat(res.getTeamAttendanceRank()).isEqualTo(2);
+        assertThat(res.getTeamMemberCount()).isEqualTo(3);
+    }
 }

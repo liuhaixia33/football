@@ -116,11 +116,13 @@ public class TeamController {
         return ApiResponse.ok(null);
     }
 
-    /** 生成球队名片（仅 ADMIN 及以上） */
+    /** 生成球队名片（仅 ADMIN 及以上）。refresh=true 强制忽略缓存重新生成 */
     @GetMapping("/{teamId}/poster")
     @RequireRole(MemberRole.ADMIN)
-    public ApiResponse<PosterRes> getPoster(@PathVariable Long teamId) {
-        String url = posterService.generatePoster(teamId);
+    public ApiResponse<PosterRes> getPoster(
+            @PathVariable Long teamId,
+            @RequestParam(defaultValue = "false") boolean refresh) {
+        String url = posterService.generatePoster(teamId, refresh);
         return ApiResponse.ok(new PosterRes(url));
     }
 }

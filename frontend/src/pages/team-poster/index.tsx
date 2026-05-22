@@ -14,15 +14,19 @@ export default function TeamPosterPage() {
   const [posterUrl, setPosterUrl] = useState('')
   const [loading, setLoading]     = useState(true)
   const [saving, setSaving]       = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const { currentTeamId } = useAuthStore()
 
-  useEffect(() => {
+  const loadPoster = (refresh = false) => {
     if (!currentTeamId) return
-    teamApi.getPoster(currentTeamId)
+    if (refresh) setRefreshing(true); else setLoading(true)
+    teamApi.getPoster(currentTeamId, refresh)
       .then(res => setPosterUrl(res.posterUrl))
       .catch(e => Taro.showToast({ title: e.message || '生成失败', icon: 'none' }))
-      .finally(() => setLoading(false))
-  }, [currentTeamId])
+      .finally(() => { setLoading(false); setRefreshing(false) })
+  }
+
+  useEffect(() => { loadPoster() }, [currentTeamId])
 
   const saveToAlbum = async () => {
     if (!posterUrl) return
@@ -72,11 +76,23 @@ export default function TeamPosterPage() {
               background: C.primary, color: '#0f1010',
               borderRadius: px(14), border: 'none',
               fontSize: px(32), fontWeight: '700', padding: `${px(14)} 0`,
+              marginBottom: px(12),
             }}
             loading={saving}
             onClick={saveToAlbum}
           >
             保存到相册
+          </Button>
+          <Button
+            style={{
+              background: 'rgba(255,255,255,0.06)', color: C.text2,
+              borderRadius: px(14), border: 'none',
+              fontSize: px(28), fontWeight: '500', padding: `${px(12)} 0`,
+            }}
+            loading={refreshing}
+            onClick={() => loadPoster(true)}
+          >
+            重新生成（含小程序码）
           </Button>
           <Text style={{ fontSize: px(24), color: C.text2, textAlign: 'center', display: 'block', marginTop: px(16) }}>
             保存后可分享到朋友圈或微信群

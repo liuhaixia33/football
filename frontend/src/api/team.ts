@@ -29,6 +29,6 @@ export const teamApi = {
     ),
   applyByTeamId: (teamId: number) =>
     api.post<void>(`/api/v1/teams/${teamId}/apply`, {}, false),
-  getPoster: (teamId: number) =>
-    api.get<{ posterUrl: string }>(`/api/v1/teams/${teamId}/poster`),
+  getPoster: (teamId: number, refresh = false) =>
+    api.get<{ posterUrl: string }>(`/api/v1/teams/${teamId}/poster${refresh ? '?refresh=true' : ''}`),
 }

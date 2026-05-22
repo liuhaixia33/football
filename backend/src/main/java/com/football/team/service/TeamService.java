@@ -164,6 +164,7 @@ public class TeamService {
             .logoUrl(team.getLogoUrl())
             .description(team.getDescription())
             .memberCount(memberCount)
+            .inviteCode(team.getInviteCode())
             .build();
     }
 

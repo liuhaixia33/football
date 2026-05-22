@@ -37,6 +37,18 @@ function SectionTitle({ label }: { label: string }) {
   )
 }
 
+// Tab Bar (50px CSS) + safe area inset bottom — must leave this much space at the bottom of sheets
+function getSheetPadBottom(): string {
+  try {
+    const info = Taro.getSystemInfoSync()
+    const safeBottom = info.screenHeight - ((info.safeArea as { bottom?: number } | undefined)?.bottom ?? info.screenHeight)
+    return `${50 + safeBottom}px`
+  } catch {
+    return '50px'
+  }
+}
+const SHEET_PAD_BOTTOM = getSheetPadBottom()
+
 export default function MyPage() {
   const [stats, setStats] = useState<MyStatsRes | null>(null)
   const { nickname, avatarUrl, token, userId, currentTeamId, currentRole,
@@ -416,18 +428,18 @@ export default function MyPage() {
               background: C.surface, borderRadius: px(16),
               border: `1px solid ${C.border}`, overflow: 'hidden',
             }}>
-              {/* 2×2 grid */}
-              <View style={{ display: 'flex', flexWrap: 'wrap' }}>
-                {[
+              {/* 2×2 grid — explicit rows to avoid flexWrap percentage issues */}
+              {(() => {
+                const cells = [
                   { label: '出勤率', value: `${Math.round(stats.attendanceRate * 100)}%` },
-                  { label: '连续参与', value: `${stats.currentStreak}场` },
-                  { label: '本赛季', value: `${stats.totalMatches}场` },
-                  { label: '队内排名', value: `第${stats.teamAttendanceRank}/${stats.teamMemberCount}名` },
-                ].map((item, idx) => (
-                  <View key={idx} style={{
-                    width: '50%', padding: `${px(14)} ${px(16)}`,
-                    borderBottom: idx < 2 ? `1px solid ${C.border}` : 'none',
-                    borderLeft: idx % 2 === 1 ? `1px solid ${C.border}` : 'none',
+                  { label: '连续出场', value: `${stats.currentStreak}场` },
+                  { label: '累计出场', value: `${stats.totalMatches}场` },
+                  { label: '对内出勤排名', value: `第${stats.teamAttendanceRank}/${stats.teamMemberCount}名` },
+                ]
+                const cell = (item: { label: string; value: string }, borderLeft: boolean) => (
+                  <View style={{
+                    flex: 1, padding: `${px(14)} ${px(16)}`,
+                    borderLeft: borderLeft ? `1px solid ${C.border}` : 'none',
                   }}>
                     <Text style={{ fontSize: px(20), color: C.text3, display: 'block', marginBottom: px(4) }}>
                       {item.label}
@@ -436,8 +448,20 @@ export default function MyPage() {
                       {item.value}
                     </Text>
                   </View>
-                ))}
-              </View>
+                )
+                return (
+                  <>
+                    <View style={{ display: 'flex', borderBottom: `1px solid ${C.border}` }}>
+                      {cell(cells[0], false)}
+                      {cell(cells[1], true)}
+                    </View>
+                    <View style={{ display: 'flex' }}>
+                      {cell(cells[2], false)}
+                      {cell(cells[3], true)}
+                    </View>
+                  </>
+                )
+              })()}
 
               {/* monthly bar chart */}
               <View style={{ borderTop: `1px solid ${C.border}`, padding: `${px(12)} ${px(16)} ${px(14)}` }}>
@@ -555,18 +579,18 @@ export default function MyPage() {
 
       {/* ── Edit Team Sheet ── */}
       {editingTeam && (
-        <View style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.75)', display: 'flex',
-          flexDirection: 'column', justifyContent: 'flex-end', zIndex: 100,
-        }}>
+        <>
+          <View onClick={() => setEditingTeam(false)} style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.75)', zIndex: 100,
+          }} />
           <View style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 101,
             background: C.surface2, borderRadius: `${px(24)} ${px(24)} 0 0`,
             border: `1px solid ${C.border}`, borderBottom: 'none',
-            maxHeight: '85vh', display: 'flex', flexDirection: 'column',
           }}>
             {/* Handle + title */}
-            <View style={{ padding: `${px(20)} ${px(24)} 0`, flexShrink: 0 }}>
+            <View style={{ padding: `${px(20)} ${px(24)} 0` }}>
               <View style={{ width: px(36), height: px(4), borderRadius: px(2),
                              background: C.border, margin: '0 auto', marginBottom: px(24) }} />
               <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text,
@@ -575,8 +599,8 @@ export default function MyPage() {
               </Text>
             </View>
 
-            {/* Scrollable content */}
-            <ScrollView scrollY style={{ flex: 1, minHeight: 0, padding: `0 ${px(24)}` }}>
+            {/* Form content */}
+            <View style={{ padding: `0 ${px(24)}` }}>
               {/* Logo picker */}
               <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
                 <View onClick={pickTeamLogo} style={{ position: 'relative' }}>
@@ -634,16 +658,13 @@ export default function MyPage() {
                 style={{
                   height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
                   padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
-                  marginBottom: px(16),
+                  marginBottom: px(20),
                 }}
               />
-            </ScrollView>
+            </View>
 
-            {/* Buttons — always visible above safe area */}
-            <View style={{
-              padding: `${px(16)} ${px(24)} calc(env(safe-area-inset-bottom) + ${px(24)})`,
-              flexShrink: 0, display: 'flex', gap: px(12),
-            }}>
+            {/* Buttons */}
+            <View style={{ padding: `${px(16)} ${px(24)}`, paddingBottom: SHEET_PAD_BOTTOM, display: 'flex', gap: px(12) }}>
               <Button
                 style={{ flex: 1, height: px(50), lineHeight: px(50), background: 'rgba(255,255,255,0.06)',
                          color: C.text2, border: 'none', borderRadius: px(12), fontSize: px(30), fontWeight: '500' }}
@@ -661,23 +682,23 @@ export default function MyPage() {
               </Button>
             </View>
           </View>
-        </View>
+        </>
       )}
 
       {/* ── Edit Profile Sheet ── */}
       {editing && (
-        <View style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.75)', display: 'flex',
-          flexDirection: 'column', justifyContent: 'flex-end', zIndex: 100,
-        }}>
+        <>
+          <View onClick={() => setEditing(false)} style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.75)', zIndex: 100,
+          }} />
           <View style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 101,
             background: C.surface2, borderRadius: `${px(24)} ${px(24)} 0 0`,
             border: `1px solid ${C.border}`, borderBottom: 'none',
-            maxHeight: '85vh', display: 'flex', flexDirection: 'column',
           }}>
             {/* Handle + title */}
-            <View style={{ padding: `${px(20)} ${px(24)} 0`, flexShrink: 0 }}>
+            <View style={{ padding: `${px(20)} ${px(24)} 0` }}>
               <View style={{ width: px(36), height: px(4), borderRadius: px(2),
                              background: C.border, margin: '0 auto', marginBottom: px(24) }} />
               <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text,
@@ -686,8 +707,8 @@ export default function MyPage() {
               </Text>
             </View>
 
-            {/* Scrollable content */}
-            <ScrollView scrollY style={{ flex: 1, minHeight: 0, padding: `0 ${px(24)}` }}>
+            {/* Form content */}
+            <View style={{ padding: `0 ${px(24)}` }}>
               {/* Avatar picker */}
               <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
                 <Button
@@ -724,16 +745,13 @@ export default function MyPage() {
                 style={{
                   height: px(48), border: `1px solid ${C.border}`, borderRadius: px(12),
                   padding: '0 16px', fontSize: px(32), background: C.surface, color: C.text,
-                  marginBottom: px(16),
+                  marginBottom: px(20),
                 }}
               />
-            </ScrollView>
+            </View>
 
-            {/* Buttons — always visible above safe area */}
-            <View style={{
-              padding: `${px(16)} ${px(24)} calc(env(safe-area-inset-bottom) + ${px(24)})`,
-              flexShrink: 0, display: 'flex', gap: px(12),
-            }}>
+            {/* Buttons */}
+            <View style={{ padding: `${px(16)} ${px(24)}`, paddingBottom: SHEET_PAD_BOTTOM, display: 'flex', gap: px(12) }}>
               <Button
                 style={{ flex: 1, height: px(50), lineHeight: px(50), background: 'rgba(255,255,255,0.06)',
                          color: C.text2, border: 'none', borderRadius: px(12), fontSize: px(30), fontWeight: '500' }}
@@ -751,7 +769,7 @@ export default function MyPage() {
               </Button>
             </View>
           </View>
-        </View>
+        </>
       )}
     </View>
   )

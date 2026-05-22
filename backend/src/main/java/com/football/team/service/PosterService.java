@@ -35,32 +35,47 @@ public class PosterService {
     private static final Color TEXT_MUTED  = new Color(0x88, 0x88, 0x88);
     private static final Color DIVIDER     = new Color(0xd0, 0xea, 0xd8);
 
-    public String generatePoster(Long teamId) {
+    public String generatePoster(Long teamId, boolean forceRefresh) {
         String cacheKey = "poster:url:" + teamId;
-        String cached = redis.opsForValue().get(cacheKey);
-        if (cached != null) return cached;
+        if (forceRefresh) {
+            redis.delete(cacheKey);
+        } else {
+            String cached = redis.opsForValue().get(cacheKey);
+            if (cached != null) return cached;
+        }
 
         TeamPublicRes info = teamService.getPublicInfo(teamId);
-        byte[] miniCode;
-        try {
-            miniCode = wechatService.generateMiniCode("teamId=" + teamId, "pages/join-team/index");
-        } catch (Exception e) {
-            log.warn("小程序码生成失败，将渲染占位符 teamId={}: {}", teamId, e.getMessage());
-            miniCode = null;
-        }
-        byte[] logoBytes = fetchLogo(info.getLogoUrl());
+        byte[] miniCode = null;
 
+        if (wechatService.isDevMock()) {
+            log.info("dev_mock 模式，跳过小程序码生成 teamId={}", teamId);
+        } else {
+            try {
+                // scene 上限 32 字符，用短 key: t=teamId&c=inviteCode
+                String scene = "t=" + teamId + "&c=" + info.getInviteCode();
+                miniCode = wechatService.generateMiniCode(scene, "pages/join-team/index");
+                log.info("小程序码生成成功 teamId={} size={}", teamId, miniCode.length);
+            } catch (Exception e) {
+                log.warn("小程序码生成失败，将渲染占位符 teamId={}: {}", teamId, e.getMessage());
+            }
+        }
+
+        byte[] logoBytes = fetchLogo(info.getLogoUrl());
         byte[] poster = renderPoster(info.getName(), info.getDescription(),
             info.getMemberCount(), logoBytes, miniCode);
 
         String key = "poster/" + teamId + "_" + System.currentTimeMillis() + ".png";
         String url = ossService.uploadBytes(poster, key);
 
-        // 只在小程序码成功生成时才缓存，失败时不缓存以便下次重试
+        // 仅在小程序码成功生成时缓存（dev_mock 和失败时不缓存，下次可重试）
         if (miniCode != null) {
             redis.opsForValue().set(cacheKey, url, 24, TimeUnit.HOURS);
         }
         return url;
+    }
+
+    public String generatePoster(Long teamId) {
+        return generatePoster(teamId, false);
     }
 
     private byte[] fetchLogo(String logoUrl) {

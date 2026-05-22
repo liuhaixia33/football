@@ -22,15 +22,17 @@ export default function JoinTeamPage() {
   useEffect(() => {
     Taro.setNavigationBarTitle({ title: t('join_team.title') })
 
-    // 从小程序码 scene 参数解析 teamId（格式：teamId=123）
     const routerParams = Taro.getCurrentInstance().router?.params ?? {}
     const scene = routerParams.scene
     if (scene) {
       const decoded = decodeURIComponent(scene)
-      const match = decoded.match(/teamId=(\d+)/)
-      if (match) {
-        const id = Number(match[1])
+      // 支持新格式 t=123&c=ABCD1234 和旧格式 teamId=123
+      const idMatch = decoded.match(/(?:^|&)t=(\d+)/) || decoded.match(/teamId=(\d+)/)
+      const codeMatch = decoded.match(/(?:^|&)c=([A-Z0-9]+)/)
+      if (idMatch) {
+        const id = Number(idMatch[1])
         setSceneTeamId(id)
+        if (codeMatch) setCode(codeMatch[1])
         teamApi.getPublicInfo(id)
           .then(info => setTeamName(info.name))
           .catch(() => setTeamName('该球队'))
@@ -47,7 +49,13 @@ export default function JoinTeamPage() {
       Taro.showToast({ title: '申请已提交，等待队长审核', icon: 'success' })
       setTimeout(() => Taro.navigateBack(), 1500)
     } catch (e: unknown) {
-      Taro.showToast({ title: e instanceof Error ? e.message : '申请失败', icon: 'none' })
+      const msg = e instanceof Error ? e.message : '申请失败'
+      if (msg.includes('已是该球队成员')) {
+        Taro.showToast({ title: '您已是该球队成员', icon: 'success' })
+        setTimeout(() => Taro.switchTab({ url: '/pages/index/index' }), 1500)
+      } else {
+        Taro.showToast({ title: msg, icon: 'none' })
+      }
     } finally {
       setLoading(false)
     }

@@ -10,4 +10,5 @@ public class TeamPublicRes {
     private String logoUrl;
     private String description;
     private int memberCount;
+    private String inviteCode;
 }

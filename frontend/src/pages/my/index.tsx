@@ -408,6 +408,65 @@ export default function MyPage() {
           )
         })()}
 
+        {/* ── Growth Stats ── */}
+        {stats && stats.monthlyStats && (
+          <View style={{ padding: `${px(14)} ${px(16)} 0` }}>
+            <SectionTitle label='出勤数据' />
+            <View style={{
+              background: C.surface, borderRadius: px(16),
+              border: `1px solid ${C.border}`, overflow: 'hidden',
+            }}>
+              {/* 2×2 grid */}
+              <View style={{ display: 'flex', flexWrap: 'wrap' }}>
+                {[
+                  { label: '出勤率', value: `${Math.round(stats.attendanceRate * 100)}%` },
+                  { label: '连续参与', value: `${stats.currentStreak}场` },
+                  { label: '本赛季', value: `${stats.totalMatches}场` },
+                  { label: '队内排名', value: `第${stats.teamAttendanceRank}/${stats.teamMemberCount}名` },
+                ].map((item, idx) => (
+                  <View key={idx} style={{
+                    width: '50%', padding: `${px(14)} ${px(16)}`,
+                    borderBottom: idx < 2 ? `1px solid ${C.border}` : 'none',
+                    borderLeft: idx % 2 === 1 ? `1px solid ${C.border}` : 'none',
+                  }}>
+                    <Text style={{ fontSize: px(20), color: C.text3, display: 'block', marginBottom: px(4) }}>
+                      {item.label}
+                    </Text>
+                    <Text style={{ fontSize: px(36), fontWeight: '800', color: C.text, letterSpacing: '-0.02em' }}>
+                      {item.value}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* monthly bar chart */}
+              <View style={{ borderTop: `1px solid ${C.border}`, padding: `${px(12)} ${px(16)} ${px(14)}` }}>
+                <Text style={{ fontSize: px(20), color: C.text3, display: 'block', marginBottom: px(10) }}>
+                  近6个月参与趋势
+                </Text>
+                <View style={{ display: 'flex', alignItems: 'flex-end', gap: px(6), height: px(60) }}>
+                  {(() => {
+                    const maxCount = Math.max(...stats.monthlyStats.map(m => m.count), 1)
+                    return stats.monthlyStats.map((m, idx) => (
+                      <View key={idx} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: px(4) }}>
+                        <View style={{
+                          width: '100%',
+                          height: px(Math.max(m.count / maxCount * 44, m.count > 0 ? 6 : 2)),
+                          background: m.count > 0 ? C.primary : C.border,
+                          borderRadius: px(3),
+                        }} />
+                        <Text style={{ fontSize: px(18), color: C.text3 }}>
+                          {m.month.slice(5)}月
+                        </Text>
+                      </View>
+                    ))
+                  })()}
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* ── Settings ── */}
         <View style={{ padding: `${px(14)} ${px(16)} 0` }}>
           <SectionTitle label='设置' />

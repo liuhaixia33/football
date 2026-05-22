@@ -23,6 +23,7 @@ import com.football.team.enums.ActivityStatus;
 import com.football.team.enums.MemberStatus;
 import com.football.team.enums.RegStatus;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 
@@ -199,5 +200,35 @@ class UserServiceTest {
 
         assertThat(res.getTeamAttendanceRank()).isEqualTo(2);
         assertThat(res.getTeamMemberCount()).isEqualTo(3);
+    }
+
+    @Test
+    void getStats_monthlyStats_returns6Months() {
+        // 1 activity in current month, user participated
+        LocalDateTime thisMonth = YearMonth.now()
+            .atDay(15).atStartOfDay();
+        Activity a1 = new Activity();
+        a1.setId(1L); a1.setTeamId(1L);
+        a1.setStatus(ActivityStatus.FINISHED);
+        a1.setStartTime(thisMonth);
+
+        when(activityRepository.findByTeamIdAndStatusOrderByStartTimeDesc(1L, ActivityStatus.FINISHED))
+            .thenReturn(List.of(a1));
+        when(regRepository.findByUserIdAndStatus(1L, RegStatus.JOINED))
+            .thenReturn(List.of(reg(1L, 1L)));
+        when(matchResultRepository.findByActivityIdIn(any())).thenReturn(List.of());
+        when(teamMemberRepository.findByTeamIdAndStatus(1L, MemberStatus.ACTIVE))
+            .thenReturn(List.of(member(1L)));
+
+        MyStatsRes res = userService.getStats(1L, 1L);
+
+        assertThat(res.getMonthlyStats()).hasSize(6);
+        // last element is current month
+        var last = res.getMonthlyStats().get(5);
+        assertThat(last.getMonth()).isEqualTo(YearMonth.now().toString());
+        assertThat(last.getCount()).isEqualTo(1);
+        // earlier months have no activities, count=0
+        res.getMonthlyStats().subList(0, 5)
+            .forEach(m -> assertThat(m.getCount()).isEqualTo(0));
     }
 }

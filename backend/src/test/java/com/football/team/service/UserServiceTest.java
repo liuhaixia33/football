@@ -15,6 +15,16 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import com.football.team.dto.res.MyStatsRes;
+import com.football.team.entity.Activity;
+import com.football.team.entity.ActivityRegistration;
+import com.football.team.entity.TeamMember;
+import com.football.team.enums.ActivityStatus;
+import com.football.team.enums.MemberStatus;
+import com.football.team.enums.RegStatus;
+import java.time.LocalDateTime;
+import java.util.List;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -73,5 +83,90 @@ class UserServiceTest {
         req.setNickname("name");
 
         assertThrows(BusinessException.class, () -> userService.updateProfile(99L, req));
+    }
+
+    @Test
+    void getStats_attendanceRate_calculatesCorrectly() {
+        Activity a1 = act(1L, 1L); Activity a2 = act(2L, 1L);
+        Activity a3 = act(3L, 1L); Activity a4 = act(4L, 1L);
+        when(activityRepository.findByTeamIdAndStatusOrderByStartTimeDesc(1L, ActivityStatus.FINISHED))
+            .thenReturn(List.of(a4, a3, a2, a1));
+
+        ActivityRegistration r1 = reg(1L, 1L); ActivityRegistration r2 = reg(2L, 1L);
+        ActivityRegistration r3 = reg(3L, 1L);
+        when(regRepository.findByUserIdAndStatus(1L, RegStatus.JOINED))
+            .thenReturn(List.of(r1, r2, r3));
+
+        when(matchResultRepository.findByActivityIdIn(any())).thenReturn(List.of());
+        when(teamMemberRepository.findByTeamIdAndStatus(1L, MemberStatus.ACTIVE))
+            .thenReturn(List.of(member(1L)));
+
+        MyStatsRes res = userService.getStats(1L, 1L);
+
+        assertThat(res.getAttendanceRate()).isEqualTo(0.75);
+    }
+
+    @Test
+    void getStats_currentStreak_countsConsecutiveFromLatest() {
+        Activity a1 = act(1L, 1L); Activity a2 = act(2L, 1L);
+        Activity a3 = act(3L, 1L); Activity a4 = act(4L, 1L);
+        when(activityRepository.findByTeamIdAndStatusOrderByStartTimeDesc(1L, ActivityStatus.FINISHED))
+            .thenReturn(List.of(a4, a3, a2, a1));
+
+        ActivityRegistration r1 = reg(1L, 1L); ActivityRegistration r2 = reg(2L, 1L);
+        ActivityRegistration r3 = reg(3L, 1L);
+        when(regRepository.findByUserIdAndStatus(1L, RegStatus.JOINED))
+            .thenReturn(List.of(r1, r2, r3));
+
+        when(matchResultRepository.findByActivityIdIn(any())).thenReturn(List.of());
+        when(teamMemberRepository.findByTeamIdAndStatus(1L, MemberStatus.ACTIVE))
+            .thenReturn(List.of(member(1L)));
+
+        MyStatsRes res = userService.getStats(1L, 1L);
+
+        assertThat(res.getCurrentStreak()).isEqualTo(0);
+    }
+
+    @Test
+    void getStats_currentStreak_countsWhenLatestAttended() {
+        Activity a1 = act(1L, 1L); Activity a2 = act(2L, 1L); Activity a3 = act(3L, 1L);
+        when(activityRepository.findByTeamIdAndStatusOrderByStartTimeDesc(1L, ActivityStatus.FINISHED))
+            .thenReturn(List.of(a3, a2, a1));
+
+        ActivityRegistration r2 = reg(2L, 1L); ActivityRegistration r3 = reg(3L, 1L);
+        when(regRepository.findByUserIdAndStatus(1L, RegStatus.JOINED))
+            .thenReturn(List.of(r2, r3));
+
+        when(matchResultRepository.findByActivityIdIn(any())).thenReturn(List.of());
+        when(teamMemberRepository.findByTeamIdAndStatus(1L, MemberStatus.ACTIVE))
+            .thenReturn(List.of(member(1L)));
+
+        MyStatsRes res = userService.getStats(1L, 1L);
+
+        assertThat(res.getCurrentStreak()).isEqualTo(2);
+    }
+
+    private Activity act(Long id, Long teamId) {
+        Activity a = new Activity();
+        a.setId(id);
+        a.setTeamId(teamId);
+        a.setStatus(ActivityStatus.FINISHED);
+        a.setStartTime(LocalDateTime.of(2026, 1, (int)(long)id, 10, 0));
+        return a;
+    }
+
+    private ActivityRegistration reg(Long activityId, Long userId) {
+        ActivityRegistration r = new ActivityRegistration();
+        r.setActivityId(activityId);
+        r.setUserId(userId);
+        r.setStatus(RegStatus.JOINED);
+        return r;
+    }
+
+    private TeamMember member(Long userId) {
+        TeamMember m = new TeamMember();
+        m.setUserId(userId);
+        m.setStatus(MemberStatus.ACTIVE);
+        return m;
     }
 }

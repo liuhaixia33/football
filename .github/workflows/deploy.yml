@@ -47,7 +47,8 @@ jobs:
           ECS_USER: ${{ secrets.ECS_USER }}
         shell: bash
         run: |
-          SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
+          set +e  # shell: bash 仍会启用 -e，显式关闭，防止健康检查非零码掐断脚本
+          SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ServerAliveInterval=30 -o ServerAliveCountMax=10 -o ConnectTimeout=10 $ECS_USER@$ECS_HOST"
 
           # 1. 上传 JAR
           ls -la backend/target/team-backend-1.0.0.jar || { echo "❌ JAR 文件不存在"; exit 1; }

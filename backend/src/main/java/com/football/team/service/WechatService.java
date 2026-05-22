@@ -18,8 +18,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class WechatService {
 
-    @Value("${wechat.app-id}")     private String appId;
-    @Value("${wechat.app-secret}") private String appSecret;
+    @Value("${wechat.app-id}")       private String appId;
+    @Value("${wechat.app-secret}")   private String appSecret;
+    @Value("${wechat.env-version:trial}") private String envVersion;
 
     private final StringRedisTemplate redis;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -81,6 +82,7 @@ public class WechatService {
         Map<String, Object> body = Map.of(
             "scene", scene,
             "page", page,
+            "env_version", envVersion,
             "width", 280,
             "auto_color", false,
             "line_color", Map.of("r", 39, "g", 174, "b", 96)

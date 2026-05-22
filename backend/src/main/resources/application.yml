@@ -22,6 +22,8 @@ jwt:
 wechat:
   app-id: ${WECHAT_APP_ID:dev_mock}
   app-secret: ${WECHAT_APP_SECRET:dev_mock}
+  # 正式版: release  体验版: trial  开发版: develop
+  env-version: ${WECHAT_ENV_VERSION:trial}
 
 oss:
   endpoint: ${OSS_ENDPOINT}

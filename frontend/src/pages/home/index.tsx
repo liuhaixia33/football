@@ -298,19 +298,32 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const t = useT()
   const { currentTeamId, isCaptainOrAdmin, teams, token } = useAuthStore()
-  const routerParams = Taro.getCurrentInstance().router?.params ?? {}
-  const sharedInviteCode = routerParams.inviteCode as string | undefined
-  const sharedTeamId = routerParams.teamId ? Number(routerParams.teamId) : null
+  // 用 state 存储邀请信息，支持 tab bar 页面背景→前台切换时更新（router.params 不会自动更新）
+  const [pendingInvite, setPendingInvite] = useState<{ code: string; teamId: number | null } | null>(() => {
+    // 初始化：优先 getEnterOptionsSync（兼容前台切换），其次 router.params（兼容首次冷启动）
+    try {
+      const q = (Taro.getEnterOptionsSync()?.query ?? {}) as Record<string, string>
+      if (q.inviteCode) return { code: q.inviteCode, teamId: q.teamId ? Number(q.teamId) : null }
+    } catch {}
+    const p = Taro.getCurrentInstance().router?.params ?? {}
+    if (p.inviteCode) return { code: p.inviteCode as string, teamId: p.teamId ? Number(p.teamId) : null }
+    return null
+  })
   const joinModalShown = useRef(false)
 
-  // 已登录用户通过分享链接进入时弹框询问是否加入
+  // 分享链接进入时弹框询问是否加入（已登录直接弹框；未登录保存邀请码，登录后由 login 页处理）
   useEffect(() => {
-    if (!sharedInviteCode || joinModalShown.current) return
-    if (sharedTeamId && teams.some(t => t.teamId === sharedTeamId)) return
+    if (!pendingInvite?.code || joinModalShown.current) return
+    if (pendingInvite.teamId && teams.some(t => t.teamId === pendingInvite.teamId)) return
     joinModalShown.current = true
-    Taro.removeStorageSync('pending_invite_code')
 
-    teamApi.getByInviteCode(sharedInviteCode)
+    if (!token) {
+      Taro.setStorageSync('pending_invite_code', pendingInvite.code)
+      return
+    }
+
+    Taro.removeStorageSync('pending_invite_code')
+    teamApi.getByInviteCode(pendingInvite.code)
       .then(teamInfo => {
         Taro.showModal({
           title: '加入球队',
@@ -318,7 +331,7 @@ export default function HomePage() {
           success: async ({ confirm }) => {
             if (!confirm) return
             try {
-              await teamApi.join(sharedInviteCode)
+              await teamApi.join(pendingInvite.code)
               Taro.showToast({ title: '申请已发送，等待管理员审核', icon: 'success' })
             } catch (e: unknown) {
               const msg = e instanceof Error ? e.message : ''
@@ -330,7 +343,7 @@ export default function HomePage() {
         })
       })
       .catch(() => {})
-  }, [sharedInviteCode, teams])
+  }, [pendingInvite, teams, token])
 
   const load = async () => {
     if (!currentTeamId) return
@@ -352,17 +365,20 @@ export default function HomePage() {
     }
   }
 
-  useDidShow(load)
-
-  useEffect(() => {
+  useDidShow(() => {
+    // tab bar 页每次显示时重检邀请参数（背景→前台切换时 router.params 不更新，需用 getEnterOptionsSync）
     try {
-      const opts = Taro.getLaunchOptionsSync()
-      const inviteCode = (opts.query as Record<string, string>)?.inviteCode
-      if (inviteCode) {
-        Taro.setStorageSync('pending_invite_code', inviteCode)
+      const q = (Taro.getEnterOptionsSync()?.query ?? {}) as Record<string, string>
+      if (q.inviteCode) {
+        setPendingInvite(prev => {
+          if (prev?.code === q.inviteCode) return prev  // 相同邀请码，不重复触发
+          joinModalShown.current = false                 // 新邀请码，重置弹框标志
+          return { code: q.inviteCode, teamId: q.teamId ? Number(q.teamId) : null }
+        })
       }
     } catch {}
-  }, [])
+    load()
+  })
 
   const handleRsvp = async (activityId: number, status: RegStatus) => {
     const currentStatus = activities.find(a => a.id === activityId)?.myStatus

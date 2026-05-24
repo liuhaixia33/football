@@ -28,7 +28,7 @@ const C = {
 export default function ActivityDetailPage() {
   const [detail, setDetail] = useState<ActivityDetailRes | null>(null)
   const t = useT()
-  const { isCaptainOrAdmin, currentTeamId, currentTeamInviteCode, teams } = useAuthStore()
+  const { isCaptainOrAdmin, currentTeamId, currentTeamInviteCode, teams, token } = useAuthStore()
   const routerParams = Taro.getCurrentInstance().router?.params ?? {}
   const activityId = Number(routerParams.id)
   const sharedTeamId = routerParams.teamId ? Number(routerParams.teamId) : null
@@ -47,18 +47,29 @@ export default function ActivityDetailPage() {
 
   useEffect(() => {
     if (!activityId) return
+    if (!token) {
+      // 未登录：保存邀请码后跳转登录，登录完成后由 login 页弹框处理
+      if (sharedInviteCode) Taro.setStorageSync('pending_invite_code', sharedInviteCode)
+      Taro.reLaunch({ url: '/pages/login/index' })
+      return
+    }
     activityApi.detail(activityId)
       .then(setDetail)
       .catch(() => Taro.showToast({ title: t('act.load_fail'), icon: 'none' }))
-  }, [activityId])
+  }, [activityId, token])
 
   // 检测邀请码并弹框询问是否加入
   useEffect(() => {
     if (!sharedInviteCode || joinModalShown.current) return
     if (sharedTeamId && teams.some(t => t.teamId === sharedTeamId)) return // 已是成员
     joinModalShown.current = true
-    Taro.removeStorageSync('pending_invite_code')
 
+    if (!token) {
+      Taro.setStorageSync('pending_invite_code', sharedInviteCode)
+      return
+    }
+
+    Taro.removeStorageSync('pending_invite_code')
     teamApi.getByInviteCode(sharedInviteCode)
       .then(teamInfo => {
         Taro.showModal({
@@ -79,7 +90,7 @@ export default function ActivityDetailPage() {
         })
       })
       .catch(() => {}) // 无效邀请码静默忽略
-  }, [sharedInviteCode, teams])
+  }, [sharedInviteCode, teams, token])
 
   if (!detail) {
     return (

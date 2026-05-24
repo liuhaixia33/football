@@ -42,8 +42,14 @@ public class ContentSafetyService {
             "content", text
         );
 
-        String raw = restTemplate.postForObject(url, body, String.class);
-        parseAndThrow(raw);
+        try {
+            String raw = restTemplate.postForObject(url, body, String.class);
+            parseAndThrow(raw);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("内容安全检查调用失败，跳过检查: {}", e.getMessage());
+        }
     }
 
     public void checkImage(byte[] imageBytes) {

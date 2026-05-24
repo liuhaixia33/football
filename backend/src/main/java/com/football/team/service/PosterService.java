@@ -78,6 +78,32 @@ public class PosterService {
         return generatePoster(teamId, false);
     }
 
+    /** 只生成小程序码图片并上传 OSS，缓存 24h；dev_mock 或失败时返回 null */
+    public String generateJoinCode(Long teamId) {
+        String cacheKey = "joincode:url:" + teamId;
+        String cached = redis.opsForValue().get(cacheKey);
+        if (cached != null) return cached;
+
+        if (wechatService.isDevMock()) {
+            log.info("dev_mock 模式，跳过小程序码生成 teamId={}", teamId);
+            return null;
+        }
+
+        TeamPublicRes info = teamService.getPublicInfo(teamId);
+        try {
+            String scene = "t=" + teamId + "&c=" + info.getInviteCode();
+            byte[] miniCode = wechatService.generateMiniCode(scene, "pages/join-team/index");
+            String key = "joincode/" + teamId + ".png";
+            String url = ossService.uploadBytes(miniCode, key);
+            redis.opsForValue().set(cacheKey, url, 24, TimeUnit.HOURS);
+            log.info("小程序码上传成功 teamId={} url={}", teamId, url);
+            return url;
+        } catch (Exception e) {
+            log.warn("小程序码生成失败 teamId={}: {}", teamId, e.getMessage());
+            return null;
+        }
+    }
+
     private byte[] fetchLogo(String logoUrl) {
         if (logoUrl == null || logoUrl.isBlank()) return null;
         try {

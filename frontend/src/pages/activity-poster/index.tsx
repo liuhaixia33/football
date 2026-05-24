@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import { View, Text, Button, Canvas } from '@tarojs/components'
 import Taro, { useDidShow, useShareAppMessage } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
+import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
 import type { ActivityDetailRes } from '../../types/api'
 
 const CANVAS_ID = 'activity-poster'
 const W = 375
-const H = 520
+const H = 620   // 比原来多 100px，给小程序码留空间
 const WEEK_CN = ['日', '一', '二', '三', '四', '五', '六']
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,25 +151,39 @@ function drawTagline(ctx: any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function drawFooter(ctx: any, inviteCode: string) {
+function drawFooter(ctx: any, inviteCode: string, miniCodePath: string | null) {
   ctx.setFillStyle('#0b1a0c')
-  ctx.fillRect(0, 420, W, 95)
-
-  if (!inviteCode) return
+  ctx.fillRect(0, 420, W, H - 420 - 5)   // 底部留 5px 给 accent bar
 
   ctx.setTextAlign('center')
 
-  ctx.setFillStyle('rgba(255,255,255,0.28)')
-  ctx.setFontSize(10)
-  ctx.fillText('球队邀请码', W / 2, 449)
+  if (miniCodePath) {
+    // 有小程序码：居中绘制，下方配文字
+    const codeSize = 120
+    const codeX = (W - codeSize) / 2
+    ctx.drawImage(miniCodePath, codeX, 432, codeSize, codeSize)
 
-  ctx.setFillStyle('rgba(255,255,255,0.78)')
-  ctx.setFontSize(15)
-  ctx.fillText(inviteCode, W / 2, 474)
+    ctx.setFillStyle('rgba(34,197,94,0.85)')
+    ctx.setFontSize(13)
+    ctx.fillText('扫码申请加入', W / 2, 574)
 
-  ctx.setFillStyle('rgba(34,197,94,0.5)')
-  ctx.setFontSize(10)
-  ctx.fillText('长按转发  邀请朋友加入球队', W / 2, 497)
+    ctx.setFillStyle('rgba(255,255,255,0.3)')
+    ctx.setFontSize(10)
+    ctx.fillText('保存图片后分享给朋友', W / 2, 596)
+  } else if (inviteCode) {
+    // 降级：纯文字邀请码
+    ctx.setFillStyle('rgba(255,255,255,0.28)')
+    ctx.setFontSize(10)
+    ctx.fillText('球队邀请码', W / 2, 449)
+
+    ctx.setFillStyle('rgba(255,255,255,0.78)')
+    ctx.setFontSize(15)
+    ctx.fillText(inviteCode, W / 2, 474)
+
+    ctx.setFillStyle('rgba(34,197,94,0.5)')
+    ctx.setFontSize(10)
+    ctx.fillText('长按转发  邀请朋友加入球队', W / 2, 497)
+  }
 }
 
 export default function ActivityPosterPage() {
@@ -180,12 +195,13 @@ export default function ActivityPosterPage() {
   const inviteCode = currentTeamInviteCode()
 
   const [detail, setDetail] = useState<ActivityDetailRes | null>(null)
+  const [miniCodePath, setMiniCodePath] = useState<string | null>(null)
   const [tempFilePath, setTempFilePath] = useState<string | null>(null)
   const [drawing, setDrawing] = useState(true)
 
   useShareAppMessage(() => ({
     title: detail?.activity.title ?? '球队活动',
-    path: `/pages/activity-detail/index?id=${activityId}&teamId=${currentTeamId}&inviteCode=${inviteCode}`,
+    path: `/pages/activity-detail/index?id=${activityId}&teamId=${currentTeamId}&inviteCode=${currentTeamInviteCode()}`,
   }))
 
   useDidShow(() => {
@@ -193,13 +209,30 @@ export default function ActivityPosterPage() {
   })
 
   useEffect(() => {
-    if (!activityId) return
-    activityApi.detail(activityId)
-      .then(d => { setDetail(d); renderPoster(d) })
-      .catch(() => Taro.showToast({ title: '加载失败', icon: 'none' }))
-  }, [activityId])
+    if (!activityId || !currentTeamId) return
 
-  function renderPoster(d: ActivityDetailRes) {
+    // 并行加载活动详情 + 小程序码，两者都就绪后再渲染海报
+    const detailP = activityApi.detail(activityId)
+
+    const codeP = teamApi.getJoinCode(currentTeamId)
+      .then(res => {
+        if (!res.posterUrl) return null
+        return Taro.downloadFile({ url: res.posterUrl })
+          .then(r => r.tempFilePath)
+          .catch(() => null)
+      })
+      .catch(() => null)
+
+    Promise.all([detailP, codeP])
+      .then(([d, codePath]) => {
+        setDetail(d)
+        setMiniCodePath(codePath)
+        renderPoster(d, codePath)
+      })
+      .catch(() => Taro.showToast({ title: '加载失败', icon: 'none' }))
+  }, [activityId, currentTeamId])
+
+  function renderPoster(d: ActivityDetailRes, codePath: string | null) {
     setDrawing(true)
     setTempFilePath(null)
     setTimeout(() => {
@@ -211,7 +244,7 @@ export default function ActivityPosterPage() {
       drawDivider(ctx)
       drawDetails(ctx, d.activity.startTime, d.activity.location, d.activity.registeredCount)
       drawTagline(ctx)
-      drawFooter(ctx, inviteCode)
+      drawFooter(ctx, inviteCode, codePath)
       ctx.draw(false, () => {
         Taro.canvasToTempFilePath({
           canvasId: CANVAS_ID,
@@ -269,7 +302,7 @@ export default function ActivityPosterPage() {
         <Button
           style={{ marginTop: '10px', background: 'rgba(255,255,255,0.06)', color: '#8a9e8a',
                    border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', fontSize: '14px' }}
-          onClick={() => detail && renderPoster(detail)}
+          onClick={() => detail && renderPoster(detail, miniCodePath)}
         >重新生成</Button>
       </View>
     </View>

@@ -144,7 +144,7 @@ export default function ActivityCreatePage() {
     return true
   }
 
-  const toISO = (v: string) => new Date(v.replace(' ', 'T') + ':00').toISOString()
+  const toISO = (v: string) => v.replace(' ', 'T') + ':00'
 
   const buildActivityBody = () => ({
     type,

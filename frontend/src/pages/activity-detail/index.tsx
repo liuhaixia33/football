@@ -48,9 +48,11 @@ export default function ActivityDetailPage() {
   useEffect(() => {
     if (!activityId) return
     if (!token) {
-      // 未登录：保存邀请码后跳转登录，登录完成后由 login 页弹框处理
       if (sharedInviteCode) Taro.setStorageSync('pending_invite_code', sharedInviteCode)
-      Taro.reLaunch({ url: '/pages/login/index' })
+      const loginUrl = sharedInviteCode
+        ? `/pages/login/index?inviteCode=${sharedInviteCode}`
+        : '/pages/login/index'
+      Taro.reLaunch({ url: loginUrl })
       return
     }
     activityApi.detail(activityId)

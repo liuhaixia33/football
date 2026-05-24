@@ -417,7 +417,14 @@ export default function HomePage() {
             fontSize: px(34), fontWeight: '800', border: 'none',
             padding: `${px(18)} ${px(60)}`,
           }}
-          onClick={() => Taro.navigateTo({ url: '/pages/login/index' })}
+          onClick={() => {
+            // 同步保存邀请码，并通过 URL 参数显式传递（双保险）
+            if (pendingInvite?.code) Taro.setStorageSync('pending_invite_code', pendingInvite.code)
+            const url = pendingInvite?.code
+              ? `/pages/login/index?inviteCode=${pendingInvite.code}`
+              : '/pages/login/index'
+            Taro.navigateTo({ url })
+          }}
         >
           登录 / 注册
         </Button>

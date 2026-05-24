@@ -116,6 +116,14 @@ public class TeamController {
         return ApiResponse.ok(null);
     }
 
+    /** 获取加入球队的小程序码图片 URL（所有成员可调用，dev_mock 时返回 null） */
+    @GetMapping("/{teamId}/joincode")
+    @RequireRole(MemberRole.PLAYER)
+    public ApiResponse<PosterRes> getJoinCode(@PathVariable Long teamId) {
+        String url = posterService.generateJoinCode(teamId);
+        return ApiResponse.ok(new PosterRes(url));
+    }
+
     /** 生成球队名片（仅 ADMIN 及以上）。refresh=true 强制忽略缓存重新生成 */
     @GetMapping("/{teamId}/poster")
     @RequireRole(MemberRole.ADMIN)

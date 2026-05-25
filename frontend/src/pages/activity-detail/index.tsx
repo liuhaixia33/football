@@ -47,8 +47,9 @@ export default function ActivityDetailPage() {
 
   useEffect(() => {
     if (!activityId) return
+    // 无论是否登录，先持久化邀请码；token 过期时 401 跳登录后 storage 保证上下文不丢失
+    if (sharedInviteCode) Taro.setStorageSync('pending_invite_code', sharedInviteCode)
     if (!token) {
-      if (sharedInviteCode) Taro.setStorageSync('pending_invite_code', sharedInviteCode)
       const loginUrl = sharedInviteCode
         ? `/pages/login/index?inviteCode=${sharedInviteCode}`
         : '/pages/login/index'
@@ -66,10 +67,7 @@ export default function ActivityDetailPage() {
     if (sharedTeamId && teams.some(t => t.teamId === sharedTeamId)) return // 已是成员
     joinModalShown.current = true
 
-    if (!token) {
-      Taro.setStorageSync('pending_invite_code', sharedInviteCode)
-      return
-    }
+    if (!token) return  // 已由第一个 useEffect 存入 storage
 
     Taro.removeStorageSync('pending_invite_code')
     teamApi.getByInviteCode(sharedInviteCode)

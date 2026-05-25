@@ -51,14 +51,18 @@ public class WechatService {
         return "dev_mock".equals(appId);
     }
 
-    /** 获取 access_token，Redis 缓存 7100s（有效期 7200s） */
+    /** 获取 access_token，使用稳定版接口（多次调用不互相失效），Redis 缓存 7100s */
     public String getAccessToken() {
         String cached = redis.opsForValue().get(ACCESS_TOKEN_KEY);
         if (cached != null) return cached;
 
-        String url = "https://api.weixin.qq.com/cgi-bin/token"
-            + "?grant_type=client_credential&appid=" + appId + "&secret=" + appSecret;
-        String raw = restTemplate.getForObject(url, String.class);
+        String url = "https://api.weixin.qq.com/cgi-bin/stable_token";
+        String body = String.format(
+            "{\"grant_type\":\"client_credential\",\"appid\":\"%s\",\"secret\":\"%s\",\"force_refresh\":false}",
+            appId, appSecret);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String raw = restTemplate.postForObject(url, new HttpEntity<>(body, headers), String.class);
         Map<?, ?> result = parseJson(raw);
         if (result == null || result.containsKey("errcode"))
             throw BusinessException.badRequest("获取 access_token 失败：" + result);

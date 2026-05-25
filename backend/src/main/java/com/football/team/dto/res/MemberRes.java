@@ -12,4 +12,5 @@ public class MemberRes {
     private String role;
     private String status;
     private LocalDateTime joinedAt;
+    private String tag;
 }

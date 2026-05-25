@@ -113,11 +113,11 @@ export const zh: Record<string, string> = {
   'members.active': '正式成员',
   'members.approve': '通过',
   'members.reject': '拒绝',
-  'members.set_admin': '设为管理员',
-  'members.remove_admin': '撤销管理员',
+  'members.set_admin': '设为队副',
+  'members.remove_admin': '撤销队副',
   'members.remove': '移除',
   'members.captain': '队长',
-  'members.admin': '管理员',
+  'members.admin': '队副',
   'members.player': '队员',
   'members.empty': '暂无成员',
 
@@ -148,7 +148,7 @@ export const zh: Record<string, string> = {
   'member_fee.set_fee': '设置会费',
 
   'my.captain': '队长',
-  'my.admin': '管理员',
+  'my.admin': '队副',
   'my.player': '队员',
   'my.stats': '本队战绩',
   'my.matches': '场数',

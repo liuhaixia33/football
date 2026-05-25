@@ -1,0 +1,1 @@
+ALTER TABLE team_member ADD COLUMN tag VARCHAR(6) NULL;

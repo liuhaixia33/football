@@ -18,4 +18,6 @@ public class TeamMember {
     @Column(columnDefinition = "varchar(16)")
     private MemberStatus status = MemberStatus.PENDING;
     private LocalDateTime joinedAt;
+    @Column(length = 6)
+    private String tag;
 }

@@ -121,6 +121,15 @@ public class TeamService {
         teamMemberRepository.save(member);
     }
 
+    @Transactional
+    public void setMemberTag(Long teamId, Long targetUserId, String tag) {
+        TeamMember member = teamMemberRepository.findByTeamIdAndUserId(teamId, targetUserId)
+            .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
+            .orElseThrow(() -> BusinessException.notFound("队员不存在"));
+        member.setTag(tag == null || tag.isBlank() ? null : tag.strip());
+        teamMemberRepository.save(member);
+    }
+
     public void leaveTeam(Long teamId, Long userId) {
         TeamMember member = teamMemberRepository.findByTeamIdAndUserId(teamId, userId)
             .filter(m -> m.getStatus() == MemberStatus.ACTIVE)
@@ -143,7 +152,7 @@ public class TeamService {
                 .memberId(m.getId()).userId(u.getId())
                 .nickname(u.getNickname()).avatarUrl(u.getAvatarUrl())
                 .role(m.getRole().name()).status(m.getStatus().name())
-                .joinedAt(m.getJoinedAt()).build();
+                .joinedAt(m.getJoinedAt()).tag(m.getTag()).build();
         }).toList();
     }
 

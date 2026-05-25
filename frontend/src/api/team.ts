@@ -12,6 +12,8 @@ export const teamApi = {
     api.post<void>(`/api/v1/teams/${teamId}/members/review`, { memberId, approve }),
   setRole: (teamId: number, userId: number, role: string) =>
     api.put<void>(`/api/v1/teams/${teamId}/members/role`, { userId, role }),
+  setTag: (teamId: number, userId: number, tag: string) =>
+    api.put<void>(`/api/v1/teams/${teamId}/members/${userId}/tag`, { tag }),
   removeMember: (teamId: number, userId: number) =>
     api.delete<void>(`/api/v1/teams/${teamId}/members/${userId}`),
   leave: (teamId: number) =>

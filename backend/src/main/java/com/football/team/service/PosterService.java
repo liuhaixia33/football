@@ -171,18 +171,21 @@ public class PosterService {
             g.setColor(DIVIDER);
             g.fillRect(50, 360, W - 100, 2);
 
-            // 数据行
-            int[] xPos = {50, 290, 510};
-            String[] values = {String.valueOf(memberCount), "—", "—"};
-            String[] labels = {"活跃队员", "场比赛", "胜场"};
-            for (int i = 0; i < 3; i++) {
-                g.setFont(new Font("SansSerif", Font.BOLD, 52));
-                g.setColor(GREEN_DARK);
-                g.drawString(values[i], xPos[i], 430);
-                g.setFont(new Font("SansSerif", Font.PLAIN, 24));
-                g.setColor(TEXT_MUTED);
-                g.drawString(labels[i], xPos[i], 470);
-            }
+            // 队员数（左）+ 口号（右）
+            g.setFont(new Font("SansSerif", Font.BOLD, 52));
+            g.setColor(GREEN_DARK);
+            g.drawString(String.valueOf(memberCount), 50, 430);
+            g.setFont(new Font("SansSerif", Font.PLAIN, 24));
+            g.setColor(TEXT_MUTED);
+            g.drawString("活跃队员", 50, 470);
+
+            // 口号居中于右侧区域 x=220..700
+            g.setFont(new Font("SansSerif", Font.BOLD, 28));
+            g.setColor(GREEN_DARK);
+            FontMetrics fmSlogan = g.getFontMetrics();
+            String slogan = "期待加入我们，一起碾压对手！";
+            int sloganX = 220 + (480 - fmSlogan.stringWidth(slogan)) / 2;
+            g.drawString(slogan, sloganX, 440);
 
             // 分隔线 2
             g.setColor(DIVIDER);

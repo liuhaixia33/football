@@ -34,9 +34,10 @@ export default function JoinTeamPage() {
         const id = Number(idMatch[1])
         const inviteCode = codeMatch?.[1] ?? ''
 
-        // 未登录：持久化邀请信息后跳登录，login 页完成后会自动处理加入逻辑
+        // 无论是否登录，先持久化邀请码；token 过期时 401 会跳登录，storage 保证上下文不丢失
+        if (inviteCode) Taro.setStorageSync('pending_invite_code', inviteCode)
+
         if (!useAuthStore.getState().token) {
-          if (inviteCode) Taro.setStorageSync('pending_invite_code', inviteCode)
           Taro.reLaunch({ url: '/pages/login/index' })
           return
         }
@@ -56,6 +57,7 @@ export default function JoinTeamPage() {
     setLoading(true)
     try {
       await teamApi.applyByTeamId(sceneTeamId)
+      Taro.removeStorageSync('pending_invite_code')
       Taro.showToast({ title: '申请已提交，等待队长审核', icon: 'success' })
       setTimeout(() => Taro.navigateBack(), 1500)
     } catch (e: unknown) {

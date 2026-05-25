@@ -65,6 +65,14 @@ public class TeamController {
         return ApiResponse.ok(null);
     }
 
+    @PutMapping("/{teamId}/members/{userId}/tag")
+    @RequireRole(MemberRole.ADMIN)
+    public ApiResponse<Void> setTag(@PathVariable Long teamId, @PathVariable Long userId,
+                                    @RequestBody @Valid SetMemberTagReq body) {
+        teamService.setMemberTag(teamId, userId, body.getTag());
+        return ApiResponse.ok(null);
+    }
+
     @DeleteMapping("/{teamId}/members/{userId}")
     @RequireRole(MemberRole.CAPTAIN)
     public ApiResponse<Void> remove(@PathVariable Long teamId, @PathVariable Long userId) {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View, Text, Button, ScrollView, Image } from '@tarojs/components'
+import { View, Text, Button, ScrollView, Image, Input } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { teamApi } from '../../api/team'
 import { useAuthStore } from '../../store/auth'
@@ -20,10 +20,20 @@ const C = {
   lose: '#ff4d5a',
 }
 
-function roleBadge(role: string) {
-  if (role === 'CAPTAIN') return { label: '队长', color: '#ffb700', dot: '#ffb700' }
-  if (role === 'ADMIN')   return { label: '管理员', color: '#4da6ff', dot: '#4da6ff' }
-  return { label: '球员', color: C.text3, dot: C.text3 }
+const PRESET_TAGS = ['队宠', '球王', '饮水机管理员', '鸽子王', '东斜', '西摇', '南转', '北杵']
+
+function RoleIcon({ role }: { role: string }) {
+  if (role === 'CAPTAIN') return (
+    <Text style={{ fontSize: px(20), color: '#ffb700', fontWeight: '800',
+                   background: 'rgba(255,183,0,0.18)', borderRadius: px(6),
+                   padding: `${px(2)} ${px(8)}` }}>C</Text>
+  )
+  if (role === 'ADMIN') return (
+    <Text style={{ fontSize: px(20), color: '#4da6ff', fontWeight: '800',
+                   background: 'rgba(77,166,255,0.18)', borderRadius: px(6),
+                   padding: `${px(2)} ${px(8)}` }}>A</Text>
+  )
+  return null
 }
 
 export default function MembersPage() {
@@ -81,10 +91,29 @@ export default function MembersPage() {
     const newRole = memberRole === 'ADMIN' ? 'PLAYER' : 'ADMIN'
     try {
       await teamApi.setRole(currentTeamId, targetUserId, newRole)
-      Taro.showToast({ title: newRole === 'ADMIN' ? '已设为管理员' : '已取消管理员', icon: 'success' })
+      Taro.showToast({ title: newRole === 'ADMIN' ? '已设为队副' : '已取消队副', icon: 'success' })
       load()
     } catch (e: unknown) {
       Taro.showToast({ title: e instanceof Error ? e.message : '操作失败', icon: 'none' })
+    }
+  }
+
+  const [tagModal, setTagModal] = useState<{ userId: number; nickname: string; current: string } | null>(null)
+  const [tagInput, setTagInput] = useState('')
+
+  const openTagModal = (m: MemberRes) => {
+    setTagInput(m.tag ?? '')
+    setTagModal({ userId: m.userId, nickname: m.nickname, current: m.tag ?? '' })
+  }
+
+  const submitTag = async (tag: string) => {
+    if (!currentTeamId || !tagModal) return
+    try {
+      await teamApi.setTag(currentTeamId, tagModal.userId, tag)
+      setTagModal(null)
+      load()
+    } catch (e: unknown) {
+      Taro.showToast({ title: e instanceof Error ? e.message : '设置失败', icon: 'none' })
     }
   }
 
@@ -165,7 +194,6 @@ export default function MembersPage() {
             border: `1px solid ${C.border}`, overflow: 'hidden',
           }}>
             {list.map((m, idx) => {
-              const rb = roleBadge(m.role)
               const isLast = idx === list.length - 1
               return (
                 <View key={m.memberId}>
@@ -190,27 +218,25 @@ export default function MembersPage() {
                         </View>
                     }
 
-                    {/* Name + role */}
+                    {/* Name + role icon + tag */}
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <View style={{ display: 'flex', alignItems: 'center', gap: px(7), marginBottom: px(2) }}>
+                      <View style={{ display: 'flex', alignItems: 'center', gap: px(7) }}>
                         <Text style={{ fontSize: px(30), fontWeight: '600', color: C.text }}>
                           {m.nickname}
                         </Text>
+                        <RoleIcon role={m.role} />
                         {m.userId === userId && (
                           <Text style={{ fontSize: px(22), color: C.primary, fontWeight: '600',
                                          background: C.primaryDim, borderRadius: '9999px',
                                          padding: '1px 6px' }}>我</Text>
                         )}
                       </View>
-                      <View style={{ display: 'flex', alignItems: 'center', gap: px(4) }}>
-                        <View style={{
-                          width: px(5), height: px(5), borderRadius: '50%',
-                          background: rb.dot,
-                        }} />
-                        <Text style={{ fontSize: px(24), color: rb.color, fontWeight: '500' }}>
-                          {rb.label}
+                      {m.tag ? (
+                        <Text style={{ fontSize: px(22), color: '#f59e0b', fontWeight: '500',
+                                       marginTop: px(3) }}>
+                          {m.tag}
                         </Text>
-                      </View>
+                      ) : null}
                     </View>
 
                     {/* Actions */}
@@ -243,33 +269,50 @@ export default function MembersPage() {
                       </View>
                     )}
 
-                    {tab === 'active' && currentRole === 'CAPTAIN' &&
-                      m.userId !== userId && m.role !== 'CAPTAIN' && (
+                    {tab === 'active' && isCaptainOrAdmin() && (
                       <View style={{ display: 'flex', gap: px(6), flexShrink: 0 }}>
+                        {/* 标签按钮：队长和队副均可 */}
                         <Button
                           size='mini'
                           style={{
-                            background: 'rgba(77,166,255,0.1)', color: '#4da6ff',
-                            border: '1px solid rgba(77,166,255,0.2)',
+                            background: 'rgba(245,158,11,0.12)', color: '#f59e0b',
+                            border: '1px solid rgba(245,158,11,0.25)',
                             borderRadius: px(8), fontSize: px(22),
                             padding: `${px(4)} ${px(10)}`,
                           }}
-                          onClick={() => toggleAdmin(m.userId, m.role)}
+                          onClick={() => openTagModal(m)}
                         >
-                          {m.role === 'ADMIN' ? t('members.remove_admin') : t('members.set_admin')}
+                          标签
                         </Button>
-                        <Button
-                          size='mini'
-                          style={{
-                            background: 'rgba(255,77,90,0.1)', color: C.lose,
-                            border: '1px solid rgba(255,77,90,0.2)',
-                            borderRadius: px(8), fontSize: px(22),
-                            padding: `${px(4)} ${px(10)}`,
-                          }}
-                          onClick={() => removeMember(m.userId)}
-                        >
-                          {t('members.remove')}
-                        </Button>
+                        {/* 设副 + 移除：仅队长，且非自身、非队长 */}
+                        {currentRole === 'CAPTAIN' && m.userId !== userId && m.role !== 'CAPTAIN' && (
+                          <>
+                            <Button
+                              size='mini'
+                              style={{
+                                background: 'rgba(77,166,255,0.1)', color: '#4da6ff',
+                                border: '1px solid rgba(77,166,255,0.2)',
+                                borderRadius: px(8), fontSize: px(22),
+                                padding: `${px(4)} ${px(10)}`,
+                              }}
+                              onClick={() => toggleAdmin(m.userId, m.role)}
+                            >
+                              {m.role === 'ADMIN' ? t('members.remove_admin') : t('members.set_admin')}
+                            </Button>
+                            <Button
+                              size='mini'
+                              style={{
+                                background: 'rgba(255,77,90,0.1)', color: C.lose,
+                                border: '1px solid rgba(255,77,90,0.2)',
+                                borderRadius: px(8), fontSize: px(22),
+                                padding: `${px(4)} ${px(10)}`,
+                              }}
+                              onClick={() => removeMember(m.userId)}
+                            >
+                              {t('members.remove')}
+                            </Button>
+                          </>
+                        )}
                       </View>
                     )}
                   </View>
@@ -285,6 +328,106 @@ export default function MembersPage() {
         )}
         <View style={{ height: px(192) }} />
       </ScrollView>
+
+      {/* 标签编辑弹层 */}
+      {tagModal && (
+        <View style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'flex-end',
+        }} onClick={() => setTagModal(null)}>
+          <View
+            style={{
+              width: '100%', background: '#1a201a',
+              borderRadius: `${px(24)} ${px(24)} 0 0`,
+              padding: `${px(24)} ${px(20)} ${px(48)}`,
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* 标题 */}
+            <Text style={{ fontSize: px(32), fontWeight: '700', color: C.text,
+                           display: 'block', marginBottom: px(6) }}>
+              设置标签
+            </Text>
+            <Text style={{ fontSize: px(24), color: C.text2, display: 'block', marginBottom: px(20) }}>
+              {tagModal.nickname}
+            </Text>
+
+            {/* 预设标签 */}
+            <View style={{ display: 'flex', flexWrap: 'wrap', gap: px(10), marginBottom: px(20) }}>
+              {PRESET_TAGS.map(tag => {
+                const active = tagInput === tag
+                return (
+                  <View
+                    key={tag}
+                    onClick={() => setTagInput(active ? '' : tag)}
+                    style={{
+                      padding: `${px(8)} ${px(16)}`,
+                      borderRadius: '9999px',
+                      background: active ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.06)',
+                      border: `1px solid ${active ? 'rgba(245,158,11,0.5)' : C.border}`,
+                    }}
+                  >
+                    <Text style={{ fontSize: px(26), color: active ? '#f59e0b' : C.text2,
+                                   fontWeight: active ? '600' : '400' }}>
+                      {tag}
+                    </Text>
+                  </View>
+                )
+              })}
+            </View>
+
+            {/* 自定义输入 */}
+            <View style={{
+              display: 'flex', alignItems: 'center',
+              background: 'rgba(255,255,255,0.05)',
+              border: `1px solid ${C.border}`, borderRadius: px(12),
+              padding: `${px(10)} ${px(14)}`, marginBottom: px(24),
+            }}>
+              <Input
+                value={tagInput}
+                onInput={e => setTagInput(e.detail.value.slice(0, 6))}
+                placeholder='自定义标签（最多6字）'
+                placeholderStyle={`color:${C.text3};font-size:${px(26)}px`}
+                maxlength={6}
+                style={{ flex: 1, fontSize: px(28), color: C.text }}
+              />
+              {tagInput ? (
+                <Text style={{ fontSize: px(24), color: C.text3, marginLeft: px(8) }}>
+                  {tagInput.length}/6
+                </Text>
+              ) : null}
+            </View>
+
+            {/* 操作按钮 */}
+            <View style={{ display: 'flex', gap: px(12) }}>
+              {tagModal.current && (
+                <Button
+                  style={{
+                    flex: 1, background: 'rgba(255,255,255,0.05)', color: C.text3,
+                    border: `1px solid ${C.border}`, borderRadius: px(14),
+                    fontSize: px(28), fontWeight: '500',
+                  }}
+                  onClick={() => submitTag('')}
+                >
+                  清除标签
+                </Button>
+              )}
+              <Button
+                style={{
+                  flex: 2, background: tagInput ? '#22c55e' : 'rgba(34,197,94,0.2)',
+                  color: tagInput ? '#0f1010' : C.text3,
+                  border: 'none', borderRadius: px(14),
+                  fontSize: px(28), fontWeight: '700',
+                }}
+                onClick={() => tagInput && submitTag(tagInput)}
+              >
+                确认
+              </Button>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   )
 }

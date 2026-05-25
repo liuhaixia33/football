@@ -38,6 +38,7 @@ export interface MemberRes {
   role: MemberRole
   status: MemberStatus
   joinedAt: string | null
+  tag?: string | null
 }
 
 export interface ActivityRes {

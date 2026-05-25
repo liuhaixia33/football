@@ -39,8 +39,8 @@ export default function JoinTeamPage() {
 
         if (!useAuthStore.getState().token) {
           const loginUrl = inviteCode
-            ? `/pages/login/index?inviteCode=${inviteCode}`
-            : '/pages/login/index'
+            ? `/pages/login/index?inviteCode=${inviteCode}&teamId=${id}`
+            : `/pages/login/index?teamId=${id}`
           Taro.reLaunch({ url: loginUrl })
           return
         }

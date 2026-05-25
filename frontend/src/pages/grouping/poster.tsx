@@ -95,6 +95,32 @@ function drawPitch(ctx: any, yo: number) {
   })
 }
 
+// 根据人数返回阵形行分布（从后卫到前锋，第一行始终是守门员）
+function getFormation(n: number): number[] {
+  const table: Record<number, number[]> = {
+    1:  [1],
+    2:  [1, 1],
+    3:  [1, 2],
+    4:  [1, 2, 1],
+    5:  [1, 2, 2],
+    6:  [1, 2, 2, 1],
+    7:  [1, 2, 3, 1],
+    8:  [1, 3, 3, 1],
+    9:  [1, 3, 3, 2],
+    10: [1, 3, 3, 3],
+    11: [1, 4, 3, 3],
+    12: [1, 4, 4, 3],
+    13: [1, 4, 4, 4],
+    14: [1, 4, 5, 4],
+  }
+  if (table[n]) return table[n]
+  // 超出预设：GK单独一行，其余每行最多4人
+  const rows: number[] = [1]
+  let rest = n - 1
+  while (rest > 0) { rows.push(Math.min(4, rest)); rest -= Math.min(4, rest) }
+  return rows
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function drawGroupPlayers(ctx: any, group: GroupDto, yo: number, halfH: number, isTopTeam: boolean, color: string) {
   const members = group.members
@@ -102,46 +128,46 @@ function drawGroupPlayers(ctx: any, group: GroupDto, yo: number, halfH: number, 
   if (n === 0) return
   const DOT_R = 14
 
-  // Content bounds within this half (leave room for corner labels)
-  const contentY1 = isTopTeam ? yo + 46 : yo + 16
-  const contentY2 = isTopTeam ? yo + halfH - 16 : yo + halfH - 46
+  // 球门侧留边（含角球弧线空间）、中线侧留边（避免双方球员紧贴中线）
+  const GOAL_MARGIN   = 38
+  const CENTER_MARGIN = 52
 
-  const colsPerRow = n <= 3 ? n : n <= 6 ? Math.ceil(n / 2) : n <= 9 ? Math.ceil(n / 3) : 4
-  const rows = Math.ceil(n / colsPerRow)
+  // goalEdge = 靠近本方球门的内容边界，centerEdge = 靠近中线的内容边界
+  const goalEdge   = isTopTeam ? yo + GOAL_MARGIN         : yo + halfH - GOAL_MARGIN
+  const centerEdge = isTopTeam ? yo + halfH - CENTER_MARGIN : yo + CENTER_MARGIN
 
-  members.forEach((m, i) => {
-    const rowIdx = Math.floor(i / colsPerRow)
-    const colIdx = i % colsPerRow
-    const totalInRow = Math.min(colsPerRow, n - rowIdx * colsPerRow)
-    const xSpacing = W / (totalInRow + 1)
-    const x = xSpacing * (colIdx + 1)
+  const formation = getFormation(n)
+  const numRows = formation.length
 
-    let y: number
-    if (rows <= 1) {
-      y = (contentY1 + contentY2) / 2
+  let memberIdx = 0
+  formation.forEach((count, rowIdx) => {
+    // 行 0 = GK（靠球门），最后一行 = 前锋（靠中线）
+    let rowY: number
+    if (numRows === 1) {
+      rowY = (goalEdge + centerEdge) / 2
     } else {
-      const rowSpacing = (contentY2 - contentY1) / (rows - 1)
-      // Top team: row 0 nearest center (contentY2), rows go toward goal (up)
-      // Bottom team: row 0 nearest center (contentY1), rows go toward goal (down)
-      y = isTopTeam
-        ? contentY2 - rowIdx * rowSpacing
-        : contentY1 + rowIdx * rowSpacing
+      const t = rowIdx / (numRows - 1)
+      rowY = isTopTeam
+        ? goalEdge + t * (centerEdge - goalEdge)   // 顶队：从上到下 GK→前锋
+        : goalEdge - t * (goalEdge - centerEdge)   // 底队：从下到上 GK→前锋
     }
 
-    // Shadow
-    ctx.setFillStyle('rgba(0,0,0,0.3)')
-    ctx.beginPath(); ctx.arc(x + 1, y + 2, DOT_R, 0, 2 * Math.PI); ctx.fill()
+    for (let i = 0; i < count && memberIdx < n; i++, memberIdx++) {
+      const x = W / (count + 1) * (i + 1)
+      const m = members[memberIdx]
 
-    // Dot
-    ctx.setFillStyle(color)
-    ctx.beginPath(); ctx.arc(x, y, DOT_R, 0, 2 * Math.PI); ctx.fill()
+      ctx.setFillStyle('rgba(0,0,0,0.3)')
+      ctx.beginPath(); ctx.arc(x + 1, rowY + 2, DOT_R, 0, 2 * Math.PI); ctx.fill()
 
-    // Name inside dot
-    const name = m.nickname.length > 4 ? m.nickname.slice(0, 4) : m.nickname
-    ctx.setFillStyle('#0a200a')
-    ctx.setFontSize(9)
-    ctx.setTextAlign('center')
-    ctx.fillText(name, x, y + 4)
+      ctx.setFillStyle(color)
+      ctx.beginPath(); ctx.arc(x, rowY, DOT_R, 0, 2 * Math.PI); ctx.fill()
+
+      const name = m.nickname.length > 4 ? m.nickname.slice(0, 4) : m.nickname
+      ctx.setFillStyle('#0a200a')
+      ctx.setFontSize(9)
+      ctx.setTextAlign('center')
+      ctx.fillText(name, x, rowY + 4)
+    }
   })
 }
 

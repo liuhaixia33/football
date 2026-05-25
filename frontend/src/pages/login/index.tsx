@@ -33,6 +33,7 @@ export default function LoginPage() {
   const t = useT()
   // 邀请码优先从 URL 参数读取（home / activity-detail 直接传入），其次从 storage（旧路径兜底）
   const urlInviteCode = (Taro.getCurrentInstance().router?.params?.inviteCode as string | undefined) || ''
+  const urlTeamId = Number(Taro.getCurrentInstance().router?.params?.teamId) || null
 
   const avatarDisplay = avatarTmp || storedAvatarUrl || ''
   const canLogin = !!(avatarTmp || storedAvatarUrl) && !!nickname.trim() && !loading && agreed
@@ -118,7 +119,13 @@ export default function LoginPage() {
           useAuthStore.getState().setCurrentTeam(res.teams[0].teamId, res.teams[0].role)
           Taro.reLaunch({ url: '/pages/home/index' })
         } else {
-          Taro.reLaunch({ url: '/pages/team-select/index' })
+          const matchedTeam = urlTeamId ? res.teams.find(t => t.teamId === urlTeamId) : null
+          if (matchedTeam) {
+            useAuthStore.getState().setCurrentTeam(matchedTeam.teamId, matchedTeam.role)
+            Taro.reLaunch({ url: '/pages/home/index' })
+          } else {
+            Taro.reLaunch({ url: '/pages/team-select/index' })
+          }
         }
       }
     } catch (e: unknown) {

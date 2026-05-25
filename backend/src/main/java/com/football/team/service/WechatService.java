@@ -88,18 +88,30 @@ public class WechatService {
             "line_color", Map.of("r", 39, "g", 174, "b", 96)
         );
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        byte[] response = restTemplate.postForObject(url, new HttpEntity<>(body, headers), byte[].class);
-        if (response == null || response.length == 0)
-            throw BusinessException.badRequest("生成小程序码失败：空响应");
-
-        // 若返回 JSON（错误情况），微信会返回 {"errcode":...}
-        if (response[0] == '{') {
-            String err = new String(response);
-            throw BusinessException.badRequest("生成小程序码失败：" + err);
+        try {
+            String jsonBody = objectMapper.writeValueAsString(body);
+            // 使用 JDK HttpClient 直接发起请求，避免 HttpURLConnection 与微信接口的兼容问题
+            java.net.http.HttpRequest req = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create(url))
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
+                .header("Content-Type", "application/json")
+                .timeout(java.time.Duration.ofSeconds(10))
+                .build();
+            java.net.http.HttpResponse<byte[]> resp = java.net.http.HttpClient.newHttpClient()
+                .send(req, java.net.http.HttpResponse.BodyHandlers.ofByteArray());
+            byte[] response = resp.body();
+            if (response == null || response.length == 0)
+                throw BusinessException.badRequest("生成小程序码失败：空响应");
+            if (response[0] == '{') {
+                String err = new String(response);
+                throw BusinessException.badRequest("生成小程序码失败：" + err);
+            }
+            return response;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw BusinessException.badRequest("生成小程序码失败：" + e.getMessage());
         }
-        return response;
     }
 
     private Map<?, ?> parseJson(String raw) {

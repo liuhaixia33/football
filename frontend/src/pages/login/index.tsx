@@ -56,11 +56,34 @@ export default function LoginPage() {
       const pendingCode = storageCode || urlInviteCode || ''
 
       if (res.teams.length === 0) {
-        // 新用户（无球队）：有邀请码就带到 onboard，让用户明确选择申请还是创建
-        const url = pendingCode
-          ? `/pages/onboard/index?inviteCode=${pendingCode}`
-          : '/pages/onboard/index'
-        Taro.reLaunch({ url })
+        if (pendingCode) {
+          // 新用户扫码进来：直接申请加入，弹窗告知审核状态后跳主页
+          let joinMsg = '已发起加入申请，需队长审核后方可加入球队。'
+          try {
+            await teamApi.join(pendingCode)
+          } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : ''
+            if (msg.includes('已是')) {
+              joinMsg = '您已是该球队成员。'
+            } else if (msg.includes('审核中')) {
+              joinMsg = '您的申请正在审核中，请等待队长处理。'
+            } else if (msg) {
+              joinMsg = msg
+            }
+          }
+          await new Promise<void>(resolve =>
+            Taro.showModal({
+              title: '申请已发送',
+              content: joinMsg,
+              showCancel: false,
+              confirmText: '知道了',
+              success: () => resolve(),
+            })
+          )
+          Taro.reLaunch({ url: '/pages/home/index' })
+        } else {
+          Taro.reLaunch({ url: '/pages/onboard/index' })
+        }
       } else {
         // 已有球队的回访用户：有邀请码就弹框询问
         if (pendingCode) {

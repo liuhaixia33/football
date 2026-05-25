@@ -304,9 +304,18 @@ export default function HomePage() {
     try {
       const q = (Taro.getEnterOptionsSync()?.query ?? {}) as Record<string, string>
       if (q.inviteCode) return { code: q.inviteCode, teamId: q.teamId ? Number(q.teamId) : null }
+      // 小程序码扫码：scene 格式 c={inviteCode}
+      if (q.scene) {
+        const m = decodeURIComponent(q.scene).match(/(?:^|&)c=([A-Z0-9]+)/)
+        if (m) return { code: m[1], teamId: null }
+      }
     } catch {}
     const p = Taro.getCurrentInstance().router?.params ?? {}
     if (p.inviteCode) return { code: p.inviteCode as string, teamId: p.teamId ? Number(p.teamId) : null }
+    if (p.scene) {
+      const m = decodeURIComponent(p.scene as string).match(/(?:^|&)c=([A-Z0-9]+)/)
+      if (m) return { code: m[1], teamId: null }
+    }
     return null
   })
   const joinModalShown = useRef(false)
@@ -369,11 +378,16 @@ export default function HomePage() {
     // tab bar 页每次显示时重检邀请参数（背景→前台切换时 router.params 不更新，需用 getEnterOptionsSync）
     try {
       const q = (Taro.getEnterOptionsSync()?.query ?? {}) as Record<string, string>
-      if (q.inviteCode) {
+      let arrivedCode = q.inviteCode || ''
+      if (!arrivedCode && q.scene) {
+        const m = decodeURIComponent(q.scene).match(/(?:^|&)c=([A-Z0-9]+)/)
+        if (m) arrivedCode = m[1]
+      }
+      if (arrivedCode) {
         setPendingInvite(prev => {
-          if (prev?.code === q.inviteCode) return prev  // 相同邀请码，不重复触发
-          joinModalShown.current = false                 // 新邀请码，重置弹框标志
-          return { code: q.inviteCode, teamId: q.teamId ? Number(q.teamId) : null }
+          if (prev?.code === arrivedCode) return prev  // 相同邀请码，不重复触发
+          joinModalShown.current = false               // 新邀请码，重置弹框标志
+          return { code: arrivedCode, teamId: q.teamId ? Number(q.teamId) : null }
         })
       }
     } catch {}

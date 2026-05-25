@@ -201,7 +201,8 @@ export default function ActivityPosterPage() {
 
   useShareAppMessage(() => ({
     title: detail?.activity.title ?? '球队活动',
-    path: `/pages/activity-detail/index?id=${activityId}&teamId=${currentTeamId}&inviteCode=${currentTeamInviteCode()}`,
+    path: `/pages/home/index?inviteCode=${currentTeamInviteCode()}&teamId=${currentTeamId}`,
+    imageUrl: tempFilePath || '/assets/images/share-cover.png',
   }))
 
   useDidShow(() => {
@@ -214,7 +215,7 @@ export default function ActivityPosterPage() {
     // 并行加载活动详情 + 小程序码，两者都就绪后再渲染海报
     const detailP = activityApi.detail(activityId)
 
-    const codeP = teamApi.getJoinCode(currentTeamId)
+    const codeP = teamApi.getHomeQrCode(currentTeamId)
       .then(res => {
         if (!res.posterUrl) return null
         return Taro.downloadFile({ url: res.posterUrl })

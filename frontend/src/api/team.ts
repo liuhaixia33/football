@@ -33,6 +33,8 @@ export const teamApi = {
     api.post<void>(`/api/v1/teams/${teamId}/apply`, {}, false),
   getJoinCode: (teamId: number) =>
     api.get<{ posterUrl: string }>(`/api/v1/teams/${teamId}/joincode`),
+  getHomeQrCode: (teamId: number) =>
+    api.get<{ posterUrl: string }>(`/api/v1/teams/${teamId}/home-qrcode`),
   getPoster: (teamId: number, refresh = false) =>
     api.get<{ posterUrl: string }>(`/api/v1/teams/${teamId}/poster${refresh ? '?refresh=true' : ''}`),
 }

@@ -38,7 +38,10 @@ export default function JoinTeamPage() {
         if (inviteCode) Taro.setStorageSync('pending_invite_code', inviteCode)
 
         if (!useAuthStore.getState().token) {
-          Taro.reLaunch({ url: '/pages/login/index' })
+          const loginUrl = inviteCode
+            ? `/pages/login/index?inviteCode=${inviteCode}`
+            : '/pages/login/index'
+          Taro.reLaunch({ url: loginUrl })
           return
         }
 
@@ -64,7 +67,7 @@ export default function JoinTeamPage() {
       const msg = e instanceof Error ? e.message : '申请失败'
       if (msg.includes('已是该球队成员')) {
         Taro.showToast({ title: '您已是该球队成员', icon: 'success' })
-        setTimeout(() => Taro.switchTab({ url: '/pages/index/index' }), 1500)
+        setTimeout(() => Taro.switchTab({ url: '/pages/home/index' }), 1500)
       } else {
         Taro.showToast({ title: msg, icon: 'none' })
       }

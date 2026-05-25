@@ -132,6 +132,14 @@ public class TeamController {
         return ApiResponse.ok(new PosterRes(url));
     }
 
+    /** 获取指向主页（活动列表）的小程序码，用于活动海报内嵌 QR 码 */
+    @GetMapping("/{teamId}/home-qrcode")
+    @RequireRole(MemberRole.PLAYER)
+    public ApiResponse<PosterRes> getHomeQrCode(@PathVariable Long teamId) {
+        String url = posterService.generateHomeQrCode(teamId);
+        return ApiResponse.ok(new PosterRes(url));
+    }
+
     /** 生成球队名片（仅 ADMIN 及以上）。refresh=true 强制忽略缓存重新生成 */
     @GetMapping("/{teamId}/poster")
     @RequireRole(MemberRole.ADMIN)

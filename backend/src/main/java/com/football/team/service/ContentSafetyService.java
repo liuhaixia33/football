@@ -30,44 +30,48 @@ public class ContentSafetyService {
     }
 
     public void checkText(String openid, String text) {
-        if (wechatService.isDevMock() || text == null || text.isBlank()) return;
+        return;
 
-        String token = wechatService.getAccessToken();
-        String url = "https://api.weixin.qq.com/wxa/msg_sec_check?access_token=" + token;
-
-        Map<String, Object> body = Map.of(
-            "openid", openid,
-            "scene", 1,
-            "version", 2,
-            "content", text
-        );
-
-        try {
-            String raw = restTemplate.postForObject(url, body, String.class);
-            parseAndThrow(raw);
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.warn("内容安全检查调用失败，跳过检查: {}", e.getMessage());
-        }
+//        if (wechatService.isDevMock() || text == null || text.isBlank()) return;
+//
+//        String token = wechatService.getAccessToken();
+//        String url = "https://api.weixin.qq.com/wxa/msg_sec_check?access_token=" + token;
+//
+//        Map<String, Object> body = Map.of(
+//            "openid", openid,
+//            "scene", 1,
+//            "version", 2,
+//            "content", text
+//        );
+//
+//        try {
+//            String raw = restTemplate.postForObject(url, body, String.class);
+//            parseAndThrow(raw);
+//        } catch (BusinessException e) {
+//            throw e;
+//        } catch (Exception e) {
+//            log.warn("内容安全检查调用失败，跳过检查: {}", e.getMessage());
+//        }
     }
 
     public void checkImage(byte[] imageBytes) {
-        if (wechatService.isDevMock() || imageBytes == null || imageBytes.length == 0) return;
+        return;
 
-        String token = wechatService.getAccessToken();
-        String url = "https://api.weixin.qq.com/wxa/img_sec_check?access_token=" + token;
-
-        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
-        form.add("media", new ByteArrayResource(imageBytes) {
-            @Override public String getFilename() { return "image.jpg"; }
-        });
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(form, headers);
-
-        String raw = restTemplate.postForEntity(url, entity, String.class).getBody();
-        parseAndThrow(raw);
+//        if (wechatService.isDevMock() || imageBytes == null || imageBytes.length == 0) return;
+//
+//        String token = wechatService.getAccessToken();
+//        String url = "https://api.weixin.qq.com/wxa/img_sec_check?access_token=" + token;
+//
+//        MultiValueMap<String, Object> form = new LinkedMultiValueMap<>();
+//        form.add("media", new ByteArrayResource(imageBytes) {
+//            @Override public String getFilename() { return "image.jpg"; }
+//        });
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//        HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(form, headers);
+//
+//        String raw = restTemplate.postForEntity(url, entity, String.class).getBody();
+//        parseAndThrow(raw);
     }
 
     private void parseAndThrow(String raw) {

@@ -1,0 +1,22 @@
+{"type":"server-started","port":62078,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:62078","screen_dir":"/Users/caoyajun/football-team/.superpowers/brainstorm/37463-1779345138/content","state_dir":"/Users/caoyajun/football-team/.superpowers/brainstorm/37463-1779345138/state"}
+{"type":"screen-added","file":"/Users/caoyajun/football-team/.superpowers/brainstorm/37463-1779345138/content/feature-map.html"}
+{"source":"user-event","type":"click","text":"🔗\n    分享 & 传播\n    活动海报 / 战报分享 / 球队主页 / 邀请链接 / 赛后集锦\n    让球队向外扩张，吸引新成员","choice":"share","id":null,"timestamp":1779345272571}
+{"source":"user-event","type":"click","text":"🔗\n    分享 & 传播\n    活动海报 / 战报分享 / 球队主页 / 邀请链接 / 赛后集锦\n    让球队向外扩张，吸引新成员","choice":"share","id":null,"timestamp":1779345276562}
+{"source":"user-event","type":"click","text":"🔗\n    分享 & 传播\n    活动海报 / 战报分享 / 球队主页 / 邀请链接 / 赛后集锦\n    让球队向外扩张，吸引新成员","choice":"share","id":null,"timestamp":1779345276862}
+{"source":"user-event","type":"click","text":"🔗\n    分享 & 传播\n    活动海报 / 战报分享 / 球队主页 / 邀请链接 / 赛后集锦\n    让球队向外扩张，吸引新成员","choice":"share","id":null,"timestamp":1779345277672}
+{"source":"user-event","type":"click","text":"🏆\n    赛事 & 联赛\n    内部积分联赛 / 淘汰赛 / 积分榜 / 赛程表 / 对阵其他球队\n    把业余比赛做成\"正式感\"","choice":"tournament","id":null,"timestamp":1779345286537}
+{"source":"user-event","type":"click","text":"🏆\n    赛事 & 联赛\n    内部积分联赛 / 淘汰赛 / 积分榜 / 赛程表 / 对阵其他球队\n    把业余比赛做成\"正式感\"","choice":"tournament","id":null,"timestamp":1779345287421}
+{"source":"user-event","type":"click","text":"🏆\n    赛事 & 联赛\n    内部积分联赛 / 淘汰赛 / 积分榜 / 赛程表 / 对阵其他球队\n    把业余比赛做成\"正式感\"","choice":"tournament","id":null,"timestamp":1779345289012}
+{"source":"user-event","type":"click","text":"🏆\n    赛事 & 联赛\n    内部积分联赛 / 淘汰赛 / 积分榜 / 赛程表 / 对阵其他球队\n    把业余比赛做成\"正式感\"","choice":"tournament","id":null,"timestamp":1779345289267}
+{"source":"user-event","type":"click","text":"🔔\n    通知 & 运营\n    活动开抢提醒 / 截止日提醒 / 微信订阅消息 / 公告广播\n    提高活动参与率和活跃度","choice":"notify","id":null,"timestamp":1779345292446}
+{"source":"user-event","type":"click","text":"💬\n    社交 & 互动\n    球队内聊天 / 活动评论 / 点赞 / @提醒 / 球员个人主页\n    让球员之间产生更多连接","choice":"social","id":null,"timestamp":1779345296784}
+{"source":"user-event","type":"click","text":"📊\n    数据 & 统计\n    个人数据看板 / 赛季报告 / 出勤率 / 进球榜 / 球队战绩分析\n    让数据说话，激励球员参与","choice":"stats","id":null,"timestamp":1779345297851}
+{"source":"user-event","type":"click","text":"💰\n    财务升级\n    在线收款 / 活动费用 AA / 自动对账 / 财务报告 / 欠费提醒\n    解决收费难、催费烦的痛点","choice":"finance2","id":null,"timestamp":1779345302213}
+{"source":"user-event","type":"click","text":"🔗\n    分享 & 传播\n    活动海报 / 战报分享 / 球队主页 / 邀请链接 / 赛后集锦\n    让球队向外扩张，吸引新成员","choice":"share","id":null,"timestamp":1779345314409}
+{"source":"user-event","type":"click","text":"🔔\n    通知 & 运营\n    活动开抢提醒 / 截止日提醒 / 微信订阅消息 / 公告广播\n    提高活动参与率和活跃度","choice":"notify","id":null,"timestamp":1779345325778}
+{"type":"screen-added","file":"/Users/caoyajun/football-team/.superpowers/brainstorm/37463-1779345138/content/waiting-1.html"}
+{"type":"screen-added","file":"/Users/caoyajun/football-team/.superpowers/brainstorm/37463-1779345138/content/approaches.html"}
+{"type":"screen-added","file":"/Users/caoyajun/football-team/.superpowers/brainstorm/37463-1779345138/content/poster-design.html"}
+{"source":"user-event","type":"click","text":"⚽ FOOTBALL TEAM\n      ⚽\n      城南联队\n      每周末，只踢好球\n      \n        \n          28\n          队员\n        \n        \n          12\n          场比赛\n        \n        \n          8胜\n          胜场\n        \n      \n      \n        小程序码\n        扫码申请加入\n      \n    \n    清爽绿色","choice":"green","id":null,"timestamp":1779345736274}
+{"type":"screen-added","file":"/Users/caoyajun/football-team/.superpowers/brainstorm/37463-1779345138/content/flow.html"}
+{"type":"server-stopped","reason":"idle timeout"}

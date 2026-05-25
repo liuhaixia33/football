@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { teamApi } from '../../api/team'
+import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
 import { px } from '../../utils/style'
 
@@ -31,8 +32,17 @@ export default function JoinTeamPage() {
       const codeMatch = decoded.match(/(?:^|&)c=([A-Z0-9]+)/)
       if (idMatch) {
         const id = Number(idMatch[1])
+        const inviteCode = codeMatch?.[1] ?? ''
+
+        // 未登录：持久化邀请信息后跳登录，login 页完成后会自动处理加入逻辑
+        if (!useAuthStore.getState().token) {
+          if (inviteCode) Taro.setStorageSync('pending_invite_code', inviteCode)
+          Taro.reLaunch({ url: '/pages/login/index' })
+          return
+        }
+
         setSceneTeamId(id)
-        if (codeMatch) setCode(codeMatch[1])
+        if (inviteCode) setCode(inviteCode)
         teamApi.getPublicInfo(id)
           .then(info => setTeamName(info.name))
           .catch(() => setTeamName('该球队'))

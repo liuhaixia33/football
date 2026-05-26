@@ -530,7 +530,8 @@ export default function MyPage() {
                 </View>
               </>
             )}
-            {(currentRole === 'CAPTAIN' || currentRole === 'ADMIN') && (
+            {/* 生成球队名片 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
+            {/* {(currentRole === 'CAPTAIN' || currentRole === 'ADMIN') && (
               <>
                 <View style={{ height: '1px', background: C.border, marginLeft: px(54) }} />
                 <View onClick={() => Taro.navigateTo({ url: '/pages/team-poster/index' })}
@@ -540,7 +541,7 @@ export default function MyPage() {
                   <Text style={{ fontSize: px(28), color: C.text3 }}>›</Text>
                 </View>
               </>
-            )}
+            )} */}
           </View>
         </View>
 

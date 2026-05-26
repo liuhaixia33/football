@@ -358,8 +358,8 @@ export default function ActivityDetailPage() {
               </Button>
             )}
 
-            {/* 分组管理（TRAINING） */}
-            {a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
+            {/* 分组管理 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
+            {/* {a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
               <Button
                 onClick={() => Taro.navigateTo({
                   url: `/pages/grouping/index?activityId=${activityId}&title=${encodeURIComponent(a.title)}&startTime=${encodeURIComponent(a.startTime)}&location=${encodeURIComponent(a.location ?? '')}&status=${a.status}`,
@@ -373,7 +373,7 @@ export default function ActivityDetailPage() {
               >
                 分组管理
               </Button>
-            )}
+            )} */}
 
             {/* 记录比赛（MATCH + 已关闭 + 无结果） */}
             {a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
@@ -390,8 +390,8 @@ export default function ActivityDetailPage() {
               </Button>
             )}
 
-            {/* 分享海报 */}
-            <Button
+            {/* 分享海报 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
+            {/* <Button
               onClick={() => Taro.navigateTo({
                 url: `/pages/activity-poster/index?activityId=${activityId}`,
               })}
@@ -403,7 +403,7 @@ export default function ActivityDetailPage() {
               }}
             >
               {t('act.share')}
-            </Button>
+            </Button> */}
           </View>
         </View>
       )}

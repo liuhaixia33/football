@@ -1,11 +1,11 @@
 export default defineAppConfig({
   pages: [
+    'pages/home/index',
     'pages/login/index',
     'pages/team-select/index',
     'pages/onboard/index',
     'pages/create-team/index',
     'pages/join-team/index',
-    'pages/home/index',
     'pages/activity-detail/index',
     'pages/activity-create/index',
     'pages/members/index',

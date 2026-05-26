@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { View, Text, ScrollView, Image, Button } from '@tarojs/components'
+import { View, Text, ScrollView, Image, Button, Input } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
 import { activityApi } from '../../api/activity'
 import { teamApi } from '../../api/team'
+import { userApi } from '../../api/user'
+import { uploadApi } from '../../api/upload'
 import { useAuthStore } from '../../store/auth'
 import { useT } from '../../i18n/useT'
 import type { ActivityRes, ActivityDetailRes, RegStatus } from '../../types/api'
@@ -298,6 +300,46 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const t = useT()
   const { currentTeamId, isCaptainOrAdmin, teams, token } = useAuthStore()
+
+  // 资料完善 modal — 报名/加入球队前触发
+  const [pendingAction, setPendingAction] = useState<null | (() => void)>(null)
+  const [profileAvatarTmp, setProfileAvatarTmp] = useState('')
+  const [profileNickname, setProfileNickname] = useState('')
+  const [profileSaving, setProfileSaving] = useState(false)
+
+  const requireProfile = (action: () => void) => {
+    if (!useAuthStore.getState().avatarUrl) {
+      setProfileAvatarTmp('')
+      setProfileNickname('')
+      setPendingAction(() => action)
+    } else {
+      action()
+    }
+  }
+
+  const saveProfileAndProceed = async () => {
+    if (profileSaving) return
+    if (!profileAvatarTmp) {
+      Taro.showToast({ title: '请选择头像', icon: 'none' }); return
+    }
+    if (!profileNickname.trim()) {
+      Taro.showToast({ title: '请输入昵称', icon: 'none' }); return
+    }
+    setProfileSaving(true)
+    try {
+      const { url } = await uploadApi.avatar(profileAvatarTmp)
+      await userApi.updateProfile({ nickname: profileNickname.trim(), avatarUrl: url })
+      const { token: tk, userId: uid } = useAuthStore.getState()
+      useAuthStore.getState().setAuth(tk!, uid!, profileNickname.trim(), url)
+      const action = pendingAction
+      setPendingAction(null)
+      action?.()
+    } catch (e: unknown) {
+      Taro.showToast({ title: e instanceof Error ? e.message : '保存失败', icon: 'none' })
+    } finally {
+      setProfileSaving(false)
+    }
+  }
   // 用 state 存储邀请信息，支持 tab bar 页面背景→前台切换时更新（router.params 不会自动更新）
   const [pendingInvite, setPendingInvite] = useState<{ code: string; teamId: number | null } | null>(() => {
     // 初始化：优先 getEnterOptionsSync（兼容前台切换），其次 router.params（兼容首次冷启动）
@@ -337,17 +379,20 @@ export default function HomePage() {
         Taro.showModal({
           title: '加入球队',
           content: `检测到邀请，是否申请加入「${teamInfo.name}」？`,
-          success: async ({ confirm }) => {
+          success: ({ confirm }) => {
             if (!confirm) return
-            try {
-              await teamApi.join(pendingInvite.code)
-              Taro.showToast({ title: '申请已发送，等待管理员审核', icon: 'success' })
-            } catch (e: unknown) {
-              const msg = e instanceof Error ? e.message : ''
-              if (!msg.includes('已是') && !msg.includes('审核中')) {
-                Taro.showToast({ title: msg || '申请失败', icon: 'none' })
+            const inviteCode = pendingInvite.code
+            requireProfile(async () => {
+              try {
+                await teamApi.join(inviteCode)
+                Taro.showToast({ title: '申请已发送，等待管理员审核', icon: 'success' })
+              } catch (e: unknown) {
+                const msg = e instanceof Error ? e.message : ''
+                if (!msg.includes('已是') && !msg.includes('审核中')) {
+                  Taro.showToast({ title: msg || '申请失败', icon: 'none' })
+                }
               }
-            }
+            })
           },
         })
       })
@@ -394,7 +439,7 @@ export default function HomePage() {
     load()
   })
 
-  const handleRsvp = async (activityId: number, status: RegStatus) => {
+  const executeRsvp = async (activityId: number, status: RegStatus) => {
     const currentStatus = activities.find(a => a.id === activityId)?.myStatus
     try {
       if (currentStatus === status) {
@@ -408,43 +453,13 @@ export default function HomePage() {
     }
   }
 
+  const handleRsvp = (activityId: number, status: RegStatus) => {
+    requireProfile(() => executeRsvp(activityId, status))
+  }
+
   const upcoming = activities.filter(a => a.status === 'OPEN')
   const past = activities.filter(a => a.status !== 'OPEN')
   const [featured, ...restUpcoming] = upcoming
-
-  if (!token) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#0f1010', display: 'flex', flexDirection: 'column',
-                     alignItems: 'center', justifyContent: 'center', padding: px(40) }}>
-        <Text style={{ fontSize: px(120), display: 'block', textAlign: 'center', marginBottom: px(24) }}>⚽</Text>
-        <Text style={{ fontSize: px(48), fontWeight: '900', color: '#e8ede8', textAlign: 'center',
-                       display: 'block', marginBottom: px(12) }}>
-          足球队
-        </Text>
-        <Text style={{ fontSize: px(28), color: '#8a9e8a', textAlign: 'center', display: 'block',
-                       marginBottom: px(48) }}>
-          管理你的球队，记录每一场比赛
-        </Text>
-        <Button
-          style={{
-            backgroundColor: '#22c55e', color: '#0f1010', borderRadius: px(16),
-            fontSize: px(34), fontWeight: '800', border: 'none',
-            padding: `${px(18)} ${px(60)}`,
-          }}
-          onClick={() => {
-            // 同步保存邀请码，并通过 URL 参数显式传递（双保险）
-            if (pendingInvite?.code) Taro.setStorageSync('pending_invite_code', pendingInvite.code)
-            const url = pendingInvite?.code
-              ? `/pages/login/index?inviteCode=${pendingInvite.code}`
-              : '/pages/login/index'
-            Taro.navigateTo({ url })
-          }}
-        >
-          登录 / 注册
-        </Button>
-      </View>
-    )
-  }
 
   return (
     <View style={{ height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>
@@ -472,6 +487,31 @@ export default function HomePage() {
         )}
       </View>
 
+      {!currentTeamId ? (
+        <View style={{ flex: 1, display: 'flex', flexDirection: 'column',
+                       alignItems: 'center', justifyContent: 'center', padding: px(40) }}>
+          <Text style={{ fontSize: px(100), display: 'block', textAlign: 'center', marginBottom: px(20) }}>⚽</Text>
+          <Text style={{ fontSize: px(40), fontWeight: '900', color: C.text, textAlign: 'center',
+                         display: 'block', marginBottom: px(10) }}>
+            加入你的球队
+          </Text>
+          <Text style={{ fontSize: px(28), color: C.text2, textAlign: 'center', display: 'block',
+                         marginBottom: px(44) }}>
+            创建或加入一支球队，开始管理活动和队员
+          </Text>
+          <View
+            onClick={() => requireProfile(() => Taro.navigateTo({ url: '/pages/onboard/index' }))}
+            style={{
+              backgroundColor: C.primary, borderRadius: px(16),
+              padding: `${px(18)} ${px(52)}`,
+            }}
+          >
+            <Text style={{ fontSize: px(34), fontWeight: '800', color: '#0f1010' }}>
+              加入 / 创建球队
+            </Text>
+          </View>
+        </View>
+      ) : (
       <ScrollView scrollY style={{ flex: 1 }}>
         <View style={{ padding: `${px(14)} ${px(14)} ${px(32)}` }}>
           {loading ? (
@@ -550,6 +590,116 @@ export default function HomePage() {
         </View>
         <View style={{ height: px(192) }} />
       </ScrollView>
+      )}
+
+      {/* ── 资料完善 Modal ── 报名/加入球队前触发 */}
+      {pendingAction !== null && (
+        <>
+          <View
+            onClick={() => setPendingAction(null)}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                     background: 'rgba(0,0,0,0.75)', zIndex: 100 }}
+          />
+          <View style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 101,
+            background: '#1e2420', borderRadius: `${px(24)} ${px(24)} 0 0`,
+            border: '1px solid rgba(255,255,255,0.07)', borderBottom: 'none',
+            padding: `${px(28)} ${px(24)} ${px(40)}`,
+          }}>
+            <View style={{ width: px(36), height: px(4), borderRadius: px(2),
+                           background: 'rgba(255,255,255,0.1)', margin: '0 auto', marginBottom: px(24) }} />
+            <Text style={{ fontSize: px(36), fontWeight: '800', color: '#e8ede8',
+                           textAlign: 'center', display: 'block', marginBottom: px(8) }}>
+              完善个人资料
+            </Text>
+            <Text style={{ fontSize: px(26), color: '#8a9e8a', textAlign: 'center',
+                           display: 'block', marginBottom: px(28) }}>
+              设置头像和昵称后即可参与活动
+            </Text>
+
+            {/* 头像选择 */}
+            <View style={{ display: 'flex', justifyContent: 'center', marginBottom: px(24) }}>
+              <Button
+                openType="chooseAvatar"
+                onChooseAvatar={(e) =>
+                  setProfileAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)
+                }
+                style={{ background: 'transparent', border: 'none', padding: 0,
+                         width: px(110), height: px(110), borderRadius: '50%' }}
+              >
+                {profileAvatarTmp
+                  ? <Image src={profileAvatarTmp} style={{
+                      width: px(110), height: px(110), borderRadius: '50%',
+                      border: '3px solid #22c55e', display: 'block',
+                    }} />
+                  : <View style={{
+                      width: px(110), height: px(110), borderRadius: '50%',
+                      background: '#181c18', border: '2px dashed rgba(34,197,94,0.4)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Text style={{ fontSize: px(80) }}>📷</Text>
+                    </View>
+                }
+              </Button>
+            </View>
+            <Text style={{ fontSize: px(22), color: '#4a5a4a', textAlign: 'center',
+                           display: 'block', marginBottom: px(20) }}>
+              {profileAvatarTmp ? '点击更换头像' : '点击选择头像（必填）'}
+            </Text>
+
+            {/* 昵称输入 */}
+            <Input
+              type="nickname"
+              value={profileNickname}
+              onInput={(e) => setProfileNickname(e.detail.value)}
+              onBlur={(e) => setProfileNickname(e.detail.value)}
+              placeholder="输入你的昵称"
+              style={{
+                height: px(52), border: '1px solid rgba(255,255,255,0.09)',
+                borderRadius: px(14), padding: `0 ${px(20)}`,
+                fontSize: px(32), background: '#181c18', color: '#e8ede8',
+                textAlign: 'center', marginBottom: px(28),
+              }}
+            />
+
+            {/* 协议提示 */}
+            <Text style={{ fontSize: px(22), color: '#4a5a4a', textAlign: 'center',
+                           display: 'block', marginBottom: px(16) }}>
+              点击确认即代表同意
+              <Text
+                style={{ color: '#22c55e' }}
+                onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/terms/index' }) }}
+              >《用户协议》</Text>
+              和
+              <Text
+                style={{ color: '#22c55e' }}
+                onClick={(e) => { e.stopPropagation(); Taro.navigateTo({ url: '/pages/privacy/index' }) }}
+              >《隐私政策》</Text>
+            </Text>
+
+            {/* 按钮组 */}
+            <View style={{ display: 'flex', gap: px(12) }}>
+              <Button
+                style={{ flex: 1, height: px(52), lineHeight: px(52), background: 'rgba(255,255,255,0.06)',
+                         color: '#8a9e8a', border: 'none', borderRadius: px(14),
+                         fontSize: px(30), fontWeight: '500' }}
+                onClick={() => setPendingAction(null)}
+              >
+                取消
+              </Button>
+              <Button
+                style={{ flex: 2, height: px(52), lineHeight: px(52), background: '#22c55e',
+                         color: '#0f1010', border: 'none', borderRadius: px(14),
+                         fontSize: px(30), fontWeight: '800' }}
+                loading={profileSaving}
+                onClick={saveProfileAndProceed}
+              >
+                确认并继续
+              </Button>
+            </View>
+          </View>
+        </>
+      )}
     </View>
   )
 }

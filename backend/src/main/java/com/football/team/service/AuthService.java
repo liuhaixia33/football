@@ -43,7 +43,7 @@ public class AuthService {
         } else {
             user = new User();
             user.setOpenid(openid);
-            user.setNickname(req.getNickname() != null ? req.getNickname() : "球员");
+            user.setNickname(req.getNickname() != null ? req.getNickname() : "游客" + String.format("%04d", (int)(Math.random() * 10000)));
             user.setAvatarUrl(req.getAvatarUrl() != null ? req.getAvatarUrl() : "");
             user = userRepository.save(user);
         }

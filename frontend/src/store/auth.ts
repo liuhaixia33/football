@@ -18,6 +18,7 @@ interface AuthState {
   isAtLeast: (required: MemberRole) => boolean
   isCaptainOrAdmin: () => boolean
   currentTeamInviteCode: () => string
+  isGuest: () => boolean
 }
 
 const ROLE_ORDER: Record<MemberRole, number> = { CAPTAIN: 0, ADMIN: 1, PLAYER: 2 }
@@ -75,4 +76,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { teams, currentTeamId } = get()
     return teams.find(t => t.teamId === currentTeamId)?.inviteCode ?? ''
   },
+
+  isGuest: () => !get().avatarUrl,
 }))

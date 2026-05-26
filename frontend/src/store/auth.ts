@@ -55,10 +55,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setTeams: (teams) => set({ teams }),
 
   clear: () => {
-    const keys = ['token', 'userId', 'nickname', 'avatarUrl', 'currentTeamId', 'currentRole']
+    const keys = ['token', 'userId', 'currentTeamId', 'currentRole']
     keys.forEach(k => { try { Taro.removeStorageSync(k) } catch {} })
-    set({ token: null, userId: null, nickname: null, avatarUrl: null,
-          currentTeamId: null, currentRole: null, teams: [] })
+    set({ token: null, userId: null, currentTeamId: null, currentRole: null, teams: [] })
   },
 
   isAtLeast: (required) => {

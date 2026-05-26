@@ -29,28 +29,38 @@ export default function LoginPage() {
   const [avatarTmp, setAvatarTmp] = useState('')
   const { setAuth, setTeams, avatarUrl: storedAvatarUrl, nickname: storedNickname } = useAuthStore()
   const [nickname, setNickname] = useState(storedNickname || '')
-  const [agreed, setAgreed] = useState(false)
   const t = useT()
-  // 邀请码优先从 URL 参数读取（home / activity-detail 直接传入），其次从 storage（旧路径兜底）
+
   const urlInviteCode = (Taro.getCurrentInstance().router?.params?.inviteCode as string | undefined) || ''
   const urlTeamId = Number(Taro.getCurrentInstance().router?.params?.teamId) || null
 
+  // 老用户：本地有头像和昵称缓存，跳过收集步骤
+  const isReturningUser = !!(storedAvatarUrl && storedNickname)
+  const agreedBefore = !!Taro.getStorageSync('agreedTerms')
+  const [agreed, setAgreed] = useState(isReturningUser && agreedBefore)
+
   const avatarDisplay = avatarTmp || storedAvatarUrl || ''
-  const canLogin = !!(avatarTmp || storedAvatarUrl) && !!nickname.trim() && !loading && agreed
+  const canLogin = isReturningUser
+    ? agreed && !loading
+    : !!(avatarTmp || storedAvatarUrl) && !!nickname.trim() && !loading && agreed
 
   const handleLogin = async () => {
     if (!canLogin) return
     setLoading(true)
     try {
-      let ossUrl = storedAvatarUrl ?? ''
+      let ossUrl: string | undefined
       if (avatarTmp) {
         const { url } = await uploadApi.avatar(avatarTmp)
         ossUrl = url
       }
       const { code } = await Taro.login()
-      const res = await authApi.login(code, nickname.trim(), ossUrl)
-      setAuth(res.token, res.userId, res.nickname, res.avatarUrl || ossUrl)
+      // 老用户不传 nickname/avatarUrl，后端直接用 DB 里的值
+      const res = isReturningUser && !avatarTmp
+        ? await authApi.login(code)
+        : await authApi.login(code, nickname.trim(), ossUrl ?? storedAvatarUrl ?? '')
+      setAuth(res.token, res.userId, res.nickname, res.avatarUrl || ossUrl || storedAvatarUrl || '')
       setTeams(res.teams)
+      Taro.setStorageSync('agreedTerms', true)
 
       const storageCode = Taro.getStorageSync('pending_invite_code') as string | undefined
       Taro.removeStorageSync('pending_invite_code')
@@ -58,7 +68,6 @@ export default function LoginPage() {
 
       if (res.teams.length === 0) {
         if (pendingCode) {
-          // 新用户扫码进来：直接申请加入，弹窗告知审核状态后跳主页
           let joinMsg = '已发起加入申请，需队长审核后方可加入球队。'
           try {
             await teamApi.join(pendingCode)
@@ -86,7 +95,6 @@ export default function LoginPage() {
           Taro.reLaunch({ url: '/pages/onboard/index' })
         }
       } else {
-        // 已有球队的回访用户：有邀请码就弹框询问
         if (pendingCode) {
           const alreadyMember = res.teams.some(t => t.inviteCode === pendingCode)
           if (!alreadyMember) {
@@ -164,52 +172,72 @@ export default function LoginPage() {
         </Text>
       </View>
 
-      {/* ── Avatar + Nickname + Login ── */}
       <View style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
                      justifyContent: 'flex-start', padding: `${px(36)} ${px(40)} ${px(40)}`, gap: px(20) }}>
-        <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Button
-            openType="chooseAvatar"
-            onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
-            style={{ background: 'transparent', border: 'none', padding: 0 }}
-          >
-            {avatarDisplay
-              ? <Image src={avatarDisplay} style={{
-                  width: px(140), height: px(140), borderRadius: '50%',
-                  border: `3px solid ${C.primary}`,
-                  display: 'block',
-                }} />
-              : <View style={{
-                  width: px(140), height: px(140), borderRadius: '50%',
-                  background: C.surface2, border: `2px dashed ${C.primaryDash}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <Text style={{ fontSize: px(80) }}>📷</Text>
-                </View>
-            }
-          </Button>
-          <Text style={{ fontSize: px(24), color: C.text3, marginTop: px(12) }}>
-            {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
-          </Text>
-        </View>
-        <Input
-          type="nickname"
-          value={nickname}
-          onInput={(e) => setNickname(e.detail.value)}
-          onBlur={(e) => setNickname(e.detail.value)}
-          placeholder={t('login.nickname_placeholder')}
-          style={{
-            width: px(380),
-            height: px(56),
-            background: C.surface,
-            borderRadius: px(14),
-            padding: `0 ${px(20)}`,
-            fontSize: px(32),
-            border: `1px solid ${C.border}`,
-            color: C.text,
-            textAlign: 'center',
-          }}
-        />
+
+        {isReturningUser ? (
+          /* ── 老用户：展示已有资料，跳过收集 ── */
+          <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: px(12) }}>
+            <Image
+              src={storedAvatarUrl!}
+              style={{
+                width: px(140), height: px(140), borderRadius: '50%',
+                border: `3px solid ${C.primary}`, display: 'block',
+              }}
+            />
+            <Text style={{ fontSize: px(34), fontWeight: '700', color: C.text }}>
+              {storedNickname}
+            </Text>
+          </View>
+        ) : (
+          /* ── 新用户：收集头像和昵称 ── */
+          <>
+            <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Button
+                openType="chooseAvatar"
+                onChooseAvatar={(e) => setAvatarTmp((e as unknown as { detail: { avatarUrl: string } }).detail.avatarUrl)}
+                style={{ background: 'transparent', border: 'none', padding: 0 }}
+              >
+                {avatarDisplay
+                  ? <Image src={avatarDisplay} style={{
+                      width: px(140), height: px(140), borderRadius: '50%',
+                      border: `3px solid ${C.primary}`,
+                      display: 'block',
+                    }} />
+                  : <View style={{
+                      width: px(140), height: px(140), borderRadius: '50%',
+                      background: C.surface2, border: `2px dashed ${C.primaryDash}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Text style={{ fontSize: px(80) }}>📷</Text>
+                    </View>
+                }
+              </Button>
+              <Text style={{ fontSize: px(24), color: C.text3, marginTop: px(12) }}>
+                {avatarDisplay ? '点击更换头像' : t('login.tap_avatar')}
+              </Text>
+            </View>
+            <Input
+              type="nickname"
+              value={nickname}
+              onInput={(e) => setNickname(e.detail.value)}
+              onBlur={(e) => setNickname(e.detail.value)}
+              placeholder={t('login.nickname_placeholder')}
+              style={{
+                width: px(380),
+                height: px(56),
+                background: C.surface,
+                borderRadius: px(14),
+                padding: `0 ${px(20)}`,
+                fontSize: px(32),
+                border: `1px solid ${C.border}`,
+                color: C.text,
+                textAlign: 'center',
+              }}
+            />
+          </>
+        )}
+
         {/* 协议同意行 */}
         <View
           style={{ display: 'flex', alignItems: 'center', gap: px(8), marginTop: px(16) }}

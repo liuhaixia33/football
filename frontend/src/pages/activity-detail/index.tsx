@@ -343,8 +343,8 @@ export default function ActivityDetailPage() {
               </Button>
             )}
 
-            {/* 编辑（OPEN） */}
-            {a.status === 'OPEN' && (
+            {/* 编辑活动 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
+            {/* {a.status === 'OPEN' && (
               <Button
                 onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?editId=${activityId}` })}
                 style={{
@@ -356,7 +356,7 @@ export default function ActivityDetailPage() {
               >
                 {t('act.edit')}
               </Button>
-            )}
+            )} */}
 
             {/* 分组管理 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
             {/* {a.type === 'TRAINING' && (a.status === 'OPEN' || a.status === 'CLOSED') && (
@@ -375,8 +375,8 @@ export default function ActivityDetailPage() {
               </Button>
             )} */}
 
-            {/* 记录比赛（MATCH + 已关闭 + 无结果） */}
-            {a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
+            {/* 记录比赛 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
+            {/* {a.type === 'MATCH' && a.status !== 'OPEN' && !detail.result && (
               <Button
                 onClick={() => Taro.navigateTo({ url: `/pages/activity-create/index?resultFor=${activityId}` })}
                 style={{
@@ -388,7 +388,7 @@ export default function ActivityDetailPage() {
               >
                 {t('act.record')}
               </Button>
-            )}
+            )} */}
 
             {/* 分享海报 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
             {/* <Button

@@ -7,7 +7,8 @@ export default defineAppConfig({
     'pages/create-team/index',
     'pages/join-team/index',
     'pages/activity-detail/index',
-    'pages/activity-create/index',
+    // TODO: 暂时下线发布活动功能，待企业主体审核通过后恢复
+    // 'pages/activity-create/index',
     'pages/members/index',
     'pages/finance/index',
     'pages/finance-record/index',

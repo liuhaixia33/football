@@ -299,7 +299,7 @@ export default function HomePage() {
   const [featuredDetail, setFeaturedDetail] = useState<ActivityDetailRes | null>(null)
   const [loading, setLoading] = useState(false)
   const t = useT()
-  const { currentTeamId, isCaptainOrAdmin, teams, token } = useAuthStore()
+  const { currentTeamId, teams, token } = useAuthStore()
 
   // 资料完善 modal — 报名/加入球队前触发
   const [pendingAction, setPendingAction] = useState<null | (() => void)>(null)
@@ -472,7 +472,8 @@ export default function HomePage() {
         <Text style={{ fontSize: px(44), fontWeight: '800', color: C.text, letterSpacing: '-0.02em' }}>
           {t('tab.home')}
         </Text>
-        {isCaptainOrAdmin() && (
+        {/* 发布活动入口 - TODO: 暂时下线，待企业主体审核通过后恢复 */}
+        {/* {isCaptainOrAdmin() && (
           <View
             onClick={() => Taro.navigateTo({ url: '/pages/activity-create/index' })}
             style={{
@@ -484,7 +485,7 @@ export default function HomePage() {
               + {t('home.create')}
             </Text>
           </View>
-        )}
+        )} */}
       </View>
 
       {!currentTeamId ? (
